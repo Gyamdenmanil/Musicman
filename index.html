@@ -35,7 +35,7 @@
   @keyframes mmRecPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
 </style>
 </helmet>
-<div style="max-width:1120px;margin:0 auto;padding:clamp(16px,4vw,28px) clamp(14px,4vw,24px) 90px;">
+<div style="max-width:1120px;margin:0 auto;padding:calc(clamp(16px,4vw,28px) + env(safe-area-inset-top)) clamp(14px,4vw,24px) calc(90px + env(safe-area-inset-bottom));">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid #000000;">
     <div>
