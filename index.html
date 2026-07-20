@@ -508,6 +508,7 @@
           <div style="display:flex;align-items:center;gap:10px;border:1px solid #2c2c2e;background:#232325;border-radius:12px;padding:10px 14px;flex-wrap:wrap;">
             <div style="flex:1;min-width:110px;font-size:13px;font-weight:600;color:#f2f2f7;">{{ r.name }}</div>
             <audio controls src="{{ r.dataUrl }}" style="height:32px;flex:2;min-width:180px;max-width:100%;"></audio>
+            <button onClick="{{ r.save }}" style="border:1px solid #2c2c2e;background:#1c1c1e;color:#f0b429;font-size:12px;font-weight:700;padding:6px 10px;border-radius:9px;cursor:pointer;">Save</button>
             <button onClick="{{ r.remove }}" style="border:none;background:transparent;color:#6e6e73;font-size:16px;cursor:pointer;padding:0;line-height:1;">×</button>
           </div>
         </sc-for>
@@ -914,6 +915,26 @@ class Component extends DCLogic {
   toggleRecording(){ if(this.state.isRecording) this.stopRecording(); else this.startRecording(); }
   deleteRecording(id){
     this.setState(st=>{ const recordings=(st.recordings||[]).filter(r=>r.id!==id); this.persistRecordings(recordings); return {recordings}; });
+  }
+  async saveRecordingToDevice(entry){
+    try{
+      const res=await fetch(entry.dataUrl);
+      const blob=await res.blob();
+      const ext=(blob.type||'').includes('mp4')?'m4a':(blob.type||'').includes('webm')?'webm':'m4a';
+      const safeName=(entry.name||'Voice memo').replace(/[^\w\- ]+/g,'').trim()||'Voice memo';
+      const file=new File([blob],safeName+'.'+ext,{type:blob.type||'audio/mp4'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:safeName});
+        return;
+      }
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=safeName+'.'+ext; a.rel='noopener';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),10000);
+    }catch(e){
+      if(e&&e.name==='AbortError') return;
+      this.setState({recordError:'Couldn\'t save that recording to your device.'});
+    }
   }
 
   // ---- audio ----
@@ -1474,7 +1495,7 @@ class Component extends DCLogic {
     const recordBtnStyle=`border:1px solid ${S.isRecording?'#ff375f':'#2c2c2e'};background:${S.isRecording?'#ff375f':'#1c1c1e'};color:${S.isRecording?'#fff':'#f2f2f7'};font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:980px;cursor:pointer;margin-top:10px;display:inline-flex;align-items:center;gap:6px;${S.isRecording?'animation:mmRecPulse 1.1s ease-in-out infinite;':''}`;
     const hasRecordError=!!S.recordError;
     const recordingsSorted=(S.recordings||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    const recordingItems=recordingsSorted.map(r=>({id:r.id,name:r.name,dataUrl:r.dataUrl,remove:()=>self.deleteRecording(r.id)}));
+    const recordingItems=recordingsSorted.map(r=>({id:r.id,name:r.name,dataUrl:r.dataUrl,remove:()=>self.deleteRecording(r.id),save:()=>self.saveRecordingToDevice(r)}));
     const hasRecordings=recordingItems.length>0;
     const noRecordings=!hasRecordings;
 
