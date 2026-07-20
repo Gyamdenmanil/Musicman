@@ -32,6 +32,7 @@
   textarea:focus,input:focus{outline:2px solid rgba(240,180,41,0.4);outline-offset:0;}
   ::selection{background:rgba(240,180,41,0.2);}
   html,body{overflow-x:hidden;overscroll-behavior-y:contain;touch-action:manipulation;-webkit-text-size-adjust:100%;height:100%;}
+  @keyframes mmRecPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
 </style>
 </helmet>
 <div style="max-width:1120px;margin:0 auto;padding:clamp(16px,4vw,28px) clamp(14px,4vw,24px) 90px;">
@@ -40,6 +41,12 @@
     <div>
       <div style="font-size:12px;font-weight:700;color:#f0b429;letter-spacing:0.08em;">SONGWRITER'S WORKBENCH</div>
       <h1 style="margin:3px 0 0;font-size:clamp(22px,5vw,28px);font-weight:700;letter-spacing:-0.02em;">Musicman</h1>
+      <div>
+        <button onClick="{{ toggleRecording }}" style="{{ recordBtnStyle }}">{{ recordBtnLabel }}</button>
+      </div>
+      <sc-if value="{{ hasRecordError }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:11px;color:#ff375f;font-weight:600;margin-top:6px;max-width:240px;">{{ recordError }}</div>
+      </sc-if>
     </div>
     <div style="display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:16px;padding:10px 16px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
       <div style="text-align:right;">
@@ -492,6 +499,25 @@
 
   <sc-if value="{{ isSongs }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:720px;margin:0 auto;">
+
+    <div style="background:#1c1c1e;border-radius:20px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;margin-bottom:12px;">Voice Memos</div>
+      <sc-if value="{{ hasRecordings }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <sc-for list="{{ recordingItems }}" as="r" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:10px;border:1px solid #2c2c2e;background:#232325;border-radius:12px;padding:10px 14px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:110px;font-size:13px;font-weight:600;color:#f2f2f7;">{{ r.name }}</div>
+            <audio controls src="{{ r.dataUrl }}" style="height:32px;flex:2;min-width:180px;max-width:100%;"></audio>
+            <button onClick="{{ r.remove }}" style="border:none;background:transparent;color:#6e6e73;font-size:16px;cursor:pointer;padding:0;line-height:1;">×</button>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ noRecordings }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:13px;color:#8e8e93;">No voice memos yet — tap Record up top to capture an idea.</div>
+      </sc-if>
+    </div>
+
     <sc-if value="{{ hasViewingSong }}" hint-placeholder-val="{{ false }}">
     <div style="background:#1c1c1e;border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #2c2c2e;">
@@ -650,7 +676,7 @@ class Component extends DCLogic {
   ];
 
   outputScrollRef = React.createRef();
-  state = {tab:'key',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null};
+  state = {tab:'key',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:''};
 
   componentDidMount(){
     let saved=null;
@@ -671,6 +697,10 @@ class Component extends DCLogic {
     let cp=Number(patch.capo); if(!isFinite(cp)||cp<0||cp>11) cp=0; patch.capo=cp;
     if(!Array.isArray(patch.tabGrids)||!patch.tabGrids.length) patch.tabGrids=[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}];
     let ss=Number(patch.scrollSpeed); if(!isFinite(ss)||ss<1||ss>10) ss=3; patch.scrollSpeed=ss;
+    let recordings=[];
+    try{const r=localStorage.getItem('mtsa_v3_recordings'); if(r) recordings=JSON.parse(r);}catch(e){}
+    patch.recordings=Array.isArray(recordings)?recordings:[];
+    patch.isRecording=false; patch.recSeconds=0; patch.recordError='';
     this.setState(patch);
   }
   componentDidUpdate(){
@@ -678,7 +708,12 @@ class Component extends DCLogic {
       localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,songText,chordMap,tabGrids,capo,savedSongs,currentSongId,currentSongName,scrollSpeed}));
     }catch(e){}
   }
-  componentWillUnmount(){ if(this.metroTimer) clearInterval(this.metroTimer); this.stopAutoScroll(); }
+  componentWillUnmount(){
+    if(this.metroTimer) clearInterval(this.metroTimer); this.stopAutoScroll();
+    if(this.recTimer) clearInterval(this.recTimer);
+    if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive'){ try{ this.mediaRecorder.stop(); }catch(e){} }
+    if(this.recStream){ this.recStream.getTracks().forEach(t=>t.stop()); }
+  }
 
   pcOf(name){ let pc=this.LPC[name[0]]; for(let i=1;i<name.length;i++){ if(name[i]==='#')pc++; else if(name[i]==='b')pc--; } return ((pc%12)+12)%12; }
   spell(root,semi,deg){
@@ -831,6 +866,56 @@ class Component extends DCLogic {
     this.setState(st=>({savedSongs:(st.savedSongs||[]).filter(s=>s.id!==id),currentSongId:st.currentSongId===id?null:st.currentSongId,currentSongName:st.currentSongId===id?'':st.currentSongName}));
   }
 
+  // ---- voice memos ----
+  uidRec(){ return 'rec_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  persistRecordings(recordings){
+    try{ localStorage.setItem('mtsa_v3_recordings',JSON.stringify(recordings)); }
+    catch(e){ this.setState({recordError:'Storage is full — delete an old voice memo to save new ones.'}); }
+  }
+  async startRecording(){
+    if(this.state.isRecording) return;
+    this.setState({recordError:''});
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==='undefined'){
+      this.setState({recordError:'Voice recording isn\'t supported in this browser.'}); return;
+    }
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      this.recStream=stream;
+      const mimeCandidates=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
+      const mime=mimeCandidates.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
+      this.mediaRecorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+      this.recChunks=[];
+      this.mediaRecorder.ondataavailable=(e)=>{ if(e.data&&e.data.size>0) this.recChunks.push(e.data); };
+      this.mediaRecorder.onstop=()=>{
+        const blob=new Blob(this.recChunks,{type:this.mediaRecorder.mimeType||'audio/webm'});
+        stream.getTracks().forEach(t=>t.stop());
+        this.recStream=null;
+        if(!blob.size) return;
+        const reader=new FileReader();
+        reader.onload=()=>{
+          const entry={id:this.uidRec(),name:'Voice memo '+new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),dataUrl:reader.result,createdAt:Date.now(),duration:this.state.recSeconds};
+          this.setState(st=>{ const recordings=[entry,...(st.recordings||[])]; this.persistRecordings(recordings); return {recordings}; });
+        };
+        reader.readAsDataURL(blob);
+      };
+      this.recStartTs=Date.now();
+      this.setState({isRecording:true,recSeconds:0});
+      this.recTimer=setInterval(()=>{ this.setState({recSeconds:Math.floor((Date.now()-this.recStartTs)/1000)}); },250);
+      this.mediaRecorder.start();
+    }catch(e){
+      this.setState({recordError:'Microphone access was blocked or unavailable.'});
+    }
+  }
+  stopRecording(){
+    if(this.recTimer){ clearInterval(this.recTimer); this.recTimer=null; }
+    this.setState({isRecording:false});
+    if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive') this.mediaRecorder.stop();
+  }
+  toggleRecording(){ if(this.state.isRecording) this.stopRecording(); else this.startRecording(); }
+  deleteRecording(id){
+    this.setState(st=>{ const recordings=(st.recordings||[]).filter(r=>r.id!==id); this.persistRecordings(recordings); return {recordings}; });
+  }
+
   // ---- audio ----
   ensureAudio(){
     if(!this.ac){ const AC=window.AudioContext||window.webkitAudioContext; this.ac=new AC(); this.master=this.ac.createGain(); this.master.gain.value=0.85; const lp=this.ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5200; this.master.connect(lp); lp.connect(this.ac.destination); }
@@ -870,7 +955,7 @@ class Component extends DCLogic {
   playSeq(chords,arp){ this.ensureAudio(); const t0=this.ac.currentTime+0.05; const step=0.62; chords.forEach((c,i)=>{ const t=t0+i*step; if(arp){ const ms=this.midiChord(c.pcs); ms.forEach((m,k)=>this.voice(this.midiFreq(m),t+k*0.075,0.7,0.15)); } else { this.midiChord(c.pcs).forEach(m=>this.voice(this.midiFreq(m),t,step*1.05,0.14)); } }); }
 
   toggleMetro(){ if(this.state.playing) this.stopMetro(); else this.startMetro(); }
-  startMetro(){ this.ensureAudio(); this.beatPos=0; this.nextTime=this.ac.currentTime+0.1; this.setState({playing:true}); this.metroTimer=setInterval(()=>this.scheduler(),25); }
+  startMetro(){ this.ensureAudio(); this.beatPos=0; this.nextTime=this.ac.currentTime+0.05; this.setState({playing:true}); this.scheduler(); this.metroTimer=setInterval(()=>this.scheduler(),25); }
   stopMetro(){ if(this.metroTimer) clearInterval(this.metroTimer); this.metroTimer=null; this.setState({playing:false,curBeat:-1}); }
   scheduler(){
     const ts=this.TIME_SIGS[this.state.tsIndex]; let bpm=Number(this.state.bpm); if(!isFinite(bpm)||bpm<=0) bpm=100; const spb=60/bpm;
@@ -1382,6 +1467,17 @@ class Component extends DCLogic {
     const autoScrollBtnLabel=S.autoScroll?'⏸ Pause':'▶ Play';
     const autoScrollBtnStyle=`border:none;background:${S.autoScroll?'#ff375f':A};color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:980px;cursor:pointer;flex:none;`;
 
+    // voice memos
+    const recSecondsLabel=Math.floor((S.recSeconds||0)/60)+':'+String((S.recSeconds||0)%60).padStart(2,'0');
+    const toggleRecording=()=>self.toggleRecording();
+    const recordBtnLabel=S.isRecording?('■ '+recSecondsLabel):'● Record';
+    const recordBtnStyle=`border:1px solid ${S.isRecording?'#ff375f':'#2c2c2e'};background:${S.isRecording?'#ff375f':'#1c1c1e'};color:${S.isRecording?'#fff':'#f2f2f7'};font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:980px;cursor:pointer;margin-top:10px;display:inline-flex;align-items:center;gap:6px;${S.isRecording?'animation:mmRecPulse 1.1s ease-in-out infinite;':''}`;
+    const hasRecordError=!!S.recordError;
+    const recordingsSorted=(S.recordings||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    const recordingItems=recordingsSorted.map(r=>({id:r.id,name:r.name,dataUrl:r.dataUrl,remove:()=>self.deleteRecording(r.id)}));
+    const hasRecordings=recordingItems.length>0;
+    const noRecordings=!hasRecordings;
+
     // songs tab
     const savedSongsSorted2=(S.savedSongs||[]).slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
     const songsListItems=savedSongsSorted2.map(s=>({name:s.name,onClick:()=>self.viewSong(s.id),
@@ -1455,6 +1551,7 @@ class Component extends DCLogic {
       toggleAutoScroll,autoScrollBtnLabel,autoScrollBtnStyle,scrollSpeed:S.scrollSpeed||3,setScrollSpeed,
       outputScrollRef:this.outputScrollRef,
       songsListItems,hasSongsListItems,noSongsListItems,hasViewingSong,viewingSongName,songView,backToList,editViewingSong,
+      toggleRecording,recordBtnLabel,recordBtnStyle,hasRecordError,recordError:S.recordError||'',recordingItems,hasRecordings,noRecordings,
       livePreviewTabBlocks,hasLivePreviewTab
     };
   }
