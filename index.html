@@ -315,6 +315,10 @@
         <button onClick="{{ bpmUp }}" style="{{ stepBtnStyle }}">+</button>
       </div>
 
+      <div style="margin:4px 0 8px;">
+        <button onClick="{{ tapTempoBtn }}" style="{{ tapTempoBtnStyle }}">Tap Tempo</button>
+      </div>
+
       <div style="display:flex;justify-content:center;gap:10px;align-items:center;margin:26px 0;min-height:34px;">
         <sc-for list="{{ beatDots }}" as="b" hint-placeholder-count="4"><div style="{{ b.style }}"></div></sc-for>
       </div>
@@ -361,6 +365,7 @@
         <button onClick="{{ saveSongBtn }}" style="{{ playPillStyle }}" style-hover="{{ playPillHoverStyle }}">Save</button>
         <button onClick="{{ newSongBtn }}" style="{{ ghostSmallStyle }}" style-hover="{{ ghostSmallStyleHover }}">New</button>
       </div>
+      <input value="{{ currentSongTags }}" onInput="{{ onSongTagsChange }}" placeholder="Tags — comma separated (e.g. sad, breakup, acoustic)" style="font-size:13px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;margin-bottom:14px;">
       <sc-if value="{{ hasSavedSongs }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
         <sc-for list="{{ savedSongChips }}" as="s" hint-placeholder-count="3">
@@ -380,13 +385,19 @@
           <div style="font-size:13px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:#f0b429;margin:10px 0 2px;">{{ ln.labelText }}</div>
           </sc-if>
           <sc-if value="{{ ln.isLyricLine }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:flex-end;min-height:20px;">
-            <sc-for list="{{ ln.wordViews }}" as="w" hint-placeholder-count="3">
-              <button onClick="{{ w.onClick }}" style="display:flex;flex-direction:column;align-items:center;border:none;background:transparent;cursor:pointer;padding:2px 5px;border-radius:6px;">
-                <span style="font-size:12px;font-weight:700;color:#f0b429;height:15px;line-height:15px;">{{ w.chordName }}</span>
-                <span style="font-size:15px;color:#f2f2f7;">{{ w.word }}</span>
-              </button>
-            </sc-for>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
+            <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:flex-end;min-height:20px;flex:1;">
+              <sc-for list="{{ ln.wordViews }}" as="w" hint-placeholder-count="3">
+                <div style="position:relative;display:inline-flex;">
+                  <button onClick="{{ w.onClick }}" style="display:flex;flex-direction:column;align-items:center;border:none;background:transparent;cursor:pointer;padding:2px 5px;border-radius:6px;">
+                    <span style="font-size:12px;font-weight:700;color:#f0b429;height:15px;line-height:15px;">{{ w.chordName }}</span>
+                    <span style="font-size:15px;color:#f2f2f7;">{{ w.word }}</span>
+                  </button>
+                  <button onClick="{{ w.onRhymeClick }}" style="position:absolute;top:-4px;right:-6px;width:16px;height:16px;border-radius:50%;border:none;background:#2c2c2e;color:#98989d;font-size:9px;font-weight:700;padding:0;line-height:16px;cursor:pointer;">~</button>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:none;font-size:10px;color:#6e6e73;font-weight:600;padding-bottom:4px;min-width:16px;text-align:right;">{{ ln.syllableCount }}</div>
           </div>
           </sc-if>
         </sc-for>
@@ -400,6 +411,21 @@
           <button onClick="{{ clearChord }}" style="border:none;background:transparent;color:#8e8e93;font-size:12px;font-weight:600;cursor:pointer;">Clear</button>
           <button onClick="{{ closePicker }}" style="border:none;background:transparent;color:#8e8e93;font-size:12px;font-weight:600;cursor:pointer;">Close</button>
         </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ rhymeActiveHere }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:14px;padding:10px 12px;background:#1c2a33;border-radius:12px;">
+        <div style="font-size:12px;color:#8ecbe6;font-weight:600;margin-bottom:8px;">Rhymes with "{{ rhymeActiveWordText }}"</div>
+        <sc-if value="{{ hasRhymeSuggestions }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <sc-for list="{{ rhymeSuggestionsList }}" as="rw" hint-placeholder-count="8"><span style="border:1px solid #2c3e46;background:#1c1c1e;color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;">{{ rw.word }}</span></sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noRhymeSuggestions }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12.5px;color:#8e8e93;">No close matches found.</div>
+        </sc-if>
+        <button onClick="{{ closeRhymePicker }}" style="border:none;background:transparent;color:#8e8e93;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;">Close</button>
       </div>
       </sc-if>
 
@@ -450,6 +476,18 @@
         </sc-for>
         <button onClick="{{ addTabBlockBtn }}" style="{{ ghostSmallStyle }}" style-hover="{{ ghostSmallStyleHover }}">+ Add another tab</button>
         <div style="font-size:11px;color:#8e8e93;margin-top:8px;">Type a fret number (0–24) in any cell, or clear it with backspace.</div>
+      </div>
+
+      <div style="border-top:1px solid #2c2c2e;margin-top:24px;padding-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+          <div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;color:#f2f2f7;">Transpose song</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onClick="{{ transposeDown }}" style="{{ stepBtnStyleSmall }}">−</button>
+            <span style="font-size:14px;font-weight:700;min-width:90px;text-align:center;">{{ keyLabel }}</span>
+            <button onClick="{{ transposeUp }}" style="{{ stepBtnStyleSmall }}">+</button>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:#8e8e93;">Rewrites every chord in this song (and its key) by a semitone — unlike Capo above, which only relabels how existing chords sound. Guitar-tab fret numbers aren't affected.</div>
       </div>
 
       <div style="border-top:1px solid #2c2c2e;margin-top:24px;padding-top:16px;">
@@ -519,6 +557,10 @@
       </sc-if>
     </div>
 
+    <div style="margin-bottom:16px;">
+      <input value="{{ songSearchQuery }}" onInput="{{ onSongSearchChange }}" placeholder="Search songs — name, tags, or lyrics" style="width:100%;border:1px solid #2c2c2e;background:#1c1c1e;color:#f2f2f7;font-size:14px;border-radius:12px;padding:11px 14px;">
+    </div>
+
     <sc-if value="{{ hasViewingSong }}" hint-placeholder-val="{{ false }}">
     <div style="background:#1c1c1e;border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #2c2c2e;">
@@ -576,7 +618,12 @@
     <div style="display:flex;flex-direction:column;gap:10px;">
       <sc-for list="{{ songsListItems }}" as="s" hint-placeholder-count="3">
         <div style="{{ s.rowStyle }}">
-          <button onClick="{{ s.onClick }}" style="border:none;background:transparent;flex:1;text-align:left;font-size:14px;font-weight:600;color:#f2f2f7;cursor:pointer;padding:0;">{{ s.name }}</button>
+          <button onClick="{{ s.onClick }}" style="border:none;background:transparent;flex:1;text-align:left;font-size:14px;font-weight:600;color:#f2f2f7;cursor:pointer;padding:0;">
+            <div>{{ s.name }}</div>
+            <sc-if value="{{ s.hasTags }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11px;font-weight:500;color:#98989d;margin-top:2px;">{{ s.tagsLabel }}</div>
+            </sc-if>
+          </button>
           <button onClick="{{ s.remove }}" style="border:none;background:transparent;color:#6e6e73;font-size:16px;cursor:pointer;padding:0;line-height:1;">×</button>
         </div>
       </sc-for>
@@ -675,14 +722,15 @@ class Component extends DCLogic {
     {role:'Submediant — the wistful substitute',dos:['A great substitute for the tonic — V → vi is the classic "deceptive cadence," a twist instead of the expected resolution.'],donts:['Don\'t rely on it as your only "home" — without the true tonic nearby it can feel aimless.']},
     {role:'Leading-tone — pure tension',dos:['Use it only as a brief passing chord resolving up into the tonic.'],donts:['Never open or close a song on it — on its own it has no gravity; it only works as a doorway into I.']}
   ];
+  RHYME_WORDS_RAW = 'a,above,absolutely,accept,accepted,accepting,accepts,account,accounts,accuse,accused,accuses,accusing,across,act,acted,acting,active,acts,actually,add,added,adding,address,addresses,adds,admit,admits,admitted,admitting,adorn,adorned,adorning,adorns,advance,advanced,advances,advancing,advise,advised,advises,advising,afraid,after,afternoon,afternoons,again,against,age,ages,agree,agreed,agreeing,agrees,air,airs,album,albums,all,allow,allowed,allowing,allows,almost,alone,already,altar,altars,although,always,among,an,ancient,and,angel,angels,anger,angers,angrier,angriest,angrily,angry,animal,animals,announce,announced,announces,announcing,annoyed,another,answer,answered,answering,answers,ant,antique,ants,anxious,any,anywhere,apart,ape,apes,apologize,apologized,apologizes,apologizing,apparently,apple,apples,approach,approached,approaches,approaching,approve,approved,approves,approving,are,argue,argued,argues,arguing,arm,armies,armor,armors,arms,army,around,arrange,arranged,arranges,arranging,arrival,arrivals,arrive,arrived,arrives,arriving,arrogant,arrow,arrows,art,arteries,artery,artificial,artist,artists,arts,ascend,ascended,ascending,ascends,ash,ashamed,ashes,ask,asked,asking,asks,assemble,assembled,assembles,assembling,assignment,assignments,asteroid,asteroids,astronaut,astronauts,at,atom,atoms,attach,attached,attaches,attaching,attack,attacked,attacking,attacks,attempt,attempted,attempting,attempts,attic,attics,attractive,audience,audiences,aunt,aunts,authentic,author,authors,autumn,autumns,avoid,avoided,avoiding,avoids,away,awful,babies,baby,backpack,backpacks,backward,bacteria,bacterias,bad,bag,baggy,bags,bake,baked,bakes,baking,balanced,balconies,balcony,ball,balls,banana,bananas,band,bandage,bandages,bands,bank,banks,barbecue,barbecued,barbecues,barbecuing,barely,bark,barks,basement,basements,basket,baskets,bathroom,bathrooms,batteries,battery,battle,battles,be,bear,bears,beat,beats,beautified,beautifies,beautiful,beautify,beautifying,became,because,become,becomes,becoming,bedroom,bedrooms,bee,been,beer,beers,bees,beetle,beetles,before,began,begin,beginning,begins,begun,being,belief,beliefs,believe,believed,believes,believing,below,belt,belts,bend,bended,bending,bends,berries,berry,betrayal,betrayals,between,big,bigger,biggest,bike,bikes,bind,binding,binds,birch,birches,bird,birds,birthday,birthdays,bit,bite,bites,biting,bitten,bitter,bitterly,black,blacks,blame,blamed,blames,blaming,bled,bleed,bleeding,bleeds,blend,blended,blending,blends,blew,blink,blinked,blinking,blinks,block,blocked,blocking,blocks,blood,bloods,blow,blowing,blown,blows,blue,blues,blurry,boat,boats,bodies,body,boil,boiled,boiling,boils,bold,bolt,bolted,bolting,bolts,bond,bonds,bone,bones,bonus,bonuses,book,books,boot,boots,border,borders,bored,borrow,borrowed,borrowing,borrows,boss,bosses,both,bought,bound,bow,bowl,bowls,bows,box,boxes,boy,boys,bracelet,bracelets,brain,brains,brake,brakes,branch,branches,brave,bravely,braver,bravest,bread,breads,break,breakfast,breakfasts,breaking,breaks,breath,breaths,breeze,breezes,brick,bricks,bridge,bridges,brief,briefer,briefest,bright,brighter,brightest,brightly,brightness,brightnesses,brilliant,bring,bringing,brings,broadcast,broadcasted,broadcasting,broadcasts,broke,broken,broom,brooms,brother,brothers,brought,brown,browns,brush,brushes,build,building,builds,built,bulb,bulbs,bullet,bullets,bumpy,burger,burgers,buried,buries,burn,burning,burns,burnt,bury,burying,bus,buses,business,businesses,but,butter,butterflies,butterfly,butters,button,buttoned,buttoning,buttons,buy,buying,buys,by,cabbage,cabbages,cabinet,cabinets,cable,cables,cactus,cactuses,cage,cages,cake,cakes,calculate,calculated,calculates,calculating,calendar,calendars,call,called,calling,calls,calm,calmer,calmest,calmly,calms,came,camera,cameras,can,candies,candle,candles,candy,canyon,canyons,cap,capital,capitals,caps,captain,captains,car,care,cared,career,careers,careful,carefully,careless,carelessly,cares,caring,carpenter,carpenters,carried,carries,carrot,carrots,carry,carrying,cars,carve,carved,carves,carving,cash,cashes,cast,castle,castles,casts,cat,catch,catches,catching,cats,caught,cause,causes,cave,caves,celebration,celebrations,centuries,century,ceremonies,ceremony,certainly,chain,chains,chair,chairs,challenge,challenged,challenges,challenging,champion,champions,changing,chant,chanted,chanting,chants,chaotic,chapter,chapters,charge,charged,charges,charging,charming,chase,chased,chases,chasing,chat,chats,chatted,chatting,chauffeur,chauffeurs,cheap,cheat,cheated,cheating,cheats,cheerful,cheese,cheeses,chemical,chemicals,cherries,cherry,chew,chewed,chewing,chews,chick,chicken,chickens,chicks,child,childs,chimney,chimneys,chocolate,chocolates,choose,chooses,choosing,chop,choped,choping,chops,chord,chords,chose,chosen,church,churches,cite,cited,cites,cities,citing,citizen,citizens,city,class,classes,classic,classroom,classrooms,claw,claws,clean,cleaned,cleaner,cleanest,cleaning,cleans,clear,clearly,clever,click,clicked,clicking,clicks,client,clients,cliff,cliffs,climate,climates,climb,climbed,climbing,climbs,clip,clipped,clipping,clips,clock,clocks,close,closed,closely,closes,closet,closets,closing,cloth,cloths,cloud,clouds,coach,coaches,coast,coasts,coat,coats,code,coded,codes,coding,coffee,coffees,coin,coins,cold,colder,coldest,coldly,coldness,coldnesses,colds,colleague,colleagues,collect,collected,collecting,collects,college,colleges,color,colors,colossal,combine,combined,combines,combining,come,comes,comet,comets,comfortable,coming,command,commanded,commanding,commands,comment,commented,commenting,comments,common,companies,company,compare,compared,compares,comparing,compass,compasses,compete,competed,competes,competing,compile,compiled,compiles,compiling,complete,completely,complex,complicated,compliment,complimented,complimenting,compliments,computer,computers,concert,concerts,confess,confessed,confesses,confessing,confident,confirm,confirmed,confirming,confirms,confuse,confused,confuses,confusing,connect,connected,connecting,connects,constant,constantly,construct,constructed,constructing,constructs,contemporary,content,contest,contests,continent,continents,continue,continued,continues,continuing,continuously,contrast,contrasted,contrasting,contrasts,control,controlled,controlling,controls,convince,convinced,convinces,convincing,cook,cooked,cooking,cooks,cool,cooldown,cooldowned,cooldowning,cooldowns,cooler,coolest,copied,copies,copy,copying,corn,corns,correct,corrected,correcting,corrects,cost,costs,cotton,cottons,cough,coughs,could,count,counted,counting,countries,country,counts,courteous,cousin,cousins,cover,covered,covering,covers,cowardly,cozy,crab,crabs,craft,crafted,crafting,crafts,crawl,crawled,crawling,crawls,cream,creams,create,created,creates,creating,creep,creeped,creeping,creeps,crew,crews,cried,cries,crime,crimes,crisp,crisper,crispest,criticize,criticized,criticizes,criticizing,crooked,crow,crowd,crowded,crowdeder,crowdedest,crowds,crown,crowns,crows,cruel,crush,crushed,crushes,crushing,crutch,crutches,cry,crying,crystal,crystals,cub,cubicle,cubicles,cubs,cucumber,cucumbers,cup,cupboard,cupboards,cups,cure,cured,cures,curing,curious,current,currents,curved,customer,customers,customs,customses,cut,cuts,cutting,damage,damaged,damages,damaging,dance,danced,dancer,dancers,dances,dancing,dangerous,dark,darker,darkest,darkness,darknesses,darks,daughter,daughters,dawn,dawns,day,days,deadline,deadlines,debate,debated,debates,debating,debt,debts,debug,debuged,debuging,debugs,decade,decades,deceive,deceived,deceives,deceiving,declare,declared,declares,declaring,decline,declined,declines,declining,decorate,decorated,decorates,decorating,deep,deeper,deepest,deeply,deer,deers,defeat,defeats,defend,defended,defending,defends,define,defined,defines,defining,definitely,degree,degrees,delay,delayed,delaying,delays,delicate,delicious,delighted,deliver,delivered,delivering,delivers,demand,demanded,demanding,demands,demolish,demolished,demolishes,demolishing,demon,demons,denied,denies,deny,denying,depart,departed,departing,departs,departure,departures,depressed,descend,descended,descending,descends,describe,described,describes,describing,desert,deserts,design,designed,designing,designs,desk,desks,destination,destinations,destroy,destroyed,destroying,destroys,detach,detached,detaches,detaching,device,devices,devil,devils,devour,devoured,devouring,devours,dial,dialed,dialing,dials,diamond,diamonds,dice,diced,dices,dicing,did,diet,dieted,dieting,diets,difficult,dig,digging,digs,dim,dimly,dimmer,dimmest,dinner,dinners,direct,directed,directing,directs,dirtier,dirtiest,dirty,disagree,disagreed,disagreeing,disagrees,disassemble,disassembled,disassembles,disassembling,disconnect,disconnected,disconnecting,disconnects,discourage,discouraged,discourages,discouraging,discover,discovered,discovering,discovers,discuss,discussed,discusses,discussing,disease,diseases,disgusting,dishonest,disloyal,display,displayed,displaying,displays,distant,district,districts,dive,dived,dives,divide,divided,divides,dividing,diving,do,doctor,doctors,dodge,dodged,dodges,dodging,does,dog,dogs,doing,dollar,dollars,dolphin,dolphins,domesticated,donate,donated,donates,donating,done,doodle,doodled,doodles,doodling,door,doors,double,doubt,doubted,doubting,doubts,dove,doves,download,downloaded,downloading,downloads,downward,drag,dragged,dragging,dragon,dragons,drags,drain,drained,draining,drains,drama,dramas,draw,drawbridge,drawbridges,drawer,drawers,drawing,drawn,draws,dream,dreamed,dreaming,dreams,dress,dresses,drew,dribble,dribbled,dribbles,dribbling,dried,drier,dries,driest,drill,drills,drip,driped,driping,drips,drive,driven,driver,drivers,drives,driving,drizzle,drizzled,drizzles,drizzling,drop,dropped,dropping,drops,drove,drown,drowned,drowning,drowns,drum,drums,dry,drying,duck,ducks,dug,dull,duller,dullest,dumb,dungeon,dungeons,during,dusk,dusks,dust,dusted,dusting,dusts,dwarf,dwarfs,each,eager,eagle,eagles,ear,early,earn,earned,earning,earns,earring,earrings,ears,earth,earthquake,earthquakes,earths,easier,easiest,easy,echo,echoes,edit,edited,editing,edits,effect,effects,egg,eggs,either,electrician,electricians,element,elements,elephant,elephants,elf,elfs,email,emails,embarrassed,ember,embers,embroider,embroidered,embroidering,embroiders,employee,employees,emptied,empties,empty,emptying,encourage,encouraged,encourages,encouraging,end,ended,ending,endless,endlessly,ends,energetic,engine,engines,enormous,enraged,enter,entered,entering,enters,entirely,envelope,envelopes,equal,era,eras,erect,erected,erecting,erects,escape,escaped,escapes,escaping,especially,essay,essays,estimate,estimated,estimates,estimating,eternal,evaluate,evaluated,evaluates,evaluating,even,evening,evenings,eventually,every,everywhere,exam,exams,exchange,exchanged,exchanges,exchanging,excited,excuse,excused,excuses,excusing,exercise,exercised,exercises,exercising,exhibit,exhibited,exhibiting,exhibits,exit,exited,exiting,exits,expensive,experiment,experimented,experimenting,experiments,explain,explained,explaining,explains,explore,explored,explores,exploring,expose,exposed,exposes,exposing,extraordinary,extremely,eye,eyes,fable,fables,face,faces,fact,factories,factory,facts,faded,fail,failed,failing,fails,failure,failures,faint,fair,fairer,fairest,fairies,fairy,faith,faithful,faiths,fake,fall,fallen,falling,falls,false,families,family,famous,far,farewell,farewells,farmer,farmers,fast,fasted,faster,fastest,fasting,fasts,father,fathers,fear,feared,fearing,fears,feast,feasted,feasting,feasts,feather,feathers,fed,feeble,feed,feeding,feeds,feel,feeling,feels,fell,felt,fence,fences,feral,festival,festivals,fever,fevers,few,fiction,fictions,field,fields,fierce,fight,fighted,fighting,fights,fill,filled,filling,fills,film,filmed,filming,films,final,finally,find,finding,finds,finger,fingers,finish,finished,finishes,finishing,finite,fire,fires,first,fish,fisherman,fishermans,fishes,fix,fixed,fixes,fixing,flag,flags,flame,flames,flash,flashed,flashes,flashing,flashlight,flashlights,flat,flatter,flattest,flawed,flew,flex,flexed,flexes,flexible,flexing,flies,float,floated,floating,floats,flood,flooded,flooding,floods,floor,floors,flour,flours,flow,flowed,flower,flowers,flowing,flown,flows,flu,flus,fly,flying,foal,foals,fog,fogs,fold,folded,folding,folds,follow,followed,following,follows,food,foods,foolish,foot,foots,for,forbid,forbided,forbiding,forbids,forest,forests,forever,forgave,forget,forgets,forgetting,forgive,forgives,forgiving,forgot,forgotten,fork,forks,fortunate,forward,found,fox,foxes,fragile,free,freedom,freedoms,freer,freest,freeze,freezes,freezing,fresh,fresher,freshest,fridge,fridges,fried,friend,friendlier,friendliest,friendly,friends,fries,frieses,frightened,frog,frogs,from,frost,frosts,froze,frozen,fruit,fruits,frustrated,fry,frying,full,fuller,fullest,funeral,funerals,fur,furious,furs,future,futures,gadget,gadgets,gain,gained,gaining,gains,galaxies,galaxy,gale,gales,game,games,garden,gardens,garlic,garlics,garnish,garnished,garnishes,garnishing,gate,gates,gather,gathered,gathering,gathers,gave,gaze,gazed,gazes,gazing,generation,generations,generous,gentle,gentler,gentlest,gently,genuine,geographies,geography,get,gets,getting,ghost,ghosts,giant,giants,gift,gifts,giraffe,giraffes,girl,girls,give,given,gives,giving,glad,gladder,gladdest,glance,glanced,glances,glancing,glass,glasses,glasseses,glide,glided,glides,gliding,gloomy,glove,gloves,glow,glowed,glowing,glows,glue,glued,glues,gluing,go,goes,going,gold,golds,gone,good,goodbye,goodbyes,goose,gooses,gorgeous,gorilla,gorillas,got,gotten,government,governments,governor,governors,grade,graded,grades,grading,gradual,gradually,grammar,grammars,grandfather,grandfathers,grandmother,grandmothers,grape,grapes,grass,grasses,grate,grated,grateful,grates,grating,gravities,gravity,gray,grays,great,greater,greatest,greedy,green,greens,greet,greeted,greeting,greets,grew,grief,griefs,grill,grilled,grilling,grills,grind,grinded,grinding,grinds,grip,gripped,gripping,grips,grow,growing,grown,grows,guard,guarded,guarding,guards,guess,guessed,guesses,guessing,guide,guided,guides,guiding,guilty,guitar,guitars,gulp,gulped,gulping,gulps,gun,guns,gush,gushed,gushes,gushing,gust,gusts,gym,gyms,had,hair,hairs,hallway,hallways,halt,halted,halting,halts,hammer,hammered,hammering,hammers,hand,handle,handles,hands,handsome,hang,hanged,hanging,hangs,happier,happiest,happily,happiness,happinesses,happy,hard,harder,hardest,hardly,harm,harmed,harming,harms,harsh,harsher,harshest,harvest,harvested,harvesting,harvests,has,hat,hate,hated,hates,hating,hats,have,having,hawk,hawks,he,head,headache,headaches,heads,heal,healed,healing,heals,health,healths,hear,heard,hearing,hears,heart,heartbroken,hearts,heat,heats,heaven,heavens,heavier,heaviest,heavy,held,hell,hells,helmet,helmets,help,helped,helping,helps,her,here,hero,heroes,hers,hid,hidden,hide,hides,hiding,high,higher,highest,highway,highways,hill,hills,him,his,histories,history,hold,holding,holds,holiday,holidays,hollow,home,homes,homework,homeworks,honest,honey,honeys,hope,hoped,hopes,hoping,horse,horses,hospital,hospitals,hot,hotter,hottest,hour,hours,house,houses,hover,hovered,hovering,hovers,how,huge,huger,hugest,hum,humble,humbler,humblest,hummed,humming,hums,hungry,hunt,hunted,hunting,hunts,hurricane,hurricanes,hurried,hurries,hurry,hurrying,hurt,hurting,hurts,husband,husbands,hymn,hymns,i,ice,ices,idea,ideas,illness,illnesses,illusion,illusions,imagine,imagined,imagines,imagining,immediately,immense,impatient,impolite,in,incredibly,indifferent,infinite,influence,influenced,influences,influencing,initial,injure,injured,injures,injuring,ink,inks,innocent,insecure,inspire,inspired,inspires,inspiring,install,installed,installing,installs,instantly,instrument,instruments,insult,insulted,insulting,insults,intelligent,intense,intern,internet,internets,interns,into,introduce,introduced,introduces,introducing,invent,invented,inventing,invention,inventions,invents,inward,irritated,is,island,islands,isolated,it,its,jacket,jackets,jam,jams,job,jobs,join,joined,joining,joins,journey,journeys,joy,joyful,joys,judge,judged,judges,judging,juice,juices,jump,jumped,jumping,jumps,juries,jury,just,justice,justices,keep,keeping,keeps,kept,key,keys,kick,kicked,kicking,kicks,kidney,kidneys,kind,kinder,kindest,king,kings,kitchen,kitchens,kitten,kittens,knew,knife,knifes,knit,knits,knitted,knitting,knot,knoted,knoting,knots,know,knowing,known,knows,koala,koalas,laboratories,laboratory,lace,laced,laces,lacing,ladder,ladders,lain,lake,lakes,lamp,lamps,large,larger,largest,last,late,laugh,laughed,laughing,laughs,laughter,laughters,launch,launched,launches,launching,law,laws,lawyer,lawyers,lay,lazier,laziest,lazy,lead,leader,leaders,leading,leads,leaf,leafs,leak,leaked,leaking,leaks,learn,learned,learning,learns,least,leather,leathers,leave,leaves,leaving,lecture,lectures,led,left,leg,legend,legends,legs,lemon,lemons,lend,lended,lending,lends,lengthy,lenient,less,lesson,lessons,let,lets,letter,letters,letting,lettuce,lettuces,lie,lies,lift,lifted,lifting,lifts,light,lighter,lightest,lightning,lightnings,lights,like,liked,likes,liking,lime,limes,lion,lions,lip,lips,listen,listened,listening,listens,liver,livers,livid,lizard,lizards,lobster,lobsters,lock,locks,lonelier,loneliest,lonely,look,looked,looking,looks,loose,looser,loosest,lose,loses,losing,loss,losses,lost,loud,louder,loudest,loudly,love,loved,lovelier,loveliest,lovely,lover,lovers,loves,loving,low,lower,lowered,lowering,lowers,lowest,loyal,loyalties,loyalty,lucky,lunch,lunches,lung,lungs,lying,machine,machines,made,mail,mailed,mailing,mails,maintain,maintained,maintaining,maintains,make,makes,making,man,manage,managed,manages,managing,mans,many,map,maple,maples,maps,march,marched,marches,marching,marinate,marinated,marinates,marinating,market,markets,mash,mashed,mashes,mashing,massive,match,matches,math,maths,may,maybe,mayor,mayors,me,meadow,meadows,meal,meals,mean,meaner,meanest,meaning,means,meant,measure,measured,measures,measuring,meat,meats,mechanic,mechanics,medicine,medicines,meet,meeting,meetings,meets,melancholy,melodies,melody,melon,melons,melt,melted,melting,melts,memories,memorize,memorized,memorizes,memorizing,memory,mention,mentioned,mentioning,mentions,merely,merge,merged,merges,merging,message,messaged,messages,messaging,messy,met,metal,metals,meteor,meteors,microphone,microphones,midnight,midnights,might,mighty,mild,milder,mildest,milk,milks,mind,minds,mine,miner,miners,miniature,minute,minutes,mirror,mirrors,miserable,mislead,misleaded,misleading,misleads,mist,mists,mix,mixed,mixes,mixing,moat,moats,modern,modest,mold,molded,molding,molds,molecule,molecules,moment,moments,money,moneys,monk,monkey,monkeys,monks,month,months,moon,moons,mop,mopped,mopping,mops,more,morning,mornings,mosque,mosques,most,moth,mother,mothers,moths,motivate,motivated,motivates,motivating,mountain,mountains,mourning,mournings,mouth,mouths,move,moved,moves,moving,much,multiple,multiplied,multiplies,multiply,multiplying,munch,munched,munches,munching,muscle,muscles,music,musics,must,my,mysteries,mysterious,mystery,myth,myths,nail,nailed,nailing,nails,nap,napped,napping,naps,narrow,nation,nations,near,nearby,nearly,neat,neater,neatest,necklace,necklaces,need,needed,needing,needs,neighbor,neighborhood,neighborhoods,neighbors,neither,nerve,nerves,nervous,nervously,nest,nests,never,new,newer,newest,next,nibble,nibbled,nibbles,nibbling,nice,nicer,nicest,night,nights,no,noble,noise,noises,noisier,noisiest,noisy,none,noodle,noodles,noon,noons,nor,normally,nose,noses,not,notable,note,notes,notice,noticed,notices,noticing,novel,novels,now,nowhere,number,numbers,nun,nuns,nurse,nurses,oak,oaks,oath,oaths,oats,oatses,obey,obeyed,obeying,obeys,obscure,observe,observed,observes,observing,obvious,obviously,occupied,ocean,oceans,octopus,octopuses,offend,offended,offending,offends,offer,offered,offering,offers,office,offices,often,old,older,oldest,on,once,onion,onions,only,onto,open,opened,opening,opens,opinion,opinions,oppose,opposed,opposes,opposing,or,orange,oranges,orbit,orbits,order,ordered,ordering,orders,ordinary,organize,organized,organizes,organizing,ornament,ornamented,ornamenting,ornaments,other,our,ours,outdated,outward,oven,ovens,over,overflow,overflowed,overflowing,overflows,owe,owed,owes,owing,owl,owls,own,pace,paced,paces,pacing,package,packages,page,pages,paid,pain,pains,paint,painted,painting,paints,palm,palms,pan,panda,pandas,panicked,pans,pants,pantses,paper,papers,paradise,paradises,paragraph,paragraphs,parcel,parcels,parrot,parrots,particularly,partly,partner,partners,pass,passed,passenger,passengers,passes,passing,passive,passport,passports,past,pasta,pastas,pasts,path,paths,patient,pause,paused,pauses,pausing,paw,paws,pay,paying,pays,peace,peaceful,peaces,peach,peaches,pear,pearl,pearls,pears,pedal,pedals,peek,peeked,peeking,peeks,peel,peeled,peeling,peels,peer,peered,peering,peers,pen,pencil,pencils,pens,pepper,peppers,perfect,perform,performed,performing,performs,perhaps,permanent,permit,permits,permitted,permitting,persuade,persuaded,persuades,persuading,phone,phones,photo,photoes,photograph,photographed,photographing,photographs,piano,pianoes,pick,picked,picking,picks,picture,pictured,pictures,picturing,pigeon,pigeons,pill,pills,pilot,pilots,pin,pine,pines,pink,pinks,pinned,pinning,pins,pizza,pizzas,plain,plainer,plainest,plains,plan,plane,planes,planet,planets,planned,planning,plans,plant,planted,planting,plants,plastic,plastics,plate,plates,play,played,player,players,playing,plays,pleased,pluck,plucked,plucking,plucks,plug,plugs,plum,plumber,plumbers,plums,plunge,plunged,plunges,plunging,pocket,pockets,poem,poems,poet,poets,polish,polished,polishes,polishing,polite,poor,poorer,poorest,porch,porches,possibly,post,posted,posting,posts,pot,potato,potatoes,pots,pound,pounded,pounding,pounds,pour,poured,pouring,pours,powerful,practice,practiced,practices,practicing,prairie,prairies,praise,praised,praises,praising,prayer,prayers,predict,predicted,predicting,predicts,present,presented,presenting,presents,preserve,preserved,preserves,preserving,president,presidents,press,pressed,presses,pressing,pretend,pretended,pretending,pretends,prettier,prettiest,pretty,prevent,prevented,preventing,prevents,previous,price,prices,priest,priests,prince,princes,princess,princesses,print,printed,printing,prints,prison,prisons,private,prize,prizes,probably,problem,problems,proceed,proceeded,proceeding,proceeds,profit,profits,program,programmed,programming,programs,project,projects,promise,promised,promises,promising,protect,protected,protecting,protects,proud,prouder,proudest,public,publish,published,publishes,publishing,puddle,puddles,pull,pulled,pulling,pulls,punch,punched,punches,punching,punishment,punishments,puppies,puppy,purple,purples,purse,purses,pursue,pursued,pursues,pursuing,push,pushed,pushes,pushing,puzzle,puzzles,queen,queens,question,questions,quick,quickly,quiet,quieter,quietest,quietly,quiver,quivers,quiz,quized,quizes,quizing,quote,quoted,quotes,quoting,rabbit,rabbits,race,raced,races,racing,rage,rages,rain,rains,raise,raised,raises,raising,rake,rakes,ramble,rambled,rambles,rambling,ran,rang,rare,rarely,rarer,rarest,raw,reaction,reactions,read,reader,readers,reading,reads,real,realities,reality,realize,realized,realizes,realizing,really,reason,reasons,recall,recalled,recalling,recalls,receive,received,receives,receiving,recite,recited,recites,reciting,recommend,recommended,recommending,recommends,record,recorded,recording,records,red,reds,referee,refereed,refereeing,referees,refuse,refused,refuses,refusing,region,regions,rehearse,rehearsed,rehearses,rehearsing,reject,rejected,rejecting,rejects,relax,relaxed,relaxes,relaxing,release,released,releases,releasing,reluctant,remember,remembered,remembering,remembers,repair,repaired,repairing,repairs,repeat,repeated,repeating,repeats,replied,replies,reply,replying,report,reports,request,requested,requesting,requests,rescue,rescued,rescues,rescuing,resentful,resist,resisted,resisting,resists,rest,rested,resting,restless,rests,result,results,resume,resumed,resumes,resuming,retreat,retreated,retreating,retreats,return,returned,returning,returns,reveal,revealed,revealing,reveals,review,reviewed,reviewing,reviews,revise,revised,revises,revising,rhythm,rhythms,rib,ribs,rice,rices,rich,richer,richest,ridden,riddle,riddles,ride,rides,riding,right,rights,rigid,ring,ringing,rings,rinse,rinsed,rinses,rinsing,ripe,rise,risen,rises,rising,risky,river,rivers,road,roads,roam,roamed,roaming,roams,roast,roasted,roasting,roasts,rob,robbed,robbing,robot,robots,robs,rock,rocket,rockets,rocks,rode,roll,rolled,rolling,rolls,roof,roofs,room,rooms,rooster,roosters,root,roots,rope,ropes,rose,rotate,rotated,rotates,rotating,rotten,rough,rougher,roughest,roughly,round,rounder,roundest,rude,ruin,ruined,ruining,ruins,rule,rules,run,rung,running,runs,rush,rushed,rushes,rushing,sad,sadder,saddest,sadly,sadness,sadnesses,safe,safer,safest,said,sailor,sailors,salad,salads,salaries,salary,salt,salted,salting,salts,salty,same,sample,sampled,samples,sampling,sand,sands,sandwich,sandwiches,sang,sat,satellite,satellites,satisfied,savage,save,saved,saves,saving,savor,savored,savoring,savors,saw,saws,say,saying,says,scan,scanned,scanning,scans,scared,scarf,scarfs,scepter,scepters,school,schools,science,sciences,score,scored,scores,scoring,scream,screamed,screaming,screams,screen,screens,screw,screwed,screwing,screws,scripture,scriptures,scroll,scrolled,scrolling,scrolls,sculpt,sculpted,sculpting,sculpts,sea,search,searched,searches,searching,seas,season,seasoned,seasoning,seasons,second,seconds,secret,secrets,see,seed,seeds,seeing,seek,seeked,seeking,seeks,seemingly,seen,seep,seeped,seeping,seeps,sees,selfish,sell,selling,sells,senator,senators,send,sending,sends,sent,sentence,sentences,separate,separated,separates,separating,serve,served,serves,serving,set,sets,setting,several,severe,sew,sewed,sewing,sews,shade,shades,shadow,shadows,shadowy,shake,shaken,shakes,shaking,shall,shallow,shape,shaped,shapes,shaping,share,shared,shares,sharing,shark,sharks,sharp,sharper,sharpest,shattered,she,shelf,shelfs,shield,shields,shier,shiest,shine,shines,shining,shiny,ship,ships,shirt,shirts,shoe,shoes,shone,shook,shoot,shooting,shoots,shop,shops,shore,shores,short,shorter,shortest,shot,should,shout,shouted,shouting,shouts,shove,shoved,shovel,shovels,shoves,shoving,show,showed,showing,shows,shrimp,shrimps,shrine,shrines,shy,silence,silences,silent,silently,silk,silks,silver,silvers,simmer,simmered,simmering,simmers,simple,simpler,simplest,simply,since,sincere,sing,singer,singers,singing,single,sings,sink,sinked,sinking,sinks,sip,sipped,sipping,sips,sister,sisters,sit,sits,sitting,sizzle,sizzled,sizzles,sizzling,sketch,sketched,sketches,sketching,skies,skin,skins,skirt,skirts,skull,skulls,sky,sleep,sleeping,sleeps,sleepy,slept,slice,sliced,slices,slicing,slither,slithered,slithering,slithers,sloppy,slow,slower,slowest,slowly,sluggish,small,smaller,smallest,smart,smile,smiled,smiles,smiling,smoke,smokes,smooth,smoother,smoothest,snail,snails,snake,snakes,snap,snapped,snapping,snaps,sneak,sneaked,sneaking,sneaks,snow,snows,snug,so,soak,soaked,soaking,soaks,soar,soared,soaring,soars,sock,socket,sockets,socks,soft,softer,softest,softly,sold,soldier,soldiers,solid,solution,solutions,some,sometimes,somewhere,son,song,songs,sons,sorrow,sorrowful,sorrows,sort,sorted,sorting,sorts,soul,souls,sound,sounds,soup,soups,sour,space,spaces,spark,sparkle,sparkled,sparkles,sparkling,sparks,sparrow,sparrows,speak,speaker,speakers,speaking,speaks,spear,spears,special,speedy,spelling,spellings,spend,spending,spends,spent,spice,spiced,spices,spicing,spicy,spider,spiders,spill,spilled,spilling,spills,spin,spine,spines,spinning,spins,spirit,spirits,splash,splashed,splashes,splashing,split,splits,splitting,spoiled,spoke,spoken,spoon,spoons,sport,sports,spray,sprayed,spraying,sprays,spring,springs,sprinkle,sprinkled,sprinkles,sprinkling,spun,square,squash,squashed,squashes,squashing,squeeze,squeezed,squeezes,squeezing,stage,stages,stair,stairs,stale,staler,stalest,stamp,stamps,stand,standing,stands,star,stare,stared,stares,staring,stars,start,started,starting,starts,starve,starved,starves,starving,state,stated,states,stating,stay,stayed,staying,stays,steady,steal,stealing,steals,steam,steamed,steaming,steams,stew,stews,still,stingy,stir,stirred,stirring,stirs,stitch,stitched,stitches,stitching,stole,stolen,stomach,stomaches,stone,stones,stood,stop,stopped,stopping,stops,store,stores,stories,storm,storms,story,stove,stoves,straight,straightforward,stranger,strangers,stream,streamed,streaming,streams,street,streets,stretch,stretched,stretches,stretching,strict,stricter,strictest,stride,strided,strides,striding,stroll,strolled,strolling,strolls,strong,stronger,strongest,struggle,struggles,student,students,studied,studies,study,studying,stunning,stupid,sturdy,subtract,subtracted,subtracting,subtracts,succeed,succeeded,succeeding,succeeds,success,successes,such,sudden,suddenly,sugar,sugars,suggest,suggested,suggesting,suggests,suitcase,suitcases,summer,summers,sun,sung,sunrise,sunrises,suns,sunset,sunsets,support,supported,supporting,supports,surely,surprise,surprises,swallow,swallowed,swallowing,swallows,swam,swan,swans,sweep,sweeping,sweeps,sweet,sweeten,sweetened,sweetening,sweetens,sweeter,sweetest,sweetly,swept,swift,swim,swimming,swims,swipe,swiped,swipes,swiping,switch,switches,sword,swords,synthetic,table,tables,tablet,tablets,tackle,tackled,tackles,tackling,tail,tails,take,taken,takes,taking,tale,tales,talk,talked,talking,talks,tall,taller,tallest,tame,tamer,tamest,tap,tape,taped,tapes,taping,tapped,tapping,taps,taste,tasted,tastes,tasting,tasty,tea,teach,teached,teacher,teachers,teaches,teaching,team,teams,tear,tears,teas,telescope,telescopes,tell,telling,tells,temperature,temperatures,temple,temples,temporary,tense,terrible,terrified,test,tested,testing,tests,text,texted,texting,texts,thankful,that,the,their,theirs,them,then,there,these,they,thick,thicker,thickest,thin,think,thinking,thinks,thinner,thinnest,thirsty,this,those,though,thought,thoughts,threaten,threatened,threatening,threatens,threw,thrilled,throne,thrones,through,throw,throwing,thrown,throws,thunder,thunders,ticket,tickets,tide,tides,tidier,tidiest,tidy,tie,tied,ties,tiger,tigers,tight,tighter,tightest,time,timeless,times,timid,tiny,tiptoe,tiptoed,tiptoeing,tiptoes,tire,tired,tires,title,titles,toast,toasted,toasting,toasts,today,together,told,tomato,tomatoes,tomorrow,tongue,tongues,tonight,took,tool,tools,tooth,tooths,torch,torches,tornado,tornadoes,totally,tour,toured,touring,tours,toward,tower,towers,town,towns,trace,traced,traces,tracing,track,tracked,tracking,tracks,trade,traded,trades,trading,train,trained,training,trains,trapped,travel,travelled,travelling,travels,treat,treated,treaties,treating,treatment,treatments,treats,treaty,tree,trees,tremble,trembled,trembles,trembling,trickle,trickled,trickles,trickling,tried,tries,trip,triple,trips,triumph,triumphs,trophies,trophy,true,truer,truest,truly,trunk,trunks,trust,trusted,trusting,trusts,truth,truths,try,trying,turn,turned,turning,turns,turtle,turtles,twice,twist,twisted,twisting,twists,tying,type,typed,types,typically,typing,uglier,ugliest,ugly,unbalanced,uncle,unclear,uncles,uncomfortable,uncover,uncovered,uncovering,uncovers,under,understand,understanded,understanding,understands,uneasy,unequal,uneven,unfair,unfaithful,unfortunate,unfriendly,ungrateful,unhappy,unique,unite,united,unites,uniting,universe,universes,universities,university,unjust,unknown,unless,unlucky,unstable,untamed,until,unveil,unveiled,unveiling,unveils,unwilling,update,updated,updates,updating,upgrade,upgraded,upgrades,upgrading,upload,uploaded,uploading,uploads,upon,upward,us,usually,vacant,vague,vaguer,vaguest,vain,valley,valleys,valuable,value,values,vegetable,vegetables,vein,veins,verdict,verdicts,vibrate,vibrated,vibrates,vibrating,victories,victory,video,videoes,village,villages,villain,villains,vine,vines,vintage,violin,violins,virus,viruses,visa,visas,visible,visit,visited,visiting,visits,visualize,visualized,visualizes,visualizing,vivid,vocabularies,vocabulary,voice,voices,vow,vows,voyage,voyages,wait,waited,waiting,waits,wake,wakes,waking,walk,walked,walking,walks,wall,wallet,wallets,walls,wander,wandered,wandering,wanders,want,wanted,wanting,wants,war,warehouse,warehouses,warm,warmed,warmer,warmest,warming,warmly,warms,warmth,warmths,warn,warned,warning,warns,wars,was,wash,washed,washes,washing,waste,wasted,wastes,wasting,watch,watched,watches,watching,water,waterfall,waterfalls,waters,wave,waves,we,weak,weaker,weakest,wealthy,weapon,weapons,wear,wearing,wears,weather,weathers,weave,weaved,weaves,weaving,wedding,weddings,week,weeks,weep,weeping,weeps,weigh,weighed,weighing,weighs,weightless,welcome,welcomed,welcomes,welcoming,went,wept,were,wet,wetter,wettest,whale,whales,what,wheat,wheats,wheel,wheelchair,wheelchairs,wheels,when,where,while,whisper,whispered,whispering,whispers,whistle,whistled,whistles,whistling,white,whites,who,whole,why,wide,wider,widest,wife,wifes,wild,wilder,wildest,will,willing,willow,willows,win,wind,window,windows,winds,wine,wines,wing,wings,winning,wins,winter,winters,wipe,wiped,wipes,wiping,wire,wires,wise,wiser,wisest,wish,wished,wishes,wishing,witch,witches,with,withdraw,withdrawed,withdrawing,withdraws,within,without,witness,witnesses,wizard,wizards,woke,woken,wolf,wolfs,woman,womans,won,wonder,wondered,wonderful,wondering,wonders,wood,woods,wool,wools,word,words,wore,work,worked,worker,workers,working,works,worm,worms,worn,worried,worries,worry,worrying,worthless,would,wrap,wrapped,wrapping,wraps,wrench,wrenches,wring,wringed,wringing,wrings,write,writer,writers,writes,writing,written,wrote,yard,yards,yawn,yawned,yawning,yawns,year,years,yellow,yellows,yes,yesterday,yet,yogurt,yogurts,you,young,younger,youngest,your,yours,zebra,zebras,zip,zipped,zipper,zippers,zipping,zips';
 
   outputScrollRef = React.createRef();
-  state = {tab:'key',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:''};
+  state = {tab:'key',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null};
 
   componentDidMount(){
     let saved=null;
     try{const s=localStorage.getItem('mtsa_v3'); if(s) saved=JSON.parse(s);}catch(e){}
-    const patch = saved?{...saved,playing:false,curBeat:-1,showPresetPicker:false,insightIdx:null,activeChordSlot:null,labelDraft:'',viewingSongId:null,autoScroll:false}:{};
+    const patch = saved?{...saved,playing:false,curBeat:-1,showPresetPicker:false,insightIdx:null,activeChordSlot:null,activeRhymeSlot:null,labelDraft:'',viewingSongId:null,autoScroll:false}:{};
     let bp=Number(patch.bpm); if(!isFinite(bp)||bp<40||bp>240) bp=100; patch.bpm=Math.round(bp);
     if(!Array.isArray(patch.builderChords)) patch.builderChords=[];
     if(typeof patch.songText!=='string') patch.songText='';
@@ -695,6 +743,8 @@ class Component extends DCLogic {
       return hasText||hasChords||hasTabInput;
     });
     if(typeof patch.currentSongName!=='string') patch.currentSongName='';
+    if(typeof patch.currentSongTags!=='string') patch.currentSongTags='';
+    patch.songSearchQuery='';
     let cp=Number(patch.capo); if(!isFinite(cp)||cp<0||cp>11) cp=0; patch.capo=cp;
     if(!Array.isArray(patch.tabGrids)||!patch.tabGrids.length) patch.tabGrids=[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}];
     let ss=Number(patch.scrollSpeed); if(!isFinite(ss)||ss<1||ss>10) ss=3; patch.scrollSpeed=ss;
@@ -705,8 +755,8 @@ class Component extends DCLogic {
     this.setState(patch);
   }
   componentDidUpdate(){
-    try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,songText,chordMap,tabGrids,capo,savedSongs,currentSongId,currentSongName,scrollSpeed}=this.state;
-      localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,songText,chordMap,tabGrids,capo,savedSongs,currentSongId,currentSongName,scrollSpeed}));
+    try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,songText,chordMap,tabGrids,capo,savedSongs,currentSongId,currentSongName,currentSongTags,scrollSpeed}=this.state;
+      localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,songText,chordMap,tabGrids,capo,savedSongs,currentSongId,currentSongName,currentSongTags,scrollSpeed}));
     }catch(e){}
   }
   componentWillUnmount(){
@@ -730,6 +780,43 @@ class Component extends DCLogic {
     const acc=diff>0?'#'.repeat(n):diff<0?'b'.repeat(n):'';
     return letter+acc;
   }
+  syllablesInWord(raw){
+    let w=(raw||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!w) return 0;
+    if(w.length<=3) return 1;
+    const isLE=/[^aeiouy]le$/.test(w);
+    if(w.endsWith('e')&&!isLE) w=w.slice(0,-1);
+    const clusters=w.match(/[aeiouy]+/g)||[];
+    return clusters.length||1;
+  }
+  rhymeKey(word){
+    let w=(word||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!w) return '';
+    const V='aeiouy';
+    const isLE=/[^aeiouy]le$/.test(w);
+    if(w.length>1&&w.endsWith('e')&&!isLE&&!V.includes(w[w.length-2])) w=w.slice(0,-1);
+    for(let i=w.length-1;i>=0;i--){
+      if(V.includes(w[i])){ let j=i; while(j>0&&V.includes(w[j-1])) j--; return w.slice(j); }
+    }
+    return w;
+  }
+  buildRhymeIndex(){
+    const idx=new Map();
+    this.RHYME_WORDS_RAW.split(',').forEach(w=>{ const k=this.rhymeKey(w); if(!idx.has(k)) idx.set(k,[]); idx.get(k).push(w); });
+    return idx;
+  }
+  getRhymeIndex(){ if(!this._rhymeIndexCache) this._rhymeIndexCache=this.buildRhymeIndex(); return this._rhymeIndexCache; }
+  findRhymes(word){
+    const target=(word||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(!target) return [];
+    const idx=this.getRhymeIndex();
+    let out=(idx.get(this.rhymeKey(target))||[]).filter(w=>w!==target);
+    if(out.length<5&&target.length>=2){
+      const suf=target.slice(-3); const seen=new Set(out);
+      out=out.concat(this.RHYME_WORDS_RAW.split(',').filter(w=>w!==target&&!seen.has(w)&&w.endsWith(suf)));
+    }
+    return out.slice(0,24);
+  }
   chordFromSpec(root,spec){
     const [semi,deg,q,roman]=spec;
     const rootName=this.spell(root,semi,deg);
@@ -751,6 +838,42 @@ class Component extends DCLogic {
     const relMajPc=(this.pcOf(keyRoot)+3+capo)%12;
     const majName=this.MAJ_KEYS.find(k=>this.pcOf(k)===relMajPc)||keyRoot;
     return {root:this.spell(majName,9,5),mode:'minor'};
+  }
+  transposeKeyRoot(keyRoot,mode,semi){
+    if(mode==='major'){
+      const pc=((this.pcOf(keyRoot)+semi)%12+12)%12;
+      return this.MAJ_KEYS.find(k=>this.pcOf(k)===pc)||keyRoot;
+    }
+    const relMajPc=((this.pcOf(keyRoot)+3+semi)%12+12)%12;
+    const majName=this.MAJ_KEYS.find(k=>this.pcOf(k)===relMajPc)||keyRoot;
+    return this.spell(majName,9,5);
+  }
+  buildRomanUniverse(keyRoot,mode){
+    const map={};
+    (mode==='major'?this.MAJ_TRI:this.MIN_TRI).forEach(sp=>{ const c=this.chordFromSpec(keyRoot,sp); map[c.roman]={name:c.name,pcs:c.pcs}; });
+    (mode==='major'?this.MAJ_7:this.MIN_7).forEach(sp=>{ const c=this.chordFromSpec(keyRoot,sp); map[c.roman]={name:c.name,pcs:c.pcs}; });
+    const cx=this.complexHarmony(keyRoot,mode);
+    [...cx.sd,...cx.mi,...cx.dm].forEach(c=>{ map[c.roman]={name:c.name,pcs:c.pcs}; });
+    return map;
+  }
+  // Chords are re-derived by their roman label against the new key, not shifted
+  // arithmetically, so every transposed chord stays idiomatically spelled.
+  // Guitar-tab tabGrids are pure fret-number data with no key reference, so they
+  // are intentionally left untouched by this.
+  transposeSong(semi){
+    if(!semi) return;
+    this.setState(st=>{
+      const mode=st.keyMode;
+      const newKeyRoot=this.transposeKeyRoot(st.keyRoot,mode,semi);
+      const universe=this.buildRomanUniverse(newKeyRoot,mode);
+      const newChordMap={};
+      Object.keys(st.chordMap||{}).forEach(k=>{
+        const entry=st.chordMap[k];
+        const hit=entry&&entry.roman!=null?universe[entry.roman]:null;
+        newChordMap[k]=hit?{name:hit.name,roman:entry.roman,pcs:hit.pcs}:entry;
+      });
+      return {chordMap:newChordMap, keyRoot:newKeyRoot};
+    });
   }
 
   uidTab(){ return 'tab_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
@@ -840,6 +963,9 @@ class Component extends DCLogic {
   }
   stopAutoScroll(){ if(this.autoScrollTimer) clearInterval(this.autoScrollTimer); this.autoScrollTimer=null; }
   uidSong(){ return 'song_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  parseTagsInput(raw){
+    return Array.from(new Set((raw||'').split(',').map(t=>t.trim().toLowerCase()).filter(Boolean)));
+  }
   saveSong(){
     this.setState(st=>{
       const hasName=!!(st.currentSongName||'').trim();
@@ -849,7 +975,7 @@ class Component extends DCLogic {
       if(!st.currentSongId && !hasName && !hasText && !hasChords && !hasTabInput) return {};
       const name=(st.currentSongName||'').trim()||'Untitled';
       const id=st.currentSongId||this.uidSong();
-      const entry={id,name,songText:st.songText,chordMap:st.chordMap,tabGrids:st.tabGrids,capo:st.capo,keyRoot:st.keyRoot,keyMode:st.keyMode,savedAt:Date.now()};
+      const entry={id,name,songText:st.songText,chordMap:st.chordMap,tabGrids:st.tabGrids,capo:st.capo,keyRoot:st.keyRoot,keyMode:st.keyMode,bpm:st.bpm,tsIndex:st.tsIndex,sub:st.sub,tags:this.parseTagsInput(st.currentSongTags),savedAt:Date.now()};
       const exists=(st.savedSongs||[]).some(s=>s.id===id);
       const savedSongs=exists?st.savedSongs.map(s=>s.id===id?entry:s):[...(st.savedSongs||[]),entry];
       return {savedSongs,currentSongId:id,currentSongName:name};
@@ -858,10 +984,13 @@ class Component extends DCLogic {
   loadSong(id){
     const s=(this.state.savedSongs||[]).find(x=>x.id===id);
     if(!s) return;
-    this.setState({songText:s.songText||'',chordMap:s.chordMap||{},tabGrids:(s.tabGrids&&s.tabGrids.length)?s.tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:s.capo||0,keyRoot:s.keyRoot||this.state.keyRoot,keyMode:s.keyMode||this.state.keyMode,currentSongId:s.id,currentSongName:s.name,activeChordSlot:null});
+    let bpm=Number(s.bpm); if(!isFinite(bpm)||bpm<40||bpm>240) bpm=this.state.bpm;
+    let tsIndex=Number(s.tsIndex); if(!isFinite(tsIndex)||tsIndex<0||tsIndex>=this.TIME_SIGS.length) tsIndex=this.state.tsIndex;
+    const sub=typeof s.sub==='boolean'?s.sub:this.state.sub;
+    this.setState({songText:s.songText||'',chordMap:s.chordMap||{},tabGrids:(s.tabGrids&&s.tabGrids.length)?s.tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:s.capo||0,keyRoot:s.keyRoot||this.state.keyRoot,keyMode:s.keyMode||this.state.keyMode,bpm,tsIndex,sub,currentSongId:s.id,currentSongName:s.name,currentSongTags:(s.tags||[]).join(', '),activeChordSlot:null});
   }
   newSong(){
-    this.setState({songText:'',chordMap:{},tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:0,currentSongId:null,currentSongName:'',activeChordSlot:null});
+    this.setState({songText:'',chordMap:{},tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:0,currentSongId:null,currentSongName:'',currentSongTags:'',activeChordSlot:null});
   }
   deleteSong(id){
     this.setState(st=>({savedSongs:(st.savedSongs||[]).filter(s=>s.id!==id),currentSongId:st.currentSongId===id?null:st.currentSongId,currentSongName:st.currentSongId===id?'':st.currentSongName}));
@@ -976,6 +1105,17 @@ class Component extends DCLogic {
   playSeq(chords,arp){ this.ensureAudio(); const t0=this.ac.currentTime+0.05; const step=0.62; chords.forEach((c,i)=>{ const t=t0+i*step; if(arp){ const ms=this.midiChord(c.pcs); ms.forEach((m,k)=>this.voice(this.midiFreq(m),t+k*0.075,0.7,0.15)); } else { this.midiChord(c.pcs).forEach(m=>this.voice(this.midiFreq(m),t,step*1.05,0.14)); } }); }
 
   toggleMetro(){ if(this.state.playing) this.stopMetro(); else this.startMetro(); }
+  tapTempo(){
+    const now=Date.now();
+    if(!this.tapTimestamps) this.tapTimestamps=[];
+    if(this.tapTimestamps.length && (now-this.tapTimestamps[this.tapTimestamps.length-1])>2500) this.tapTimestamps=[];
+    this.tapTimestamps.push(now);
+    if(this.tapTimestamps.length>8) this.tapTimestamps=this.tapTimestamps.slice(-8);
+    if(this.tapTimestamps.length<2) return;
+    const intervals=[]; for(let i=1;i<this.tapTimestamps.length;i++) intervals.push(this.tapTimestamps[i]-this.tapTimestamps[i-1]);
+    const avgMs=intervals.reduce((a,b)=>a+b,0)/intervals.length;
+    this.setState({bpm:Math.max(40,Math.min(240,Math.round(60000/avgMs)))});
+  }
   startMetro(){ this.ensureAudio(); this.beatPos=0; this.nextTime=this.ac.currentTime+0.05; this.setState({playing:true}); this.scheduler(); this.metroTimer=setInterval(()=>this.scheduler(),25); }
   stopMetro(){ if(this.metroTimer) clearInterval(this.metroTimer); this.metroTimer=null; this.setState({playing:false,curBeat:-1}); }
   scheduler(){
@@ -1432,6 +1572,7 @@ class Component extends DCLogic {
     const onSongTextChange=(e)=>self.setState({songText:e.target.value});
     const chordMap=S.chordMap||{};
     const activeSlot=S.activeChordSlot;
+    const rhymeSlot=S.activeRhymeSlot;
     const linesArr=songText.split('\n');
     const lineViews=linesArr.map((line,li)=>{
       const trimmed=line.trim();
@@ -1439,10 +1580,19 @@ class Component extends DCLogic {
       const wordViews=line.split(/\s+/).filter(Boolean).map((w,wi)=>{
         const key=li+'_'+wi; const ch=chordMap[key];
         const isActive=!!(activeSlot&&activeSlot.line===li&&activeSlot.word===wi);
-        return {word:w,chordName:ch?ch.name:'',pcs:ch?ch.pcs:null,isActive,onClick:()=>self.setState(st=>{ const a=st.activeChordSlot; const same=a&&a.line===li&&a.word===wi; return {activeChordSlot:same?null:{line:li,word:wi}}; })};
+        return {word:w,chordName:ch?ch.name:'',pcs:ch?ch.pcs:null,isActive,
+          onClick:()=>self.setState(st=>{ const a=st.activeChordSlot; const same=a&&a.line===li&&a.word===wi; return {activeChordSlot:same?null:{line:li,word:wi},activeRhymeSlot:null}; }),
+          onRhymeClick:()=>self.setState(st=>{ const a=st.activeRhymeSlot; const same=a&&a.line===li&&a.word===wi; return {activeRhymeSlot:same?null:{line:li,word:wi},activeChordSlot:null}; })};
       });
-      return {k:li,isLabel:false,isLyricLine:true,labelText:'',wordViews};
+      const syllableCount=wordViews.reduce((sum,wv)=>sum+this.syllablesInWord(wv.word),0);
+      return {k:li,isLabel:false,isLyricLine:true,labelText:'',wordViews,syllableCount};
     });
+    const rhymeActiveHere=!!rhymeSlot;
+    const rhymeActiveWordText=rhymeActiveHere?((linesArr[rhymeSlot.line]||'').split(/\s+/).filter(Boolean)[rhymeSlot.word]||''):'';
+    const rhymeSuggestionsList=rhymeActiveHere?this.findRhymes(rhymeActiveWordText).map(w=>({word:w})):[];
+    const hasRhymeSuggestions=rhymeSuggestionsList.length>0;
+    const noRhymeSuggestions=!hasRhymeSuggestions;
+    const closeRhymePicker=()=>self.setState({activeRhymeSlot:null});
 
     const activeHere=!!activeSlot;
     const activeWordText=activeHere?((linesArr[activeSlot.line]||'').split(/\s+/).filter(Boolean)[activeSlot.word]||''):'';
@@ -1480,6 +1630,8 @@ class Component extends DCLogic {
     const capoLabel=capo>0?('Capo '+capo):'No capo';
     const capoUp=()=>self.setState({capo:Math.min(11,capo+1)});
     const capoDown=()=>self.setState({capo:Math.max(0,capo-1)});
+    const transposeUp=()=>self.transposeSong(1);
+    const transposeDown=()=>self.transposeSong(-1);
     const hasCapo=capo>0;
     const soundingKeyLabel=hasCapo?(()=>{ const sk=this.transposeKeyForCapo(keyRoot,mode,capo); return sk.root+' '+sk.mode; })():'';
 
@@ -1500,8 +1652,18 @@ class Component extends DCLogic {
     const noRecordings=!hasRecordings;
 
     // songs tab
-    const savedSongsSorted2=(S.savedSongs||[]).slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
-    const songsListItems=savedSongsSorted2.map(s=>({name:s.name,onClick:()=>self.viewSong(s.id),
+    const songSearchQuery=S.songSearchQuery||'';
+    const onSongSearchChange=(e)=>self.setState({songSearchQuery:e.target.value});
+    const searchQ=songSearchQuery.trim().toLowerCase();
+    const songMatchesSearch=(s)=>{
+      if(!searchQ) return true;
+      if((s.name||'').toLowerCase().includes(searchQ)) return true;
+      if((s.tags||[]).some(t=>t.includes(searchQ))) return true;
+      if((s.songText||'').toLowerCase().includes(searchQ)) return true;
+      return false;
+    };
+    const savedSongsSorted2=(S.savedSongs||[]).slice().filter(songMatchesSearch).sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
+    const songsListItems=savedSongsSorted2.map(s=>({name:s.name,tagsLabel:(s.tags||[]).join(' · '),hasTags:!!(s.tags&&s.tags.length),onClick:()=>self.viewSong(s.id),
       remove:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); self.deleteSong(s.id); },
       rowStyle:`display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid ${s.id===S.viewingSongId?A:'#2c2c2e'};background:${s.id===S.viewingSongId?'#2e2410':'#1c1c1e'};border-radius:12px;padding:12px 16px;`}));
     const hasSongsListItems=songsListItems.length>0;
@@ -1519,6 +1681,7 @@ class Component extends DCLogic {
     const metroBtnStyleSmall=`border:none;background:${S.playing?'#ff375f':A};color:#fff;font-size:14px;font-weight:600;padding:9px 22px;border-radius:980px;cursor:pointer;flex:none;`;
 
     const onSongNameChange=(e)=>self.setState({currentSongName:e.target.value});
+    const onSongTagsChange=(e)=>self.setState({currentSongTags:e.target.value});
     const saveSongBtn=()=>self.saveSong();
     const newSongBtn=()=>self.newSong();
     const savedSongsSorted=(S.savedSongs||[]).slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
@@ -1557,6 +1720,7 @@ class Component extends DCLogic {
       stepBtnStyle:`width:44px;height:44px;border-radius:50%;border:1px solid #2c2c2e;background:#1c1c1e;font-size:22px;font-weight:400;color:#f2f2f7;cursor:pointer;`,
       beatDots,tsList,toggleMetro:()=>self.toggleMetro(),metroBtnLabel:S.playing?'Stop':'Start',
       metroBtnStyle:`border:none;background:${S.playing?'#ff375f':A};color:#fff;font-size:17px;font-weight:600;padding:13px 46px;border-radius:980px;cursor:pointer;transition:all .2s;`,
+      tapTempoBtn:()=>self.tapTempo(),tapTempoBtnStyle:`border:1px solid #2c2c2e;background:#1c1c1e;color:#f2f2f7;font-size:13px;font-weight:600;padding:9px 20px;border-radius:980px;cursor:pointer;`,
       toggleSub:()=>self.setState({sub:!S.sub}),subToggleStyle:toggle(S.sub),subKnobStyle:knob(S.sub),
       builderChips,hasBuilderChords,noBuilderChords,builderAddChips,progExtList,borrowedChips,secDomChips,playBuilder,playBuilderArp,clearBuilder,
       showPresetPicker:!!S.showPresetPicker,togglePresetPicker,
@@ -1564,11 +1728,13 @@ class Component extends DCLogic {
       progressionMessages,hasProgressionMessages,allGoodMessage,
       presetList,
       songText,onSongTextChange,lineViews,activeHere,activeWordText,pickerOptions,clearChord,closePicker,
+      rhymeActiveHere,rhymeActiveWordText,rhymeSuggestionsList,hasRhymeSuggestions,noRhymeSuggestions,closeRhymePicker,
       labelButtons,labelDraft,onLabelDraftChange,insertCustomLabel,
       tabBlocks,addTabBlockBtn,outputTabBlocks,
       ghostSmallStyle,ghostSmallStyleHover,stepBtnStyleSmall,metroBtnStyleSmall,
       currentSongName:S.currentSongName||'',onSongNameChange,saveSongBtn,newSongBtn,savedSongChips,hasSavedSongs,
-      tabHasInput,capo,capoLabel,capoUp,capoDown,hasCapo,soundingKeyLabel,
+      currentSongTags:S.currentSongTags||'',onSongTagsChange,songSearchQuery,onSongSearchChange,
+      tabHasInput,capo,capoLabel,capoUp,capoDown,hasCapo,soundingKeyLabel,transposeUp,transposeDown,
       toggleAutoScroll,autoScrollBtnLabel,autoScrollBtnStyle,scrollSpeed:S.scrollSpeed||3,setScrollSpeed,
       outputScrollRef:this.outputScrollRef,
       songsListItems,hasSongsListItems,noSongsListItems,hasViewingSong,viewingSongName,songView,backToList,editViewingSong,
