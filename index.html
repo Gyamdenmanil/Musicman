@@ -287,14 +287,21 @@
         <div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;margin-bottom:10px;">Suggested next chord</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ suggestedChips }}" as="s" hint-placeholder-count="4">
-            <button onClick="{{ s.onClick }}" style="{{ s.style }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.98);">
-              <div style="display:flex;align-items:baseline;gap:8px;">
-                <span style="font-size:9px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:{{ s.tierColor }};">{{ s.tier }}</span>
-                <span style="font-size:11px;color:#f0b429;font-weight:700;">{{ s.roman }}</span>
-                <span style="font-size:15px;font-weight:700;">{{ s.name }}</span>
+            <div style="{{ s.style }}">
+              <div onClick="{{ s.onClick }}" style="cursor:pointer;transition:filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="opacity:0.7;">
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                  <span style="font-size:9px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:{{ s.tierColor }};">{{ s.tier }}</span>
+                  <span style="font-size:11px;color:#f0b429;font-weight:700;">{{ s.roman }}</span>
+                  <span style="font-size:15px;font-weight:700;">{{ s.name }}</span>
+                </div>
+                <div style="font-size:11.5px;color:#98989d;margin-top:3px;line-height:1.4;">{{ s.reason }}</div>
               </div>
-              <div style="font-size:11.5px;color:#98989d;margin-top:3px;line-height:1.4;">{{ s.reason }}</div>
-            </button>
+              <sc-if value="{{ s.hasVariants }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid #2c2c2e;">
+                <sc-for list="{{ s.variants }}" as="v" hint-placeholder-count="6"><button onClick="{{ v.onClick }}" style="border:1px solid #2c2c2e;background:#232325;color:#c7c7cc;font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;cursor:pointer;transition:filter .12s ease,transform .1s ease;" style-hover="filter:brightness(1.25);" style-active="transform:scale(0.92);">{{ v.name }}</button></sc-for>
+              </div>
+              </sc-if>
+            </div>
           </sc-for>
         </div>
       </div>
@@ -1853,9 +1860,10 @@ class Component extends DCLogic {
             progressionMessages.push({text:builderChords[i].name+' wants to resolve to '+targetName+', but is followed by '+nxt.name+'.',actions});
           }
         } else {
-          if(cur.kind==='borrowed') continue;
-          const tgtObj=getTargetChordObj(cur);
-          progressionMessages.push({text:builderChords[i].name+' is the last chord and never resolves — it still wants to reach '+targetName+'.',actions:[{label:'Add '+tgtObj.name+' at the end',onClick:()=>APPEND_CHORD(tgtObj)}]});
+          // No follow-up chord yet — don't flag this as an error. The Suggested Next Chord
+          // panel already recommends the resolution as its top ("Strongest") pick, so a
+          // separate red warning here would just contradict it.
+          continue;
         }
       }
       const touchesTonic=builderChords.some(c=>{ const k=classifyChord(c); return k.kind==='diatonic'&&k.diatIdx===0; });
@@ -1939,39 +1947,43 @@ class Component extends DCLogic {
 
     // AI chord suggestions — ranked "what could come next"
     const tierColorMap={Strongest:'#32d74b',Solid:A,Colorful:'#bf7af0',Adventurous:'#ff9f43'};
-    const mkSuggestion=(cObj,tier,reason)=>({name:cObj.name,roman:cObj.roman,pcs:cObj.pcs,tier,reason});
+    const buildVariants=(degIdx)=>degIdx==null?null:EXT_DEFS.map(([id,label])=>{
+      const built=this.buildDiatonicChord(keyRoot,diatScaleSemis,mode,degIdx,id,romanArrB[degIdx]);
+      return {id,label,name:built.name,onClick:()=>addChordToBuilder({name:built.name,roman:romanArrB[degIdx],pcs:built.pcs})};
+    });
+    const mkSuggestion=(cObj,tier,reason,degIdx)=>({name:cObj.name,roman:cObj.roman,pcs:cObj.pcs,tier,reason,variants:buildVariants(degIdx)});
     const diatonicCandidates = degSpecsArr.map(sp=>this.chordFromSpec(keyRoot,sp));
     const lastChord = builderChords.length ? builderChords[builderChords.length-1] : null;
     const lastKind = lastChord ? classifyChord(lastChord) : null;
     let suggestions=[];
     if(!lastChord){
-      suggestions.push(mkSuggestion(tonicChordObj,'Strongest','Plants the flag on '+keyLabel+' right away — the clearest way to open.'));
-      suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','A classic subdominant opener — lifts off before settling home.'));
-      suggestions.push(mkSuggestion(diatonicCandidates[5],'Solid','Opens on the relative minor, so arriving at '+tonicChordObj.name+' later feels earned.'));
+      suggestions.push(mkSuggestion(tonicChordObj,'Strongest','Plants the flag on '+keyLabel+' right away — the clearest way to open.',0));
+      suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','A classic subdominant opener — lifts off before settling home.',3));
+      suggestions.push(mkSuggestion(diatonicCandidates[5],'Solid','Opens on the relative minor, so arriving at '+tonicChordObj.name+' later feels earned.',5));
     } else if(lastKind.kind==='secdom' || lastKind.kind==='dimpass'){
       const src = lastKind.kind==='secdom' ? cxHarm.sd.find(x=>x.roman===lastChord.roman) : cxHarm.dm.find(x=>x.roman===lastChord.roman);
       const targetRoman=((src&&src.hint)||'').replace('→ ','').trim();
       const ti=romanArrB.indexOf(targetRoman);
-      if(ti>=0) suggestions.push(mkSuggestion(diatonicCandidates[ti],'Strongest',lastChord.name+' is already set up to resolve to '+diatonicCandidates[ti].name+' — that\'s the payoff.'));
+      if(ti>=0) suggestions.push(mkSuggestion(diatonicCandidates[ti],'Strongest',lastChord.name+' is already set up to resolve to '+diatonicCandidates[ti].name+' — that\'s the payoff.',ti));
     } else if(lastKind.kind==='borrowed'){
-      suggestions.push(mkSuggestion(tonicChordObj,'Strongest','Resolves the borrowed color of '+lastChord.name+' back home.'));
-      suggestions.push(mkSuggestion(domChordObj,'Solid','Pushes the borrowed color of '+lastChord.name+' toward the dominant instead of resolving immediately.'));
+      suggestions.push(mkSuggestion(tonicChordObj,'Strongest','Resolves the borrowed color of '+lastChord.name+' back home.',0));
+      suggestions.push(mkSuggestion(domChordObj,'Solid','Pushes the borrowed color of '+lastChord.name+' toward the dominant instead of resolving immediately.',4));
     } else {
       const di = lastKind.kind==='diatonic' ? lastKind.diatIdx : -1;
       if(di===4){
-        suggestions.push(mkSuggestion(tonicChordObj,'Strongest','V → I is the strongest cadence in music — the leading tone resolves straight home.'));
-        suggestions.push(mkSuggestion(diatonicCandidates[5],'Colorful','A deceptive cadence — V → vi twists away from home at the last second.'));
+        suggestions.push(mkSuggestion(tonicChordObj,'Strongest','V → I is the strongest cadence in music — the leading tone resolves straight home.',0));
+        suggestions.push(mkSuggestion(diatonicCandidates[5],'Colorful','A deceptive cadence — V → vi twists away from home at the last second.',5));
       } else if(di===1||di===3){
-        suggestions.push(mkSuggestion(domChordObj,'Strongest',romanArrB[di]+' → V is the classic setup — builds straight into the strongest cadence.'));
-        suggestions.push(mkSuggestion(tonicChordObj,'Solid',romanArrB[di]+' can also resolve straight home for a softer, plagal-flavored motion.'));
+        suggestions.push(mkSuggestion(domChordObj,'Strongest',romanArrB[di]+' → V is the classic setup — builds straight into the strongest cadence.',4));
+        suggestions.push(mkSuggestion(tonicChordObj,'Solid',romanArrB[di]+' can also resolve straight home for a softer, plagal-flavored motion.',0));
       } else if(di===5){
-        suggestions.push(mkSuggestion(diatonicCandidates[1],'Solid','vi commonly continues on to ii, extending the phrase before it heads toward V.'));
-        suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','vi → IV is a smooth, stepwise continuation.'));
+        suggestions.push(mkSuggestion(diatonicCandidates[1],'Solid','vi commonly continues on to ii, extending the phrase before it heads toward V.',1));
+        suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','vi → IV is a smooth, stepwise continuation.',3));
       } else if(di===0){
-        suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','I → IV is the most natural first move away from home.'));
-        suggestions.push(mkSuggestion(diatonicCandidates[5],'Solid','I → vi trades home for its wistful relative minor.'));
+        suggestions.push(mkSuggestion(diatonicCandidates[3],'Solid','I → IV is the most natural first move away from home.',3));
+        suggestions.push(mkSuggestion(diatonicCandidates[5],'Solid','I → vi trades home for its wistful relative minor.',5));
       } else {
-        suggestions.push(mkSuggestion(domChordObj,'Solid','Heading to V keeps the phrase moving toward a cadence.'));
+        suggestions.push(mkSuggestion(domChordObj,'Solid','Heading to V keeps the phrase moving toward a cadence.',4));
       }
     }
     const seenRoman=new Set(suggestions.map(s=>s.roman));
@@ -1986,14 +1998,15 @@ class Component extends DCLogic {
     colorPool.slice(0,2).forEach(c=>{
       const isSd=cxHarm.sd.includes(c);
       const reason=isSd ? (c.name+' briefly tonicizes '+(c.hint||'').replace('→ ','')+' before pulling back into the key.') : ('Borrowed color ('+(c.hint||'modal interchange')+') for a moment outside the diatonic palette.');
-      suggestions.push(mkSuggestion(c,'Colorful',reason));
+      suggestions.push(mkSuggestion(c,'Colorful',reason,null));
       seenRoman.add(c.roman);
     });
     const tierOrder={Strongest:0,Solid:1,Colorful:2,Adventurous:3};
     suggestions=suggestions.filter((s,i)=>suggestions.findIndex(x=>x.roman===s.roman)===i).sort((a,b)=>tierOrder[a.tier]-tierOrder[b.tier]).slice(0,6);
     const suggestedChips=suggestions.map(s=>({
       name:s.name,roman:s.roman,tier:s.tier,reason:s.reason,tierColor:tierColorMap[s.tier]||A,
-      style:`text-align:left;width:100%;border:1px solid #2c2c2e;border-left:3px solid ${tierColorMap[s.tier]||A};background:#1c1c1e;border-radius:12px;padding:10px 14px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`,
+      hasVariants:!!s.variants,variants:s.variants||[],
+      style:`border:1px solid #2c2c2e;border-left:3px solid ${tierColorMap[s.tier]||A};background:#1c1c1e;border-radius:12px;padding:10px 14px;`,
       onClick:()=>addChordToBuilder(s)
     }));
     const hasSuggestions=suggestedChips.length>0;
