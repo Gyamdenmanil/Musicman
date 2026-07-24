@@ -1101,6 +1101,7 @@ class Component extends DCLogic {
   LPC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
   QUAL = {maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8],dom7:[0,4,7,10],maj7:[0,4,7,11],min7:[0,3,7,10],m7b5:[0,3,6,10],dim7:[0,3,6,9],sus2:[0,2,7],sus4:[0,5,7],'6':[0,4,7,9],m6:[0,3,7,9],add9:[0,4,7,14],'9':[0,4,7,10,14],m9:[0,3,7,10,14]};
   SUF = {maj:'',min:'m',dim:'°',aug:'+',dom7:'7',maj7:'maj7',min7:'m7',m7b5:'m7♭5',dim7:'°7',sus2:'sus2',sus4:'sus4','6':'6',m6:'m6',add9:'add9','9':'9',m9:'m9'};
+  CHORD_ID_QUALS = ['maj','min','dim','aug','sus2','sus4','dom7','maj7','min7','m7b5','dim7'];
   MAJ_KEYS = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
   GTR_ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   QUALITY_FLAVOR = {maj:'bright and settled',min:'melancholic and inward',dom7:'unresolved, dissolving — it wants to move',maj7:'dreamy, suspended in a nice way',min7:'smooth, a little wistful',m7b5:'hushed and uneasy',dim7:'maximally tense, built to pass through',dim:'unstable, sliding',aug:'queasy, floating upward',sus2:'open, unresolved, airy',sus4:'suspended, holding its breath','6':'nostalgic, sweet',m6:'noir, bittersweet',add9:'sparkling, wide open','9':'lush and a little jazzy',m9:'soft, moody, sophisticated'};
@@ -1984,6 +1985,8 @@ class Component extends DCLogic {
       this.tunerTimeData=new Float32Array(analyser.fftSize);
       this.tunerFreqData=new Float32Array(analyser.frequencyBinCount);
       this._tunerLastUpdate=0;
+      this._tunerNoteGoodAt=0;
+      this._tunerChordGoodAt=0;
       this.setState({tunerListening:true,tunerNote:null,tunerChord:null});
       this.tunerTick();
     }catch(e){
@@ -2007,21 +2010,28 @@ class Component extends DCLogic {
     if(!this._tunerLastUpdate||now-this._tunerLastUpdate>90){
       this._tunerLastUpdate=now;
       if(this.state.tunerSubTab==='chord'){
-        const {chroma,total}=this.computeChroma();
-        if(total>1e-6){
-          const match=this.matchChord(chroma);
-          if(match&&match.score>0.32){
-            this.setState({tunerChord:{name:this.GTR_ROOTS[match.root]+(this.SUF[match.quality]||''),pcs:match.pcs,score:match.score}});
-          } else {
-            this.setState({tunerChord:null});
-          }
-        } else {
+        this.tunerAnalyser.getFloatTimeDomainData(this.tunerTimeData);
+        let rms=0;
+        for(let i=0;i<this.tunerTimeData.length;i++) rms+=this.tunerTimeData[i]*this.tunerTimeData[i];
+        rms=Math.sqrt(rms/this.tunerTimeData.length);
+        const match=rms>0.008?this.matchChord(this.computeChroma().chroma):null;
+        if(match&&(match.singleNote||match.score>0.28)){
+          this._tunerChordGoodAt=now;
+          this.setState({tunerChord:match.singleNote
+            ?{name:this.GTR_ROOTS[match.root],pcs:[match.root],score:1,single:true}
+            :{name:this.GTR_ROOTS[match.root]+(this.SUF[match.quality]||''),pcs:match.pcs,score:match.score,single:false}});
+        } else if(!this._tunerChordGoodAt||now-this._tunerChordGoodAt>700){
           this.setState({tunerChord:null});
         }
       } else {
         this.tunerAnalyser.getFloatTimeDomainData(this.tunerTimeData);
         const freq=this.autoCorrelate(this.tunerTimeData,this.ac.sampleRate);
-        this.setState({tunerNote:freq>0?this.freqToNoteInfo(freq):null});
+        if(freq>0){
+          this._tunerNoteGoodAt=now;
+          this.setState({tunerNote:this.freqToNoteInfo(freq)});
+        } else if(!this._tunerNoteGoodAt||now-this._tunerNoteGoodAt>900){
+          this.setState({tunerNote:null});
+        }
       }
     }
     this.tunerRaf=requestAnimationFrame(()=>this.tunerTick());
@@ -2086,18 +2096,26 @@ class Component extends DCLogic {
     return {chroma:norm,total};
   }
   matchChord(chroma){
-    let best=null;
-    for(const q in this.QUAL){
+    const sorted=chroma.map((v,pc)=>({pc,v})).sort((a,b)=>b.v-a.v);
+    if(sorted[0].v>0.62&&sorted[1].v<0.2){
+      return {root:sorted[0].pc,quality:null,score:1,pcs:[sorted[0].pc],singleNote:true};
+    }
+    const candidates=[];
+    for(const q of this.CHORD_ID_QUALS){
       const ivs=this.QUAL[q];
       for(let root=0;root<12;root++){
         const pcSet=new Set(ivs.map(iv=>(root+iv)%12));
         let inSum=0; pcSet.forEach(pc=>{ inSum+=chroma[pc]; });
         let outSum=0; for(let pc=0;pc<12;pc++){ if(!pcSet.has(pc)) outSum+=chroma[pc]; }
         const score=inSum/pcSet.size-0.6*(outSum/(12-pcSet.size));
-        if(!best||score>best.score) best={root,quality:q,score,pcs:[...pcSet]};
+        candidates.push({root,quality:q,score,pcs:[...pcSet]});
       }
     }
-    return best;
+    candidates.sort((a,b)=>b.score-a.score);
+    const top=candidates[0].score;
+    const close=candidates.filter(c=>top-c.score<0.04);
+    close.sort((a,b)=>a.pcs.length-b.pcs.length);
+    return close[0];
   }
 
   // practice mode — chord switching trainer
@@ -3171,7 +3189,7 @@ class Component extends DCLogic {
     const tunerNeedleStyle=`position:absolute;top:0;bottom:0;left:${50+(tunerCentsClamped/50)*45}%;width:3px;margin-left:-1.5px;border-radius:2px;background:${tunerCentsColor};transition:left .1s linear,background .15s;`;
     const tunerChordObj=S.tunerChord;
     const tunerChordName=tunerChordObj?tunerChordObj.name:(S.tunerListening?'Listening…':'—');
-    const tunerChordNotesLabel=tunerChordObj?tunerChordObj.pcs.slice().sort((a,b)=>a-b).map(pc=>this.GTR_ROOTS[pc]).join(' · '):'';
+    const tunerChordNotesLabel=tunerChordObj?(tunerChordObj.single?'Single note — strum a full chord to identify it.':tunerChordObj.pcs.slice().sort((a,b)=>a-b).map(pc=>this.GTR_ROOTS[pc]).join(' · ')):'';
     const tunerBtnLabel=S.tunerListening?'Stop Listening':'Start Listening';
     const tunerBtnStyle=`border:none;background:${S.tunerListening?'#ff375f':A};color:#fff;font-size:17px;font-weight:600;padding:13px 46px;border-radius:980px;cursor:pointer;transition:all .2s;`;
 
