@@ -37,10 +37,10 @@
   @keyframes mmTabFade{0%{opacity:0;transform:translateY(4px);}100%{opacity:1;transform:translateY(0);}}
 </style>
 </helmet>
-<div style="max-width:1120px;margin:0 auto;padding:calc(clamp(16px,4vw,28px) + env(safe-area-inset-top)) clamp(14px,4vw,24px) calc(90px + env(safe-area-inset-bottom));">
+<div ref="{{ heroRef }}" style="max-width:1120px;margin:0 auto;padding:calc(clamp(16px,4vw,28px) + env(safe-area-inset-top)) clamp(14px,4vw,24px) calc(90px + env(safe-area-inset-bottom));">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid #000000;">
-    <div>
+    <div data-hero-item>
       <div onClick="{{ goHome }}" style="cursor:pointer;display:inline-block;">
         <div style="font-size:12px;font-weight:700;color:#f0b429;letter-spacing:0.08em;">SONGWRITER'S WORKBENCH</div>
         <h1 style="margin:3px 0 0;font-size:clamp(22px,5vw,28px);font-weight:700;letter-spacing:-0.02em;">Musicman</h1>
@@ -56,7 +56,7 @@
       <div style="font-size:11px;color:#ff375f;font-weight:600;margin-top:6px;max-width:240px;">{{ recordError }}</div>
       </sc-if>
     </div>
-    <div style="display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:16px;padding:10px 16px;box-shadow:0 1px 2px rgba(0,0,0,0.05);flex-wrap:wrap;">
+    <div data-hero-item style="display:flex;align-items:center;gap:14px;background:#1c1c1e;border-radius:16px;padding:10px 16px;box-shadow:0 1px 2px rgba(0,0,0,0.05);flex-wrap:wrap;">
       <div style="text-align:right;">
         <div style="font-size:11px;color:#98989d;text-transform:uppercase;letter-spacing:0.05em;">Writing in</div>
         <div style="display:flex;align-items:center;gap:6px;font-size:19px;font-weight:700;letter-spacing:-0.01em;"><span style="width:7px;height:7px;border-radius:50%;background:#f0b429;display:inline-block;flex:none;"></span>{{ keyLabel }}</div>
@@ -78,15 +78,16 @@
   </div>
 
   <div style="display:flex;justify-content:center;margin-bottom:26px;max-width:100%;">
-    <div style="display:inline-flex;background:#000000;border-radius:16px;padding:4px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;">
-      <button onClick="{{ goTheory }}" style="{{ tTheory }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">T</span><span style="font-size:10px;">Theory</span></button>
-      <button onClick="{{ goGuitar }}" style="{{ tGuitar }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">G</span><span style="font-size:10px;">Guitar</span></button>
-      <button onClick="{{ goProg }}" style="{{ tProg }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">P</span><span style="font-size:10px;">Progression</span></button>
-      <button onClick="{{ goMood }}" style="{{ tMood }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">M</span><span style="font-size:10px;">Mood</span></button>
-      <button onClick="{{ goSongs }}" style="{{ tSongs }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">S</span><span style="font-size:10px;">Songs</span></button>
-      <button onClick="{{ goRhythm }}" style="{{ tRhythm }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">R</span><span style="font-size:10px;">Rhythm</span></button>
-      <button onClick="{{ goPractice }}" style="{{ tPractice }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Pr</span><span style="font-size:10px;">Practice</span></button>
-      <button onClick="{{ goTuner }}" style="{{ tTuner }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Tu</span><span style="font-size:10px;">Tuner</span></button>
+    <div ref="{{ navTrackRef }}" style="position:relative;display:inline-flex;background:#000000;border-radius:16px;padding:4px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;">
+      <div ref="{{ navIndicatorRef }}" style="position:absolute;top:4px;left:4px;width:0;height:0;border-radius:10px;background:#1c1c1e;box-shadow:0 1px 3px rgba(0,0,0,0.12);pointer-events:none;opacity:0;z-index:0;"></div>
+      <button data-hero-item data-tab="theory" onClick="{{ goTheory }}" style="{{ tTheory }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">T</span><span style="font-size:10px;">Theory</span></button>
+      <button data-hero-item data-tab="guitar" onClick="{{ goGuitar }}" style="{{ tGuitar }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">G</span><span style="font-size:10px;">Guitar</span></button>
+      <button data-hero-item data-tab="prog" onClick="{{ goProg }}" style="{{ tProg }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">P</span><span style="font-size:10px;">Progression</span></button>
+      <button data-hero-item data-tab="mood" onClick="{{ goMood }}" style="{{ tMood }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">M</span><span style="font-size:10px;">Mood</span></button>
+      <button data-hero-item data-tab="songs" onClick="{{ goSongs }}" style="{{ tSongs }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">S</span><span style="font-size:10px;">Songs</span></button>
+      <button data-hero-item data-tab="rhythm" onClick="{{ goRhythm }}" style="{{ tRhythm }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">R</span><span style="font-size:10px;">Rhythm</span></button>
+      <button data-hero-item data-tab="practice" onClick="{{ goPractice }}" style="{{ tPractice }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Pr</span><span style="font-size:10px;">Practice</span></button>
+      <button data-hero-item data-tab="tuner" onClick="{{ goTuner }}" style="{{ tTuner }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Tu</span><span style="font-size:10px;">Tuner</span></button>
     </div>
   </div>
 
@@ -204,7 +205,7 @@
       </sc-for>
       <div style="border-top:1px solid #2c2c2e;padding-top:12px;margin-top:6px;">
         <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:6px;">Quick jump · diatonic chords in {{ keyLabel }}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <div ref="{{ keyShortcutsRef }}" style="display:flex;flex-wrap:wrap;gap:6px;">
           <sc-for list="{{ keyShortcuts }}" as="k" hint-placeholder-count="7"><button onClick="{{ k.onClick }}" style="{{ k.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
         </div>
       </div>
@@ -230,7 +231,7 @@
     <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:6px;">
         <div>
-          <div style="font-size:30px;font-weight:700;letter-spacing:-0.02em;">{{ selChordName }}</div>
+          <div ref="{{ chordHeroRef }}" style="font-size:30px;font-weight:700;letter-spacing:-0.02em;display:inline-block;">{{ selChordName }}</div>
           <div style="font-size:13px;color:#98989d;margin-top:2px;">{{ selChordNotes }}</div>
           <div style="font-size:12.5px;color:#c7c7cc;margin-top:8px;line-height:1.5;max-width:400px;">{{ chordVibeText }}</div>
         </div>
@@ -475,7 +476,7 @@
         <sc-if value="{{ hasSwitchDiagram }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;justify-content:center;margin-bottom:14px;">{{ switchDiagram }}</div>
         </sc-if>
-        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:18px;">
+        <div ref="{{ practiceSwitchDotsRef }}" style="display:flex;justify-content:center;gap:8px;margin-bottom:18px;">
           <sc-for list="{{ switchBeatDots }}" as="bd" hint-placeholder-count="4"><div style="{{ bd.style }}"></div></sc-for>
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px;">
@@ -603,7 +604,7 @@
         <button onClick="{{ tapTempoBtn }}" style="{{ tapTempoBtnStyle }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Tap Tempo</button>
       </div>
 
-      <div style="display:flex;justify-content:center;gap:10px;align-items:center;margin:26px 0;min-height:34px;">
+      <div ref="{{ beatDotsRef }}" style="display:flex;justify-content:center;gap:10px;align-items:center;margin:26px 0;min-height:34px;">
         <sc-for list="{{ beatDots }}" as="b" hint-placeholder-count="4"><div style="{{ b.style }}"></div></sc-for>
       </div>
 
@@ -901,7 +902,7 @@
         <button onClick="{{ toggleLiveStats }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ liveStatsChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Song stats</button>
         <sc-if value="{{ showLiveStats }}" hint-placeholder-val="{{ false }}">
         <div style="margin-top:14px;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px;">
+          <div ref="{{ liveStatsRef }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px;">
             <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ liveStats.wordCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Words</div></div>
             <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ liveStats.uniqueWordCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Unique words</div></div>
             <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ liveStats.syllableCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Syllables</div></div>
@@ -1064,7 +1065,7 @@
       <div style="border-top:1px solid #2c2c2e;padding:16px 22px;">
         <button onClick="{{ toggleViewStats }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ viewStatsChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Song stats</button>
         <sc-if value="{{ showViewStats }}" hint-placeholder-val="{{ false }}">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:14px;">
+        <div ref="{{ viewStatsRef }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:14px;">
           <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ songView.stats.wordCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Words</div></div>
           <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ songView.stats.uniqueWordCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Unique words</div></div>
           <div style="background:#232325;border-radius:12px;padding:10px 12px;"><div style="font-size:19px;font-weight:700;">{{ songView.stats.syllableCount }}</div><div style="font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.04em;">Syllables</div></div>
@@ -1282,6 +1283,15 @@ class Component extends DCLogic {
 
   outputScrollRef = React.createRef();
   waveformCanvasRef = React.createRef();
+  navTrackRef = React.createRef();
+  navIndicatorRef = React.createRef();
+  heroRef = React.createRef();
+  chordHeroRef = React.createRef();
+  keyShortcutsRef = React.createRef();
+  liveStatsRef = React.createRef();
+  viewStatsRef = React.createRef();
+  beatDotsRef = React.createRef();
+  practiceSwitchDotsRef = React.createRef();
   state = {tab:'home',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,
     practiceMode:'switch',practiceScore:0,practiceStreak:0,
     practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
@@ -1321,12 +1331,97 @@ class Component extends DCLogic {
     try{const r=localStorage.getItem('mtsa_v3_recordings'); if(r) recordings=JSON.parse(r);}catch(e){}
     patch.recordings=Array.isArray(recordings)?recordings:[];
     patch.isRecording=false; patch.recSeconds=0; patch.recordError='';
-    this.setState(patch);
+    this.setState(patch,()=>{
+      this._lastTab=this.state.tab;
+      this._lastGChord=this.state.gRoot+'|'+this.state.gQual;
+      this._lastKey=this.state.keyRoot+'|'+this.state.keyMode;
+      this.positionNavIndicator(false);
+      this.whenAnime(()=>{ this.positionNavIndicator(false); this.playHeroIntro(); });
+    });
   }
   componentDidUpdate(){
     try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}=this.state;
       localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}));
     }catch(e){}
+    if(this._lastTab!==this.state.tab){
+      this._lastTab=this.state.tab;
+      this.positionNavIndicator(true);
+    }
+    const gChordKey=this.state.gRoot+'|'+this.state.gQual;
+    if(this._lastGChord!==gChordKey){
+      this._lastGChord=gChordKey;
+      this.punchChordHero();
+    }
+    const keyKey=this.state.keyRoot+'|'+this.state.keyMode;
+    if(this._lastKey!==keyKey){
+      this._lastKey=keyKey;
+      this.staggerKeyShortcuts();
+    }
+    if(this.state.showLiveStats&&!this._lastShowLiveStats){ this.staggerStatCards(this.liveStatsRef); }
+    this._lastShowLiveStats=this.state.showLiveStats;
+    if(this.state.showViewStats&&!this._lastShowViewStats){ this.staggerStatCards(this.viewStatsRef); }
+    this._lastShowViewStats=this.state.showViewStats;
+    if(this.state.playing&&this.state.curBeat!==this._lastCurBeat){
+      this.pulseBeatDot(this.beatDotsRef,this.state.curBeat);
+    }
+    this._lastCurBeat=this.state.curBeat;
+    if(this.state.practiceSwitchOn&&this.state.practiceSwitchBeat!==this._lastSwitchBeat){
+      this.pulseBeatDot(this.practiceSwitchDotsRef,this.state.practiceSwitchBeat);
+    }
+    this._lastSwitchBeat=this.state.practiceSwitchBeat;
+  }
+  positionNavIndicator(animate){
+    const track=this.navTrackRef.current, ind=this.navIndicatorRef.current;
+    if(!track||!ind) return;
+    const btn=track.querySelector('[data-tab="'+this.state.tab+'"]');
+    if(!btn){
+      if(animate&&window.anime) window.anime.animate(ind,{opacity:0,duration:200,ease:'outQuad'});
+      else ind.style.opacity=0;
+      return;
+    }
+    const tRect=track.getBoundingClientRect(), bRect=btn.getBoundingClientRect();
+    const left=bRect.left-tRect.left+track.scrollLeft, top=bRect.top-tRect.top, width=bRect.width, height=bRect.height;
+    if(animate&&window.anime){
+      window.anime.animate(ind,{left,top,width,height,opacity:1,duration:480,ease:'outElastic(1,.75)'});
+    }else{
+      ind.style.left=left+'px'; ind.style.top=top+'px'; ind.style.width=width+'px'; ind.style.height=height+'px'; ind.style.opacity=1;
+    }
+  }
+  playHeroIntro(){
+    const hero=this.heroRef.current;
+    if(!hero||!window.anime||this._heroPlayed) return;
+    this._heroPlayed=true;
+    const targets=hero.querySelectorAll('[data-hero-item]');
+    if(!targets.length) return;
+    window.anime.animate(targets,{opacity:[0,1],translateY:[14,0],scale:[0.92,1],delay:window.anime.stagger(45),duration:520,ease:'outQuad'});
+  }
+  punchChordHero(){
+    const el=this.chordHeroRef.current;
+    if(!el||!window.anime) return;
+    window.anime.animate(el,{scale:[0.85,1],duration:520,ease:'outElastic(1,.6)'});
+  }
+  staggerKeyShortcuts(){
+    const el=this.keyShortcutsRef.current;
+    if(!el||!window.anime) return;
+    const targets=el.querySelectorAll('button');
+    if(!targets.length) return;
+    window.anime.animate(targets,{scale:[0.7,1],opacity:[0.3,1],delay:window.anime.stagger(30),duration:360,ease:'outBack'});
+  }
+  staggerStatCards(ref){
+    this.whenAnime(()=>{
+      const el=ref.current;
+      if(!el) return;
+      const targets=el.children;
+      if(!targets.length) return;
+      window.anime.animate(targets,{scale:[0.6,1],opacity:[0,1],translateY:[10,0],delay:window.anime.stagger(40),duration:420,ease:'outBack'});
+    });
+  }
+  pulseBeatDot(ref,idx){
+    if(!window.anime) return;
+    const el=ref.current;
+    const dot=el&&el.children[idx];
+    if(!dot) return;
+    window.anime.animate(dot,{scale:[1.5,1],duration:260,ease:'outQuad'});
   }
   componentWillUnmount(){
     if(this.metroTimer) clearInterval(this.metroTimer); this.stopAutoScroll();
@@ -1783,6 +1878,23 @@ class Component extends DCLogic {
     }
   }
 
+  loadAnime(){
+    if(window.anime) return Promise.resolve(window.anime);
+    if(this._animeReady) return this._animeReady;
+    this._animeReady=new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://unpkg.com/animejs@4.5.0/dist/bundles/anime.umd.min.js';
+      s.crossOrigin='anonymous';
+      s.integrity='sha384-InMmvD3VoYcY7hGjSC80aLb2bNNE4CzpX+Eq6FVDlmB0IKgDvmfPw4UY8L/M++iG';
+      s.onload=()=>{ if(window.anime) resolve(window.anime); else reject(new Error('anime.js failed to load')); };
+      s.onerror=()=>reject(new Error('anime.js failed to load'));
+      document.head.appendChild(s);
+    });
+    return this._animeReady;
+  }
+  whenAnime(fn){
+    this.loadAnime().then(fn).catch(()=>{});
+  }
   loadJsPdf(){
     if(window.jspdf&&window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
     if(this._jspdfReady) return this._jspdfReady;
@@ -2442,6 +2554,7 @@ class Component extends DCLogic {
     const keyModeLabel=mode==='major'?'major':'minor';
     const keyLabel=keyRoot+' '+keyModeLabel;
     const seg=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;box-shadow:${on?'0 1px 3px rgba(0,0,0,0.12)':'none'};transition:all .2s;`;
+    const navSeg=(on)=>`border:none;background:transparent;color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;position:relative;z-index:1;transition:color .2s;`;
     const segS=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:13px;font-weight:600;padding:5px 13px;border-radius:7px;cursor:pointer;box-shadow:${on?'0 1px 2px rgba(0,0,0,0.1)':'none'};transition:all .2s;`;
     const pill=(active)=>`border:1px solid ${active?A:'#2c2c2e'};background:${active?A:'#1c1c1e'};color:${active?'#fff':'#f2f2f7'};font-size:13px;font-weight:500;padding:7px 13px;border-radius:980px;cursor:pointer;transition:all .15s;`;
     const romanChip=(bg)=>`border:1px solid #2c2c2e;background:${bg};color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
@@ -3219,7 +3332,7 @@ class Component extends DCLogic {
       goMood:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'mood',autoScroll:false});},
       goPractice:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'practice',autoScroll:false});},
       goTuner:()=>{self.stopAutoScroll();self.setState({tab:'tuner',autoScroll:false});},
-      tTheory:seg(S.tab==='theory'),tGuitar:seg(S.tab==='guitar'),tProg:seg(S.tab==='prog'),tRhythm:seg(S.tab==='rhythm'),tSongs:seg(S.tab==='songs'),tMood:seg(S.tab==='mood'),tPractice:seg(S.tab==='practice'),tTuner:seg(S.tab==='tuner'),
+      tTheory:navSeg(S.tab==='theory'),tGuitar:navSeg(S.tab==='guitar'),tProg:navSeg(S.tab==='prog'),tRhythm:navSeg(S.tab==='rhythm'),tSongs:navSeg(S.tab==='songs'),tMood:navSeg(S.tab==='mood'),tPractice:navSeg(S.tab==='practice'),tTuner:navSeg(S.tab==='tuner'),
       tunerSubIsPitch:S.tunerSubTab!=='chord',tunerSubIsChord:S.tunerSubTab==='chord',
       tunerSubPitchStyle:segS(S.tunerSubTab!=='chord'),tunerSubChordStyle:segS(S.tunerSubTab==='chord'),
       goTunerPitch:()=>self.setState({tunerSubTab:'pitch'}),goTunerChord:()=>self.setState({tunerSubTab:'chord'}),
@@ -3283,6 +3396,8 @@ class Component extends DCLogic {
       tabHasInput,capo,capoLabel,capoUp,capoDown,hasCapo,soundingKeyLabel,transposeUp,transposeDown,
       toggleAutoScroll,autoScrollBtnLabel,autoScrollBtnStyle,scrollSpeed:S.scrollSpeed||3,setScrollSpeed,
       outputScrollRef:this.outputScrollRef,
+      navTrackRef:this.navTrackRef,navIndicatorRef:this.navIndicatorRef,heroRef:this.heroRef,chordHeroRef:this.chordHeroRef,keyShortcutsRef:this.keyShortcutsRef,
+      liveStatsRef:this.liveStatsRef,viewStatsRef:this.viewStatsRef,beatDotsRef:this.beatDotsRef,practiceSwitchDotsRef:this.practiceSwitchDotsRef,
       songsListItems,hasSongsListItems,noSongsListItems,hasViewingSong,viewingSongName,songView,backToList,editViewingSong,
       exportSongPdfBtn,pdfExportBtnLabel,pdfExportBtnStyle,hasPdfError,pdfError:S.pdfError||'',
       showViewStats,toggleViewStats,viewStatsChevronStyle,
