@@ -1652,8 +1652,9 @@ class Component extends DCLogic {
         this.waveformSrc=src; this.waveformAnalyser=analyser;
         const dataArray=new Uint8Array(analyser.frequencyBinCount);
         const draw=()=>{
+          if(!this.waveformAnalyser) return;
           const canvas=this.waveformCanvasRef.current;
-          if(canvas&&this.waveformAnalyser){
+          if(canvas){
             this.waveformAnalyser.getByteTimeDomainData(dataArray);
             const ctx=canvas.getContext('2d'); const w=canvas.width, h=canvas.height;
             ctx.clearRect(0,0,w,h);
@@ -1726,6 +1727,7 @@ class Component extends DCLogic {
       const s=document.createElement('script');
       s.src='https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js';
       s.crossOrigin='anonymous';
+      s.integrity='sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/';
       s.onload=()=>{ if(window.jspdf&&window.jspdf.jsPDF) resolve(window.jspdf.jsPDF); else reject(new Error('jsPDF failed to load')); };
       s.onerror=()=>reject(new Error('jsPDF failed to load'));
       document.head.appendChild(s);
@@ -1931,6 +1933,10 @@ class Component extends DCLogic {
       chords=p.specs.map(sp=>{ const c=this.chordFromSpec(this.state.keyRoot,sp); return {name:c.name,roman:c.roman,pcs:c.pcs,rootPC:c.rootPC,quality:c.quality}; });
     }
     this.setState({practiceSwitchOn:true,practiceSwitchChords:chords,practiceSwitchIdx:0,practiceSwitchBeat:0});
+    this.scheduleSwitchTimer();
+  }
+  scheduleSwitchTimer(){
+    if(this.switchTimer){ clearInterval(this.switchTimer); this.switchTimer=null; }
     const bpm=this.state.practiceSwitchBpm||80;
     const beatMs=Math.max(150,60000/bpm);
     this.switchTimer=setInterval(()=>{
@@ -1945,6 +1951,10 @@ class Component extends DCLogic {
     },beatMs);
   }
   stopSwitchPractice(){ if(this.switchTimer){ clearInterval(this.switchTimer); this.switchTimer=null; } this.setState({practiceSwitchOn:false}); }
+  adjustSwitchBpm(delta){
+    this.setState(st=>({practiceSwitchBpm:Math.max(40,Math.min(200,(st.practiceSwitchBpm||80)+delta))}),
+      ()=>{ if(this.state.practiceSwitchOn) this.scheduleSwitchTimer(); });
+  }
 
   // practice mode — ear training
   nextEarQuestion(typeOverride){
@@ -2923,8 +2933,8 @@ class Component extends DCLogic {
     const practiceStartBtnStyle=`border:none;background:${A};color:#000;font-size:15px;font-weight:700;padding:12px 44px;border-radius:980px;cursor:pointer;box-shadow:0 2px 14px rgba(240,180,41,0.28);`;
     const startSwitch=()=>self.startSwitchPractice();
     const stopSwitch=()=>self.stopSwitchPractice();
-    const switchBpmUp=()=>self.setState({practiceSwitchBpm:Math.min(200,switchBpm+4)});
-    const switchBpmDown=()=>self.setState({practiceSwitchBpm:Math.max(40,switchBpm-4)});
+    const switchBpmUp=()=>self.adjustSwitchBpm(4);
+    const switchBpmDown=()=>self.adjustSwitchBpm(-4);
     const switchBeatDots=[0,1,2,3].map(i=>({key:i,style:`width:9px;height:9px;border-radius:50%;background:${S.practiceSwitchBeat===i&&switchOn?A:'#2c2c2e'};transition:background .1s;`}));
 
     const earType=S.practiceEarType||'note';
