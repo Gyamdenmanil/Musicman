@@ -45,8 +45,12 @@
         <div style="font-size:12px;font-weight:700;color:#f0b429;letter-spacing:0.08em;">SONGWRITER'S WORKBENCH</div>
         <h1 style="margin:3px 0 0;font-size:clamp(22px,5vw,28px);font-weight:700;letter-spacing:-0.02em;">Musicman</h1>
       </div>
-      <div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <button onClick="{{ toggleRecording }}" style="{{ recordBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ recordBtnLabel }}</button>
+        <sc-if value="{{ isRecording }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:18px;font-weight:700;color:#ff375f;font-variant-numeric:tabular-nums;">{{ recSecondsLabel }}</div>
+        <canvas ref="{{ waveformCanvasRef }}" width="160" height="36" style="border-radius:8px;background:#1c1c1e;border:1px solid #2c2c2e;"></canvas>
+        </sc-if>
       </div>
       <sc-if value="{{ hasRecordError }}" hint-placeholder-val="{{ false }}">
       <div style="font-size:11px;color:#ff375f;font-weight:600;margin-top:6px;max-width:240px;">{{ recordError }}</div>
@@ -81,13 +85,21 @@
       <button onClick="{{ goMood }}" style="{{ tMood }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">M</span><span style="font-size:10px;">Mood</span></button>
       <button onClick="{{ goSongs }}" style="{{ tSongs }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">S</span><span style="font-size:10px;">Songs</span></button>
       <button onClick="{{ goRhythm }}" style="{{ tRhythm }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">R</span><span style="font-size:10px;">Rhythm</span></button>
+      <button onClick="{{ goPractice }}" style="{{ tPractice }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Pr</span><span style="font-size:10px;">Practice</span></button>
     </div>
   </div>
 
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div style="max-width:400px;margin:0 auto;animation:mmTabFade .18s ease-out;">
     <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
-      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Circle of Fifths</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Circle of Fifths</div>
+        <div style="display:flex;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">
+          <button onClick="{{ setWheelModeKeys }}" style="{{ wheelModeKeysStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Keys</button>
+          <button onClick="{{ setWheelModeChords }}" style="{{ wheelModeChordsStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chords</button>
+        </div>
+      </div>
+      <sc-if value="{{ isWheelKeys }}" hint-placeholder-val="{{ true }}">
       <div style="position:relative;width:300px;height:300px;margin:14px auto 6px;max-width:100%;">
         {{ wheelDiagram }}
         <div style="position:absolute;left:150px;top:150px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
@@ -98,6 +110,22 @@
       </div>
       <div style="font-size:12.5px;color:#c7c7cc;text-align:center;line-height:1.5;min-height:34px;">{{ wheelCaption }}</div>
       <div style="margin-top:12px;padding:10px 12px;background:#232325;border-radius:12px;font-size:13px;color:#c7c7cc;">{{ relativeInfo }}</div>
+      </sc-if>
+      <sc-if value="{{ isWheelChords }}" hint-placeholder-val="{{ false }}">
+      <div style="position:relative;width:300px;height:300px;margin:14px auto 6px;max-width:100%;">
+        {{ chordWheelDiagram }}
+        <div style="position:absolute;left:150px;top:150px;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+          <div style="font-size:19px;font-weight:700;letter-spacing:-0.02em;">{{ chordWheelCenterLabel }}</div>
+          <div style="font-size:10px;color:#98989d;font-weight:600;">{{ keyRoot }} {{ keyModeLabel }}</div>
+        </div>
+      </div>
+      <div style="font-size:12.5px;color:#c7c7cc;text-align:center;line-height:1.5;min-height:34px;">{{ chordWheelCaption }}</div>
+      <sc-if value="{{ hasChordWheelSel }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:12px;text-align:center;">
+        <button onClick="{{ addWheelChordToProg }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);">+ Add to progression</button>
+      </div>
+      </sc-if>
+      </sc-if>
     </div>
   </div>
   </sc-if>
@@ -278,6 +306,26 @@
         </sc-if>
       </div>
       </sc-if>
+      <sc-if value="{{ hasVoiceLeading }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid #2c2c2e;">
+        <button onClick="{{ toggleVoiceLeading }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ voiceLeadingChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Voice leading</button>
+        <sc-if value="{{ showVoiceLeading }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:14px;justify-content:center;">
+          <sc-for list="{{ voiceLeadingPairs }}" as="vp" hint-placeholder-count="2">
+            <div style="width:160px;">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#98989d;margin-bottom:4px;"><span>{{ vp.fromName }}</span><span>{{ vp.toName }}</span></div>
+              <svg width="140" height="{{ vp.svgH }}" style="display:block;margin:0 auto;">
+                <sc-for list="{{ vp.lines }}" as="ln2" hint-placeholder-count="4"><line x1="{{ ln2.x1 }}" y1="{{ ln2.y1 }}" x2="{{ ln2.x2 }}" y2="{{ ln2.y2 }}" stroke="{{ ln2.color }}" stroke-width="1.6"></line></sc-for>
+                <sc-for list="{{ vp.notesA }}" as="na" hint-placeholder-count="4"><text x="4" y="{{ na.y }}" fill="#f2f2f7" font-size="11" font-weight="700">{{ na.label }}</text></sc-for>
+                <sc-for list="{{ vp.notesB }}" as="nb" hint-placeholder-count="4"><text x="136" y="{{ nb.y }}" text-anchor="end" fill="#f2f2f7" font-size="11" font-weight="700">{{ nb.label }}</text></sc-for>
+              </svg>
+              <div style="font-size:11px;color:#8e8e93;text-align:center;margin-top:4px;line-height:1.4;">{{ vp.summary }}</div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
       </sc-if>
       <sc-if value="{{ noBuilderChords }}" hint-placeholder-val="{{ true }}">
       <div style="font-size:14px;color:#98989d;">Nothing here yet — add a chord below, or ask for a suggestion.</div>
@@ -366,15 +414,162 @@
       <div style="font-size:12.5px;color:#8e8e93;margin-bottom:16px;line-height:1.5;">Pick a mood for a starter key, tempo, time signature, chord progression, and instrument palette — loads straight into Progression.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
         <sc-for list="{{ moodList }}" as="mo" hint-placeholder-count="6">
-          <button onClick="{{ mo.onClick }}" style="{{ mo.style }}" style-hover="filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.3);" style-active="transform:scale(0.98);">
-            <div style="font-size:16px;font-weight:700;color:#f2f2f7;">{{ mo.mood }}</div>
-            <div style="font-size:11.5px;color:#f0b429;font-weight:700;margin-top:2px;">{{ mo.keyLabel }} · {{ mo.bpm }} BPM · {{ mo.tsLabel }}</div>
-            <div style="font-size:12px;color:#98989d;margin-top:6px;line-height:1.45;">{{ mo.why }}</div>
-            <div style="font-size:11px;color:#8e8e93;margin-top:8px;">{{ mo.instrumentsStr }}</div>
-            <div style="font-size:11.5px;color:#f0b429;font-style:italic;margin-top:4px;">{{ mo.artistStyle }}</div>
-          </button>
+          <div style="{{ mo.style }}">
+            <div onClick="{{ mo.onClick }}" style="cursor:pointer;">
+              <div style="font-size:16px;font-weight:700;color:#f2f2f7;">{{ mo.mood }}</div>
+              <div style="font-size:11.5px;color:#f0b429;font-weight:700;margin-top:2px;">{{ mo.keyLabel }} · {{ mo.bpm }} BPM · {{ mo.tsLabel }}</div>
+              <div style="font-size:12px;color:#98989d;margin-top:6px;line-height:1.45;">{{ mo.why }}</div>
+              <div style="font-size:11px;color:#8e8e93;margin-top:8px;">{{ mo.instrumentsStr }}</div>
+              <div style="font-size:11.5px;color:#f0b429;font-style:italic;margin-top:4px;">{{ mo.artistStyle }}</div>
+            </div>
+            <button onClick="{{ mo.toggleStyleNotes }}" style="display:flex;align-items:center;gap:5px;width:100%;border:none;background:transparent;color:#8e8e93;font-size:10.5px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;cursor:pointer;padding:10px 0 0;margin-top:10px;border-top:1px solid #2c2c2e;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{{ mo.styleChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Style notes</button>
+            <sc-if value="{{ mo.styleOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px;">
+              <div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#98989d;">Common chords</div><div style="font-size:11.5px;color:#c7c7cc;line-height:1.4;">{{ mo.styleCommonChords }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#98989d;">Harmonic tendencies</div><div style="font-size:11.5px;color:#c7c7cc;line-height:1.4;">{{ mo.styleHarmonicTendencies }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#98989d;">Rhythm</div><div style="font-size:11.5px;color:#c7c7cc;line-height:1.4;">{{ mo.styleRhythmStyle }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#98989d;">Voicing style</div><div style="font-size:11.5px;color:#c7c7cc;line-height:1.4;">{{ mo.styleVoicingStyle }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:#98989d;">Characteristics</div><div style="font-size:11.5px;color:#c7c7cc;line-height:1.4;">{{ mo.styleCharacteristics }}</div></div>
+            </div>
+            </sc-if>
+          </div>
         </sc-for>
       </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isPractice }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:640px;margin:0 auto;animation:mmTabFade .18s ease-out;">
+    <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Practice</div>
+        <div style="font-size:12px;color:#98989d;">Score <b style="color:#f0b429;">{{ practiceScore }}</b> · Streak <b style="color:#f0b429;">{{ practiceStreak }}</b></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);margin-bottom:20px;gap:2px;">
+        <button onClick="{{ goPracticeSwitch }}" style="{{ practiceModeSwitchStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chord Switching</button>
+        <button onClick="{{ goPracticeEar }}" style="{{ practiceModeEarStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Ear Training</button>
+        <button onClick="{{ goPracticeScale }}" style="{{ practiceModeScaleStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Scale Practice</button>
+        <button onClick="{{ goPracticeMemory }}" style="{{ practiceModeMemoryStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Progression Memory</button>
+      </div>
+
+      <sc-if value="{{ isPracticeSwitch }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;">
+        <div style="font-size:12.5px;color:#8e8e93;margin-bottom:14px;">Practices whatever's in your Progression builder, or a random preset if it's empty. Follow the click and switch chords in time.</div>
+        <sc-if value="{{ hasSwitchChord }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:#98989d;">{{ switchCurChord.roman }}</div>
+        <div style="font-size:44px;font-weight:700;margin:4px 0 12px;letter-spacing:-0.02em;">{{ switchCurChord.name }}</div>
+        </sc-if>
+        <sc-if value="{{ hasSwitchDiagram }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;justify-content:center;margin-bottom:14px;">{{ switchDiagram }}</div>
+        </sc-if>
+        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:18px;">
+          <sc-for list="{{ switchBeatDots }}" as="bd" hint-placeholder-count="4"><div style="{{ bd.style }}"></div></sc-for>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px;">
+          <button onClick="{{ switchBpmDown }}" style="{{ stepBtnStyleSmall }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.88);">−</button>
+          <div style="font-size:16px;font-weight:700;min-width:80px;">{{ switchBpm }} BPM</div>
+          <button onClick="{{ switchBpmUp }}" style="{{ stepBtnStyleSmall }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.88);">+</button>
+        </div>
+        <sc-if value="{{ switchOff }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ startSwitch }}" style="{{ practiceStartBtnStyle }}">Start</button>
+        </sc-if>
+        <sc-if value="{{ switchOn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ stopSwitch }}" style="border:none;background:#ff375f;color:#fff;font-size:15px;font-weight:700;padding:12px 44px;border-radius:980px;cursor:pointer;">Stop</button>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isPracticeEar }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;justify-content:center;">
+          <button onClick="{{ setEarNote }}" style="{{ earTypeNoteStyle }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">Notes</button>
+          <button onClick="{{ setEarInterval }}" style="{{ earTypeIntervalStyle }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">Intervals</button>
+          <button onClick="{{ setEarChord }}" style="{{ earTypeChordStyle }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">Chord Qualities</button>
+        </div>
+        <sc-if value="{{ hasEarQuestion }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;">
+          <div style="font-size:14px;color:#98989d;margin-bottom:14px;">{{ earQPrompt }}</div>
+          <button onClick="{{ earReplay }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Replay</button>
+          <div style="display:flex;flex-direction:column;gap:8px;margin:20px auto 0;max-width:280px;">
+            <sc-for list="{{ earChoices }}" as="ec" hint-placeholder-count="4"><button onClick="{{ ec.onClick }}" style="{{ ec.style }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.97);">{{ ec.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ earFeedbackIsCorrect }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:#32d74b;font-weight:600;margin-top:14px;">Correct!</div>
+          </sc-if>
+          <sc-if value="{{ earFeedbackIsWrong }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:#ff375f;font-weight:600;margin-top:14px;">Not quite — it was {{ earCorrectAnswer }}.</div>
+          </sc-if>
+          <sc-if value="{{ hasEarFeedback }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ earNext }}" style="{{ ghostSmallStyle }}" style-hover="background:#232325;border-color:#48484a;" style-active="transform:scale(0.96);margin-top:14px;">Next question →</button>
+          </sc-if>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isPracticeScale }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;justify-content:center;">
+          <sc-for list="{{ scaleListPractice }}" as="sp" hint-placeholder-count="8"><button onClick="{{ sp.onClick }}" style="{{ sp.style }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">{{ sp.name }}</button></sc-for>
+        </div>
+        <sc-if value="{{ hasScaleQuestion }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;">
+          <div style="font-size:14px;color:#98989d;margin-bottom:14px;">Which note is scale degree {{ scaleQDegree }}?</div>
+          <button onClick="{{ scaleReplay }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Replay</button>
+          <div style="display:flex;flex-direction:column;gap:8px;margin:20px auto 0;max-width:280px;">
+            <sc-for list="{{ scaleChoices }}" as="sc2" hint-placeholder-count="4"><button onClick="{{ sc2.onClick }}" style="{{ sc2.style }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.97);">{{ sc2.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ scaleFeedbackIsCorrect }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:#32d74b;font-weight:600;margin-top:14px;">Correct!</div>
+          </sc-if>
+          <sc-if value="{{ scaleFeedbackIsWrong }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:#ff375f;font-weight:600;margin-top:14px;">Not quite — it was {{ scaleCorrectAnswer }}.</div>
+          </sc-if>
+          <sc-if value="{{ hasScaleFeedback }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ scaleNext }}" style="{{ ghostSmallStyle }}" style-hover="background:#232325;border-color:#48484a;" style-active="transform:scale(0.96);margin-top:14px;">Next question →</button>
+          </sc-if>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isPracticeMemory }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;">
+        <sc-if value="{{ memoryIsIdle }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12.5px;color:#8e8e93;margin-bottom:16px;">You'll see a progression for a few seconds, hear it played, then rebuild the order from a shuffled pool.</div>
+        <button onClick="{{ startMemory }}" style="{{ practiceStartBtnStyle }}">Start round</button>
+        </sc-if>
+        <sc-if value="{{ memoryIsShow }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12px;color:#8e8e93;margin-bottom:12px;">Memorize this order…</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
+          <sc-for list="{{ memoryShowChips }}" as="mc" hint-placeholder-count="4"><div style="border:1px solid #2c2c2e;background:#1c1c1e;border-radius:12px;padding:10px 16px;"><div style="font-size:11px;color:#f0b429;font-weight:700;">{{ mc.roman }}</div><div style="font-size:17px;font-weight:700;">{{ mc.name }}</div></div></sc-for>
+        </div>
+        <button onClick="{{ skipMemoryReveal }}" style="{{ ghostSmallStyle }}" style-hover="background:#232325;border-color:#48484a;" style-active="transform:scale(0.96);">I'm ready →</button>
+        </sc-if>
+        <sc-if value="{{ memoryIsQuiz }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12px;color:#8e8e93;margin-bottom:12px;">Tap the chords back in order.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;min-height:34px;">
+          <sc-for list="{{ memoryPickedChips }}" as="mp" hint-placeholder-count="4"><div style="{{ mp.style }}">{{ mp.name }}</div></sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+          <sc-for list="{{ memoryPoolChips }}" as="mo2" hint-placeholder-count="4"><button onClick="{{ mo2.onClick }}" style="{{ mo2.style }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">{{ mo2.name }}</button></sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ memoryIsResult }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;">
+          <sc-for list="{{ memoryPickedChips }}" as="mp2" hint-placeholder-count="4"><div style="{{ mp2.style }}">{{ mp2.name }}</div></sc-for>
+        </div>
+        <sc-if value="{{ memoryAllCorrect }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:15px;color:#32d74b;font-weight:700;margin-bottom:16px;">Perfect order!</div>
+        </sc-if>
+        <sc-if value="{{ memoryIncorrect }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:15px;color:#ff375f;font-weight:700;margin-bottom:16px;">Not quite — the correct order is highlighted above in red.</div>
+        </sc-if>
+        <button onClick="{{ resetMemory }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);">Try another</button>
+        </sc-if>
+      </div>
+      </sc-if>
     </div>
   </div>
   </sc-if>
@@ -427,7 +622,11 @@
         <button onClick="{{ saveSongBtn }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);">Save</button>
         <button onClick="{{ newSongBtn }}" style="{{ ghostSmallStyle }}" style-hover="background:#232325;border-color:#48484a;" style-active="transform:scale(0.96);">New</button>
       </div>
-      <input value="{{ currentSongTags }}" onInput="{{ onSongTagsChange }}" placeholder="Tags — comma separated (e.g. sad, breakup, acoustic)" style="font-size:13px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;margin-bottom:14px;">
+      <input value="{{ currentSongTags }}" onInput="{{ onSongTagsChange }}" placeholder="Tags — comma separated (e.g. sad, breakup, acoustic)" style="font-size:13px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;margin-bottom:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <input value="{{ currentSongArtist }}" onInput="{{ onSongArtistChange }}" placeholder="Artist (for PDF export)" style="font-size:13px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;flex:1;min-width:160px;">
+      </div>
+      <textarea value="{{ currentSongNotes }}" onInput="{{ onSongNotesChange }}" placeholder="Notes (performance notes, ideas — included in PDF export)" style="font-size:12.5px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;min-height:44px;margin-bottom:14px;font-family:inherit;resize:vertical;"></textarea>
       <sc-if value="{{ hasSavedSongs }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
         <sc-for list="{{ savedSongChips }}" as="s" hint-placeholder-count="3">
@@ -469,6 +668,15 @@
       </sc-if>
 
       <sc-if value="{{ writeSubTabIsLyrics }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ showTeleprompter }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-bottom:16px;padding:14px 16px;background:rgba(51,40,18,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(240,180,41,0.2);border-radius:14px;">
+        <div style="font-size:10.5px;color:#f7d488;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Recording — teleprompter (estimate, not audio-synced)</div>
+        <div style="font-size:26px;font-weight:700;color:#f0b429;margin-top:6px;">{{ teleCurrentChord }}</div>
+        <div style="max-height:120px;overflow-y:auto;margin-top:10px;border-top:1px solid rgba(240,180,41,0.15);padding-top:8px;">
+          <sc-for list="{{ teleLineViews }}" as="tl" hint-placeholder-count="3"><div style="{{ tl.style }}">{{ tl.text }}</div></sc-for>
+        </div>
+      </div>
+      </sc-if>
       <textarea value="{{ songText }}" onInput="{{ onSongTextChange }}" placeholder="Write your lyrics here…" style="width:100%;min-height:150px;border:none;background:transparent;padding:0;font-size:16px;line-height:1.9;font-family:inherit;resize:vertical;color:#f2f2f7;"></textarea>
 
       <div style="font-size:11px;color:#8e8e93;font-weight:600;margin:16px 0 10px;">Tap a word to add a chord above it</div>
@@ -711,10 +919,17 @@
       <div style="display:flex;flex-direction:column;gap:10px;">
         <sc-for list="{{ recordingItems }}" as="r" hint-placeholder-count="2">
           <div style="display:flex;align-items:center;gap:10px;border:1px solid #2c2c2e;background:#232325;border-radius:12px;padding:10px 14px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:110px;font-size:13px;font-weight:600;color:#f2f2f7;">{{ r.name }}</div>
+            <sc-if value="{{ r.isRenaming }}" hint-placeholder-val="{{ false }}">
+            <input value="{{ renameDraft }}" onInput="{{ onRenameDraftChange }}" style="flex:1;min-width:110px;font-size:13px;font-weight:600;color:#f2f2f7;background:#1c1c1e;border:1px solid #6b551f;border-radius:8px;padding:5px 9px;">
+            <button onClick="{{ commitRename }}" style="border:1px solid #6b551f;background:#332812;color:#f7d488;font-size:12px;font-weight:700;padding:6px 10px;border-radius:9px;cursor:pointer;">Save name</button>
+            <button onClick="{{ cancelRename }}" style="border:none;background:transparent;color:#8e8e93;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>
+            </sc-if>
+            <sc-if value="{{ r.isRenaming }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ r.startRename }}" style="flex:1;min-width:110px;font-size:13px;font-weight:600;color:#f2f2f7;cursor:pointer;" title="Tap to rename">{{ r.name }}</div>
             <audio controls src="{{ r.dataUrl }}" style="height:32px;flex:2;min-width:180px;max-width:100%;"></audio>
             <button onClick="{{ r.save }}" style="border:1px solid #2c2c2e;background:#1c1c1e;color:#f0b429;font-size:12px;font-weight:700;padding:6px 10px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);">Save</button>
             <button onClick="{{ r.remove }}" style="border:none;background:transparent;color:#6e6e73;font-size:16px;cursor:pointer;padding:0;line-height:1;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.4);" style-active="transform:scale(0.85);">×</button>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -743,7 +958,11 @@
           <span style="font-size:12px;color:#98989d;font-weight:600;">Speed</span>
           <input type="range" min="1" max="10" value="{{ scrollSpeed }}" onInput="{{ setScrollSpeed }}" style="flex:1;height:5px;">
         </div>
+        <button onClick="{{ exportSongPdfBtn }}" style="{{ pdfExportBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ pdfExportBtnLabel }}</button>
       </div>
+      <sc-if value="{{ hasPdfError }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:10px 22px 0;font-size:11.5px;color:#ff375f;font-weight:600;">{{ pdfError }}</div>
+      </sc-if>
       <div ref="{{ outputScrollRef }}" style="overflow-y:auto;max-height:65vh;padding:24px 26px;">
         <sc-if value="{{ songView.hasCapo }}" hint-placeholder-val="{{ false }}">
         <div style="display:inline-block;background:#332812;color:#f7d488;font-size:12px;font-weight:700;padding:5px 12px;border-radius:980px;margin-bottom:14px;">{{ songView.capoLabel }} · sounds in {{ songView.soundingKeyLabel }}</div>
@@ -906,34 +1125,84 @@ class Component extends DCLogic {
   MOODS = [
     {mood:'Happy',keyRoot:'C',keyMode:'major',bpm:120,tsIndex:0,specs:[[0,0,'maj','I'],[5,3,'maj','IV'],[7,4,'maj','V'],[0,0,'maj','I']],
       instruments:['Bright acoustic guitar','Handclaps','Ukulele or glockenspiel'],artistStyle:'Jack Johnson, Vance Joy',
-      why:'Fast tempo, major key, and a I–IV–V loop are about as unambiguously upbeat as harmony gets.'},
+      why:'Fast tempo, major key, and a I–IV–V loop are about as unambiguously upbeat as harmony gets.',
+      styleNotes:{commonChords:'I, IV, V, and vi in constant rotation — rarely strays from the diatonic set.',
+        harmonicTendencies:'Resolves quickly and often; avoids lingering tension or unresolved sevenths.',
+        rhythmStyle:'Even eighth-note strumming or a driving four-on-the-floor feel, usually 100–130 BPM.',
+        voicingStyle:'Open-position or capo\'d acoustic voicings, bright and full-range.',
+        characteristics:'Short, singable phrases with hooks that repeat early and often.'}},
     {mood:'Sad',keyRoot:'A',keyMode:'minor',bpm:68,tsIndex:0,specs:[[0,0,'min','i'],[8,5,'maj','♭VI'],[3,2,'maj','♭III'],[10,6,'maj','♭VII']],
       instruments:['Solo piano','Sparse strings','Soft brushed drums'],artistStyle:'Bon Iver, Phoebe Bridgers',
-      why:'A slow minor-key loop through borrowed major chords gives a bittersweet lift that never fully resolves.'},
+      why:'A slow minor-key loop through borrowed major chords gives a bittersweet lift that never fully resolves.',
+      styleNotes:{commonChords:'Minor i with borrowed major ♭III/♭VI/♭VII — color without leaving the key.',
+        harmonicTendencies:'Chords often move by step or sit static under a moving vocal line rather than driving toward a cadence.',
+        rhythmStyle:'Sparse, rubato-leaning tempo with space between chord changes.',
+        voicingStyle:'Fingerpicked or arpeggiated rather than strummed, favoring open strings and close voicings.',
+        characteristics:'Long sustained notes, understated dynamics, silence used as an instrument.'}},
     {mood:'Dreamy',keyRoot:'D',keyMode:'major',bpm:78,tsIndex:0,specs:[[0,0,'maj7','Imaj7'],[9,5,'min7','vi7'],[5,3,'maj7','IVmaj7'],[7,4,'dom7','V7']],
       instruments:['Reverb-heavy electric guitar','Airy synth pads','Soft brushed drums'],artistStyle:'Beach House, Cocteau Twins',
-      why:'Maj7 chords wash out any hard edges — everything floats instead of resolving sharply.'},
+      why:'Maj7 chords wash out any hard edges — everything floats instead of resolving sharply.',
+      styleNotes:{commonChords:'Major 7th and dominant 7th chords replace plain triads throughout.',
+        harmonicTendencies:'Resolution is softened — a maj7 substitutes for the plain tonic so nothing lands too hard.',
+        rhythmStyle:'Slow-to-mid tempo, swelling pads and reverb tails that blur the beat.',
+        voicingStyle:'Wide, effects-heavy voicings (chorus/reverb/delay) that blur individual notes into a wash.',
+        characteristics:'Vocals mixed low and hazy; melody often secondary to atmosphere.'}},
     {mood:'Dark',keyRoot:'E',keyMode:'minor',bpm:90,tsIndex:0,specs:[[0,0,'min','i'],[10,6,'maj','♭VII'],[8,5,'maj','♭VI'],[7,4,'min','v']],
       instruments:['Distorted electric guitar','Analog synth bass','Tom-heavy drums'],artistStyle:'Nine Inch Nails, Billie Eilish',
-      why:'A natural-minor v (not a hard dominant) keeps the pull toward resolution weak — everything stays heavy and unresolved.'},
+      why:'A natural-minor v (not a hard dominant) keeps the pull toward resolution weak — everything stays heavy and unresolved.',
+      styleNotes:{commonChords:'Natural-minor i, ♭VI, ♭VII — avoiding the harmonic-minor leading tone keeps it heavy rather than dramatic.',
+        harmonicTendencies:'Weak or absent dominant function; the progression loops instead of resolving.',
+        rhythmStyle:'Driving, repetitive rhythm — one sustained groove rather than varied sections.',
+        voicingStyle:'Low-register power chords or distorted guitar, minimal upper extensions.',
+        characteristics:'Sparse lyrics, repetition as a build device, dynamic swells rather than melodic movement.'}},
     {mood:'Cinematic',keyRoot:'C',keyMode:'minor',bpm:92,tsIndex:4,specs:[[0,0,'min','i'],[8,5,'maj','♭VI'],[3,2,'maj','♭III'],[10,6,'maj','♭VII']],
       instruments:['Full string section','French horns','Orchestral percussion'],artistStyle:'Hans Zimmer, Ludwig Göransson',
-      why:'A descending Andalusian-style loop through borrowed major chords gives that widescreen, epic-trailer sweep.'},
+      why:'A descending Andalusian-style loop through borrowed major chords gives that widescreen, epic-trailer sweep.',
+      styleNotes:{commonChords:'Minor i descending through borrowed ♭VI–♭III–♭VII — the classic "Andalusian" descent.',
+        harmonicTendencies:'Harmony moves by step in a descending bassline rather than by functional cadence.',
+        rhythmStyle:'Rubato or slow, irregular meter built for tension and release rather than dancing.',
+        voicingStyle:'Orchestral doubling across octaves — strings, horns, and low brass reinforcing the same line.',
+        characteristics:'Long crescendos; thematic motifs repeated and developed rather than verse/chorus form.'}},
     {mood:'Hopeful',keyRoot:'G',keyMode:'major',bpm:100,tsIndex:0,specs:[[9,5,'min','vi'],[5,3,'maj','IV'],[0,0,'maj','I'],[7,4,'maj','V']],
       instruments:['Layered acoustic guitars','Warm pad synth','Building drums'],artistStyle:'Coldplay, The Lumineers',
-      why:'Starting on vi makes the arrival at I feel like a genuine lift rather than a given — "hope breaking through" motion.'},
+      why:'Starting on vi makes the arrival at I feel like a genuine lift rather than a given — "hope breaking through" motion.',
+      styleNotes:{commonChords:'vi–IV–I–V and its rotations — the same four pop chords reordered to change the emotional entry point.',
+        harmonicTendencies:'Starts away from the tonic so the eventual arrival at I feels earned.',
+        rhythmStyle:'Building arrangement — starts sparse, adds layers (drums, strings) toward the chorus.',
+        voicingStyle:'Strummed acoustic or piano block chords, doubled with rising vocal harmony.',
+        characteristics:'Anthemic, communal-sounding choruses meant to be sung along to.'}},
     {mood:'Romantic',keyRoot:'F',keyMode:'major',bpm:84,tsIndex:1,specs:[[0,0,'maj','I'],[4,2,'min','iii'],[5,3,'maj','IV'],[7,4,'dom7','V7']],
       instruments:['Nylon-string guitar','Warm strings','Soft piano'],artistStyle:'Norah Jones, John Legend',
-      why:'A gentle waltz feel with the iii chord adds a wistful, tender lean without ever turning sad.'},
+      why:'A gentle waltz feel with the iii chord adds a wistful, tender lean without ever turning sad.',
+      styleNotes:{commonChords:'I–iii–IV–V7 — the mediant (iii) chord adds warmth without leaving the key.',
+        harmonicTendencies:'Smooth, stepwise root motion; the dominant 7th resolves cleanly back to I.',
+        rhythmStyle:'Waltz or slow triple meter, gentle swing feel.',
+        voicingStyle:'Warm, close piano or nylon-string voicings, understated dynamics.',
+        characteristics:'Conversational, intimate vocal delivery; unhurried phrasing.'}},
     {mood:'Indie',keyRoot:'A',keyMode:'major',bpm:132,tsIndex:0,specs:[[0,0,'maj','I'],[7,4,'maj','V'],[9,5,'min','vi'],[4,2,'min','iii']],
       instruments:['Jangly electric guitar','Tambourine','Synth bass'],artistStyle:'Malcolm Todd, Peach Pit',
-      why:'Swapping the usual IV for iii on the way down gives a wistful, slightly unresolved lift favored by indie-pop.'},
+      why:'Swapping the usual IV for iii on the way down gives a wistful, slightly unresolved lift favored by indie-pop.',
+      styleNotes:{commonChords:'I–V–vi–iii — swapping the expected IV for iii is the signature move.',
+        harmonicTendencies:'Slightly unresolved descending motion; avoids the most predictable resolution.',
+        rhythmStyle:'Upbeat, syncopated strumming, often faster than the mood name suggests.',
+        voicingStyle:'Jangly, chorus-pedal electric guitar with open, ringing chords.',
+        characteristics:'Conversational, slightly deadpan vocal delivery over bright instrumentation.'}},
     {mood:'R&B',keyRoot:'Bb',keyMode:'major',bpm:76,tsIndex:0,specs:[[2,1,'min7','ii7'],[7,4,'dom7','V7'],[0,0,'maj7','Imaj7'],[9,5,'min7','vi7']],
       instruments:['Rhodes electric piano','Sub bass','Trap-influenced hi-hats'],artistStyle:'Daniel Caesar, Frank Ocean',
-      why:'A jazz ii–V turnaround dressed in 7th chords for that smooth, unresolved neo-soul float.'},
+      why:'A jazz ii–V turnaround dressed in 7th chords for that smooth, unresolved neo-soul float.',
+      styleNotes:{commonChords:'ii7–V7–Imaj7–vi7 — a jazz turnaround dressed in extended chords.',
+        harmonicTendencies:'Chords rarely resolve to a plain triad; extensions (7ths, 9ths) are the default color.',
+        rhythmStyle:'Laid-back, behind-the-beat groove, often swung or half-time.',
+        voicingStyle:'Rhodes/electric-piano voicings with rich upper extensions, sparse low end.',
+        characteristics:'Melismatic vocal phrasing, unhurried pacing, space left between phrases.'}},
     {mood:'Jazz',keyRoot:'F',keyMode:'major',bpm:96,tsIndex:0,specs:[[4,2,'min7','iii7'],[9,5,'min7','vi7'],[2,1,'min7','ii7'],[7,4,'dom7','V7']],
       instruments:['Upright bass','Brushed drum kit','Piano comping'],artistStyle:'Bill Evans, Robert Glasper',
-      why:'A chain of descending ii–V motions (iii→vi→ii→V) is the backbone of jazz harmony — endlessly reusable turnarounds.'}
+      why:'A chain of descending ii–V motions (iii→vi→ii→V) is the backbone of jazz harmony — endlessly reusable turnarounds.',
+      styleNotes:{commonChords:'Chains of ii7–V7 motion (iii7–vi7–ii7–V7) — the core building block of jazz harmony.',
+        harmonicTendencies:'Constant forward motion by descending fifths; rarely sits still on one chord.',
+        rhythmStyle:'Swung eighth notes, walking bass, loose and conversational time-feel.',
+        voicingStyle:'Rootless voicings and extended chords (9ths, 11ths, 13ths) rather than plain triads.',
+        characteristics:'Improvisation-driven, melodic variation over a repeating harmonic form.'}}
   ];
   ROLE_INSIGHTS = [
     {role:'Tonic — home',dos:['Great to start on — it establishes the key immediately.','Great to end on — the strongest possible resting point.'],donts:['Don\'t sit here too long mid-progression, or it starts to feel static.']},
@@ -951,7 +1220,14 @@ class Component extends DCLogic {
   RHYME_WORDS_RAW = 'a,above,absolutely,accept,accepted,accepting,accepts,account,accounts,accuse,accused,accuses,accusing,across,act,acted,acting,active,acts,actually,add,added,adding,address,addresses,adds,admit,admits,admitted,admitting,adorn,adorned,adorning,adorns,advance,advanced,advances,advancing,advise,advised,advises,advising,afraid,after,afternoon,afternoons,again,against,age,ages,agree,agreed,agreeing,agrees,air,airs,album,albums,all,allow,allowed,allowing,allows,almost,alone,already,altar,altars,although,always,among,an,ancient,and,angel,angels,anger,angers,angrier,angriest,angrily,angry,animal,animals,announce,announced,announces,announcing,annoyed,another,answer,answered,answering,answers,ant,antique,ants,anxious,any,anywhere,apart,ape,apes,apologize,apologized,apologizes,apologizing,apparently,apple,apples,approach,approached,approaches,approaching,approve,approved,approves,approving,are,argue,argued,argues,arguing,arm,armies,armor,armors,arms,army,around,arrange,arranged,arranges,arranging,arrival,arrivals,arrive,arrived,arrives,arriving,arrogant,arrow,arrows,art,arteries,artery,artificial,artist,artists,arts,ascend,ascended,ascending,ascends,ash,ashamed,ashes,ask,asked,asking,asks,assemble,assembled,assembles,assembling,assignment,assignments,asteroid,asteroids,astronaut,astronauts,at,atom,atoms,attach,attached,attaches,attaching,attack,attacked,attacking,attacks,attempt,attempted,attempting,attempts,attic,attics,attractive,audience,audiences,aunt,aunts,authentic,author,authors,autumn,autumns,avoid,avoided,avoiding,avoids,away,awful,babies,baby,backpack,backpacks,backward,bacteria,bacterias,bad,bag,baggy,bags,bake,baked,bakes,baking,balanced,balconies,balcony,ball,balls,banana,bananas,band,bandage,bandages,bands,bank,banks,barbecue,barbecued,barbecues,barbecuing,barely,bark,barks,basement,basements,basket,baskets,bathroom,bathrooms,batteries,battery,battle,battles,be,bear,bears,beat,beats,beautified,beautifies,beautiful,beautify,beautifying,became,because,become,becomes,becoming,bedroom,bedrooms,bee,been,beer,beers,bees,beetle,beetles,before,began,begin,beginning,begins,begun,being,belief,beliefs,believe,believed,believes,believing,below,belt,belts,bend,bended,bending,bends,berries,berry,betrayal,betrayals,between,big,bigger,biggest,bike,bikes,bind,binding,binds,birch,birches,bird,birds,birthday,birthdays,bit,bite,bites,biting,bitten,bitter,bitterly,black,blacks,blame,blamed,blames,blaming,bled,bleed,bleeding,bleeds,blend,blended,blending,blends,blew,blink,blinked,blinking,blinks,block,blocked,blocking,blocks,blood,bloods,blow,blowing,blown,blows,blue,blues,blurry,boat,boats,bodies,body,boil,boiled,boiling,boils,bold,bolt,bolted,bolting,bolts,bond,bonds,bone,bones,bonus,bonuses,book,books,boot,boots,border,borders,bored,borrow,borrowed,borrowing,borrows,boss,bosses,both,bought,bound,bow,bowl,bowls,bows,box,boxes,boy,boys,bracelet,bracelets,brain,brains,brake,brakes,branch,branches,brave,bravely,braver,bravest,bread,breads,break,breakfast,breakfasts,breaking,breaks,breath,breaths,breeze,breezes,brick,bricks,bridge,bridges,brief,briefer,briefest,bright,brighter,brightest,brightly,brightness,brightnesses,brilliant,bring,bringing,brings,broadcast,broadcasted,broadcasting,broadcasts,broke,broken,broom,brooms,brother,brothers,brought,brown,browns,brush,brushes,build,building,builds,built,bulb,bulbs,bullet,bullets,bumpy,burger,burgers,buried,buries,burn,burning,burns,burnt,bury,burying,bus,buses,business,businesses,but,butter,butterflies,butterfly,butters,button,buttoned,buttoning,buttons,buy,buying,buys,by,cabbage,cabbages,cabinet,cabinets,cable,cables,cactus,cactuses,cage,cages,cake,cakes,calculate,calculated,calculates,calculating,calendar,calendars,call,called,calling,calls,calm,calmer,calmest,calmly,calms,came,camera,cameras,can,candies,candle,candles,candy,canyon,canyons,cap,capital,capitals,caps,captain,captains,car,care,cared,career,careers,careful,carefully,careless,carelessly,cares,caring,carpenter,carpenters,carried,carries,carrot,carrots,carry,carrying,cars,carve,carved,carves,carving,cash,cashes,cast,castle,castles,casts,cat,catch,catches,catching,cats,caught,cause,causes,cave,caves,celebration,celebrations,centuries,century,ceremonies,ceremony,certainly,chain,chains,chair,chairs,challenge,challenged,challenges,challenging,champion,champions,changing,chant,chanted,chanting,chants,chaotic,chapter,chapters,charge,charged,charges,charging,charming,chase,chased,chases,chasing,chat,chats,chatted,chatting,chauffeur,chauffeurs,cheap,cheat,cheated,cheating,cheats,cheerful,cheese,cheeses,chemical,chemicals,cherries,cherry,chew,chewed,chewing,chews,chick,chicken,chickens,chicks,child,childs,chimney,chimneys,chocolate,chocolates,choose,chooses,choosing,chop,choped,choping,chops,chord,chords,chose,chosen,church,churches,cite,cited,cites,cities,citing,citizen,citizens,city,class,classes,classic,classroom,classrooms,claw,claws,clean,cleaned,cleaner,cleanest,cleaning,cleans,clear,clearly,clever,click,clicked,clicking,clicks,client,clients,cliff,cliffs,climate,climates,climb,climbed,climbing,climbs,clip,clipped,clipping,clips,clock,clocks,close,closed,closely,closes,closet,closets,closing,cloth,cloths,cloud,clouds,coach,coaches,coast,coasts,coat,coats,code,coded,codes,coding,coffee,coffees,coin,coins,cold,colder,coldest,coldly,coldness,coldnesses,colds,colleague,colleagues,collect,collected,collecting,collects,college,colleges,color,colors,colossal,combine,combined,combines,combining,come,comes,comet,comets,comfortable,coming,command,commanded,commanding,commands,comment,commented,commenting,comments,common,companies,company,compare,compared,compares,comparing,compass,compasses,compete,competed,competes,competing,compile,compiled,compiles,compiling,complete,completely,complex,complicated,compliment,complimented,complimenting,compliments,computer,computers,concert,concerts,confess,confessed,confesses,confessing,confident,confirm,confirmed,confirming,confirms,confuse,confused,confuses,confusing,connect,connected,connecting,connects,constant,constantly,construct,constructed,constructing,constructs,contemporary,content,contest,contests,continent,continents,continue,continued,continues,continuing,continuously,contrast,contrasted,contrasting,contrasts,control,controlled,controlling,controls,convince,convinced,convinces,convincing,cook,cooked,cooking,cooks,cool,cooldown,cooldowned,cooldowning,cooldowns,cooler,coolest,copied,copies,copy,copying,corn,corns,correct,corrected,correcting,corrects,cost,costs,cotton,cottons,cough,coughs,could,count,counted,counting,countries,country,counts,courteous,cousin,cousins,cover,covered,covering,covers,cowardly,cozy,crab,crabs,craft,crafted,crafting,crafts,crawl,crawled,crawling,crawls,cream,creams,create,created,creates,creating,creep,creeped,creeping,creeps,crew,crews,cried,cries,crime,crimes,crisp,crisper,crispest,criticize,criticized,criticizes,criticizing,crooked,crow,crowd,crowded,crowdeder,crowdedest,crowds,crown,crowns,crows,cruel,crush,crushed,crushes,crushing,crutch,crutches,cry,crying,crystal,crystals,cub,cubicle,cubicles,cubs,cucumber,cucumbers,cup,cupboard,cupboards,cups,cure,cured,cures,curing,curious,current,currents,curved,customer,customers,customs,customses,cut,cuts,cutting,damage,damaged,damages,damaging,dance,danced,dancer,dancers,dances,dancing,dangerous,dark,darker,darkest,darkness,darknesses,darks,daughter,daughters,dawn,dawns,day,days,deadline,deadlines,debate,debated,debates,debating,debt,debts,debug,debuged,debuging,debugs,decade,decades,deceive,deceived,deceives,deceiving,declare,declared,declares,declaring,decline,declined,declines,declining,decorate,decorated,decorates,decorating,deep,deeper,deepest,deeply,deer,deers,defeat,defeats,defend,defended,defending,defends,define,defined,defines,defining,definitely,degree,degrees,delay,delayed,delaying,delays,delicate,delicious,delighted,deliver,delivered,delivering,delivers,demand,demanded,demanding,demands,demolish,demolished,demolishes,demolishing,demon,demons,denied,denies,deny,denying,depart,departed,departing,departs,departure,departures,depressed,descend,descended,descending,descends,describe,described,describes,describing,desert,deserts,design,designed,designing,designs,desk,desks,destination,destinations,destroy,destroyed,destroying,destroys,detach,detached,detaches,detaching,device,devices,devil,devils,devour,devoured,devouring,devours,dial,dialed,dialing,dials,diamond,diamonds,dice,diced,dices,dicing,did,diet,dieted,dieting,diets,difficult,dig,digging,digs,dim,dimly,dimmer,dimmest,dinner,dinners,direct,directed,directing,directs,dirtier,dirtiest,dirty,disagree,disagreed,disagreeing,disagrees,disassemble,disassembled,disassembles,disassembling,disconnect,disconnected,disconnecting,disconnects,discourage,discouraged,discourages,discouraging,discover,discovered,discovering,discovers,discuss,discussed,discusses,discussing,disease,diseases,disgusting,dishonest,disloyal,display,displayed,displaying,displays,distant,district,districts,dive,dived,dives,divide,divided,divides,dividing,diving,do,doctor,doctors,dodge,dodged,dodges,dodging,does,dog,dogs,doing,dollar,dollars,dolphin,dolphins,domesticated,donate,donated,donates,donating,done,doodle,doodled,doodles,doodling,door,doors,double,doubt,doubted,doubting,doubts,dove,doves,download,downloaded,downloading,downloads,downward,drag,dragged,dragging,dragon,dragons,drags,drain,drained,draining,drains,drama,dramas,draw,drawbridge,drawbridges,drawer,drawers,drawing,drawn,draws,dream,dreamed,dreaming,dreams,dress,dresses,drew,dribble,dribbled,dribbles,dribbling,dried,drier,dries,driest,drill,drills,drip,driped,driping,drips,drive,driven,driver,drivers,drives,driving,drizzle,drizzled,drizzles,drizzling,drop,dropped,dropping,drops,drove,drown,drowned,drowning,drowns,drum,drums,dry,drying,duck,ducks,dug,dull,duller,dullest,dumb,dungeon,dungeons,during,dusk,dusks,dust,dusted,dusting,dusts,dwarf,dwarfs,each,eager,eagle,eagles,ear,early,earn,earned,earning,earns,earring,earrings,ears,earth,earthquake,earthquakes,earths,easier,easiest,easy,echo,echoes,edit,edited,editing,edits,effect,effects,egg,eggs,either,electrician,electricians,element,elements,elephant,elephants,elf,elfs,email,emails,embarrassed,ember,embers,embroider,embroidered,embroidering,embroiders,employee,employees,emptied,empties,empty,emptying,encourage,encouraged,encourages,encouraging,end,ended,ending,endless,endlessly,ends,energetic,engine,engines,enormous,enraged,enter,entered,entering,enters,entirely,envelope,envelopes,equal,era,eras,erect,erected,erecting,erects,escape,escaped,escapes,escaping,especially,essay,essays,estimate,estimated,estimates,estimating,eternal,evaluate,evaluated,evaluates,evaluating,even,evening,evenings,eventually,every,everywhere,exam,exams,exchange,exchanged,exchanges,exchanging,excited,excuse,excused,excuses,excusing,exercise,exercised,exercises,exercising,exhibit,exhibited,exhibiting,exhibits,exit,exited,exiting,exits,expensive,experiment,experimented,experimenting,experiments,explain,explained,explaining,explains,explore,explored,explores,exploring,expose,exposed,exposes,exposing,extraordinary,extremely,eye,eyes,fable,fables,face,faces,fact,factories,factory,facts,faded,fail,failed,failing,fails,failure,failures,faint,fair,fairer,fairest,fairies,fairy,faith,faithful,faiths,fake,fall,fallen,falling,falls,false,families,family,famous,far,farewell,farewells,farmer,farmers,fast,fasted,faster,fastest,fasting,fasts,father,fathers,fear,feared,fearing,fears,feast,feasted,feasting,feasts,feather,feathers,fed,feeble,feed,feeding,feeds,feel,feeling,feels,fell,felt,fence,fences,feral,festival,festivals,fever,fevers,few,fiction,fictions,field,fields,fierce,fight,fighted,fighting,fights,fill,filled,filling,fills,film,filmed,filming,films,final,finally,find,finding,finds,finger,fingers,finish,finished,finishes,finishing,finite,fire,fires,first,fish,fisherman,fishermans,fishes,fix,fixed,fixes,fixing,flag,flags,flame,flames,flash,flashed,flashes,flashing,flashlight,flashlights,flat,flatter,flattest,flawed,flew,flex,flexed,flexes,flexible,flexing,flies,float,floated,floating,floats,flood,flooded,flooding,floods,floor,floors,flour,flours,flow,flowed,flower,flowers,flowing,flown,flows,flu,flus,fly,flying,foal,foals,fog,fogs,fold,folded,folding,folds,follow,followed,following,follows,food,foods,foolish,foot,foots,for,forbid,forbided,forbiding,forbids,forest,forests,forever,forgave,forget,forgets,forgetting,forgive,forgives,forgiving,forgot,forgotten,fork,forks,fortunate,forward,found,fox,foxes,fragile,free,freedom,freedoms,freer,freest,freeze,freezes,freezing,fresh,fresher,freshest,fridge,fridges,fried,friend,friendlier,friendliest,friendly,friends,fries,frieses,frightened,frog,frogs,from,frost,frosts,froze,frozen,fruit,fruits,frustrated,fry,frying,full,fuller,fullest,funeral,funerals,fur,furious,furs,future,futures,gadget,gadgets,gain,gained,gaining,gains,galaxies,galaxy,gale,gales,game,games,garden,gardens,garlic,garlics,garnish,garnished,garnishes,garnishing,gate,gates,gather,gathered,gathering,gathers,gave,gaze,gazed,gazes,gazing,generation,generations,generous,gentle,gentler,gentlest,gently,genuine,geographies,geography,get,gets,getting,ghost,ghosts,giant,giants,gift,gifts,giraffe,giraffes,girl,girls,give,given,gives,giving,glad,gladder,gladdest,glance,glanced,glances,glancing,glass,glasses,glasseses,glide,glided,glides,gliding,gloomy,glove,gloves,glow,glowed,glowing,glows,glue,glued,glues,gluing,go,goes,going,gold,golds,gone,good,goodbye,goodbyes,goose,gooses,gorgeous,gorilla,gorillas,got,gotten,government,governments,governor,governors,grade,graded,grades,grading,gradual,gradually,grammar,grammars,grandfather,grandfathers,grandmother,grandmothers,grape,grapes,grass,grasses,grate,grated,grateful,grates,grating,gravities,gravity,gray,grays,great,greater,greatest,greedy,green,greens,greet,greeted,greeting,greets,grew,grief,griefs,grill,grilled,grilling,grills,grind,grinded,grinding,grinds,grip,gripped,gripping,grips,grow,growing,grown,grows,guard,guarded,guarding,guards,guess,guessed,guesses,guessing,guide,guided,guides,guiding,guilty,guitar,guitars,gulp,gulped,gulping,gulps,gun,guns,gush,gushed,gushes,gushing,gust,gusts,gym,gyms,had,hair,hairs,hallway,hallways,halt,halted,halting,halts,hammer,hammered,hammering,hammers,hand,handle,handles,hands,handsome,hang,hanged,hanging,hangs,happier,happiest,happily,happiness,happinesses,happy,hard,harder,hardest,hardly,harm,harmed,harming,harms,harsh,harsher,harshest,harvest,harvested,harvesting,harvests,has,hat,hate,hated,hates,hating,hats,have,having,hawk,hawks,he,head,headache,headaches,heads,heal,healed,healing,heals,health,healths,hear,heard,hearing,hears,heart,heartbroken,hearts,heat,heats,heaven,heavens,heavier,heaviest,heavy,held,hell,hells,helmet,helmets,help,helped,helping,helps,her,here,hero,heroes,hers,hid,hidden,hide,hides,hiding,high,higher,highest,highway,highways,hill,hills,him,his,histories,history,hold,holding,holds,holiday,holidays,hollow,home,homes,homework,homeworks,honest,honey,honeys,hope,hoped,hopes,hoping,horse,horses,hospital,hospitals,hot,hotter,hottest,hour,hours,house,houses,hover,hovered,hovering,hovers,how,huge,huger,hugest,hum,humble,humbler,humblest,hummed,humming,hums,hungry,hunt,hunted,hunting,hunts,hurricane,hurricanes,hurried,hurries,hurry,hurrying,hurt,hurting,hurts,husband,husbands,hymn,hymns,i,ice,ices,idea,ideas,illness,illnesses,illusion,illusions,imagine,imagined,imagines,imagining,immediately,immense,impatient,impolite,in,incredibly,indifferent,infinite,influence,influenced,influences,influencing,initial,injure,injured,injures,injuring,ink,inks,innocent,insecure,inspire,inspired,inspires,inspiring,install,installed,installing,installs,instantly,instrument,instruments,insult,insulted,insulting,insults,intelligent,intense,intern,internet,internets,interns,into,introduce,introduced,introduces,introducing,invent,invented,inventing,invention,inventions,invents,inward,irritated,is,island,islands,isolated,it,its,jacket,jackets,jam,jams,job,jobs,join,joined,joining,joins,journey,journeys,joy,joyful,joys,judge,judged,judges,judging,juice,juices,jump,jumped,jumping,jumps,juries,jury,just,justice,justices,keep,keeping,keeps,kept,key,keys,kick,kicked,kicking,kicks,kidney,kidneys,kind,kinder,kindest,king,kings,kitchen,kitchens,kitten,kittens,knew,knife,knifes,knit,knits,knitted,knitting,knot,knoted,knoting,knots,know,knowing,known,knows,koala,koalas,laboratories,laboratory,lace,laced,laces,lacing,ladder,ladders,lain,lake,lakes,lamp,lamps,large,larger,largest,last,late,laugh,laughed,laughing,laughs,laughter,laughters,launch,launched,launches,launching,law,laws,lawyer,lawyers,lay,lazier,laziest,lazy,lead,leader,leaders,leading,leads,leaf,leafs,leak,leaked,leaking,leaks,learn,learned,learning,learns,least,leather,leathers,leave,leaves,leaving,lecture,lectures,led,left,leg,legend,legends,legs,lemon,lemons,lend,lended,lending,lends,lengthy,lenient,less,lesson,lessons,let,lets,letter,letters,letting,lettuce,lettuces,lie,lies,lift,lifted,lifting,lifts,light,lighter,lightest,lightning,lightnings,lights,like,liked,likes,liking,lime,limes,lion,lions,lip,lips,listen,listened,listening,listens,liver,livers,livid,lizard,lizards,lobster,lobsters,lock,locks,lonelier,loneliest,lonely,look,looked,looking,looks,loose,looser,loosest,lose,loses,losing,loss,losses,lost,loud,louder,loudest,loudly,love,loved,lovelier,loveliest,lovely,lover,lovers,loves,loving,low,lower,lowered,lowering,lowers,lowest,loyal,loyalties,loyalty,lucky,lunch,lunches,lung,lungs,lying,machine,machines,made,mail,mailed,mailing,mails,maintain,maintained,maintaining,maintains,make,makes,making,man,manage,managed,manages,managing,mans,many,map,maple,maples,maps,march,marched,marches,marching,marinate,marinated,marinates,marinating,market,markets,mash,mashed,mashes,mashing,massive,match,matches,math,maths,may,maybe,mayor,mayors,me,meadow,meadows,meal,meals,mean,meaner,meanest,meaning,means,meant,measure,measured,measures,measuring,meat,meats,mechanic,mechanics,medicine,medicines,meet,meeting,meetings,meets,melancholy,melodies,melody,melon,melons,melt,melted,melting,melts,memories,memorize,memorized,memorizes,memorizing,memory,mention,mentioned,mentioning,mentions,merely,merge,merged,merges,merging,message,messaged,messages,messaging,messy,met,metal,metals,meteor,meteors,microphone,microphones,midnight,midnights,might,mighty,mild,milder,mildest,milk,milks,mind,minds,mine,miner,miners,miniature,minute,minutes,mirror,mirrors,miserable,mislead,misleaded,misleading,misleads,mist,mists,mix,mixed,mixes,mixing,moat,moats,modern,modest,mold,molded,molding,molds,molecule,molecules,moment,moments,money,moneys,monk,monkey,monkeys,monks,month,months,moon,moons,mop,mopped,mopping,mops,more,morning,mornings,mosque,mosques,most,moth,mother,mothers,moths,motivate,motivated,motivates,motivating,mountain,mountains,mourning,mournings,mouth,mouths,move,moved,moves,moving,much,multiple,multiplied,multiplies,multiply,multiplying,munch,munched,munches,munching,muscle,muscles,music,musics,must,my,mysteries,mysterious,mystery,myth,myths,nail,nailed,nailing,nails,nap,napped,napping,naps,narrow,nation,nations,near,nearby,nearly,neat,neater,neatest,necklace,necklaces,need,needed,needing,needs,neighbor,neighborhood,neighborhoods,neighbors,neither,nerve,nerves,nervous,nervously,nest,nests,never,new,newer,newest,next,nibble,nibbled,nibbles,nibbling,nice,nicer,nicest,night,nights,no,noble,noise,noises,noisier,noisiest,noisy,none,noodle,noodles,noon,noons,nor,normally,nose,noses,not,notable,note,notes,notice,noticed,notices,noticing,novel,novels,now,nowhere,number,numbers,nun,nuns,nurse,nurses,oak,oaks,oath,oaths,oats,oatses,obey,obeyed,obeying,obeys,obscure,observe,observed,observes,observing,obvious,obviously,occupied,ocean,oceans,octopus,octopuses,offend,offended,offending,offends,offer,offered,offering,offers,office,offices,often,old,older,oldest,on,once,onion,onions,only,onto,open,opened,opening,opens,opinion,opinions,oppose,opposed,opposes,opposing,or,orange,oranges,orbit,orbits,order,ordered,ordering,orders,ordinary,organize,organized,organizes,organizing,ornament,ornamented,ornamenting,ornaments,other,our,ours,outdated,outward,oven,ovens,over,overflow,overflowed,overflowing,overflows,owe,owed,owes,owing,owl,owls,own,pace,paced,paces,pacing,package,packages,page,pages,paid,pain,pains,paint,painted,painting,paints,palm,palms,pan,panda,pandas,panicked,pans,pants,pantses,paper,papers,paradise,paradises,paragraph,paragraphs,parcel,parcels,parrot,parrots,particularly,partly,partner,partners,pass,passed,passenger,passengers,passes,passing,passive,passport,passports,past,pasta,pastas,pasts,path,paths,patient,pause,paused,pauses,pausing,paw,paws,pay,paying,pays,peace,peaceful,peaces,peach,peaches,pear,pearl,pearls,pears,pedal,pedals,peek,peeked,peeking,peeks,peel,peeled,peeling,peels,peer,peered,peering,peers,pen,pencil,pencils,pens,pepper,peppers,perfect,perform,performed,performing,performs,perhaps,permanent,permit,permits,permitted,permitting,persuade,persuaded,persuades,persuading,phone,phones,photo,photoes,photograph,photographed,photographing,photographs,piano,pianoes,pick,picked,picking,picks,picture,pictured,pictures,picturing,pigeon,pigeons,pill,pills,pilot,pilots,pin,pine,pines,pink,pinks,pinned,pinning,pins,pizza,pizzas,plain,plainer,plainest,plains,plan,plane,planes,planet,planets,planned,planning,plans,plant,planted,planting,plants,plastic,plastics,plate,plates,play,played,player,players,playing,plays,pleased,pluck,plucked,plucking,plucks,plug,plugs,plum,plumber,plumbers,plums,plunge,plunged,plunges,plunging,pocket,pockets,poem,poems,poet,poets,polish,polished,polishes,polishing,polite,poor,poorer,poorest,porch,porches,possibly,post,posted,posting,posts,pot,potato,potatoes,pots,pound,pounded,pounding,pounds,pour,poured,pouring,pours,powerful,practice,practiced,practices,practicing,prairie,prairies,praise,praised,praises,praising,prayer,prayers,predict,predicted,predicting,predicts,present,presented,presenting,presents,preserve,preserved,preserves,preserving,president,presidents,press,pressed,presses,pressing,pretend,pretended,pretending,pretends,prettier,prettiest,pretty,prevent,prevented,preventing,prevents,previous,price,prices,priest,priests,prince,princes,princess,princesses,print,printed,printing,prints,prison,prisons,private,prize,prizes,probably,problem,problems,proceed,proceeded,proceeding,proceeds,profit,profits,program,programmed,programming,programs,project,projects,promise,promised,promises,promising,protect,protected,protecting,protects,proud,prouder,proudest,public,publish,published,publishes,publishing,puddle,puddles,pull,pulled,pulling,pulls,punch,punched,punches,punching,punishment,punishments,puppies,puppy,purple,purples,purse,purses,pursue,pursued,pursues,pursuing,push,pushed,pushes,pushing,puzzle,puzzles,queen,queens,question,questions,quick,quickly,quiet,quieter,quietest,quietly,quiver,quivers,quiz,quized,quizes,quizing,quote,quoted,quotes,quoting,rabbit,rabbits,race,raced,races,racing,rage,rages,rain,rains,raise,raised,raises,raising,rake,rakes,ramble,rambled,rambles,rambling,ran,rang,rare,rarely,rarer,rarest,raw,reaction,reactions,read,reader,readers,reading,reads,real,realities,reality,realize,realized,realizes,realizing,really,reason,reasons,recall,recalled,recalling,recalls,receive,received,receives,receiving,recite,recited,recites,reciting,recommend,recommended,recommending,recommends,record,recorded,recording,records,red,reds,referee,refereed,refereeing,referees,refuse,refused,refuses,refusing,region,regions,rehearse,rehearsed,rehearses,rehearsing,reject,rejected,rejecting,rejects,relax,relaxed,relaxes,relaxing,release,released,releases,releasing,reluctant,remember,remembered,remembering,remembers,repair,repaired,repairing,repairs,repeat,repeated,repeating,repeats,replied,replies,reply,replying,report,reports,request,requested,requesting,requests,rescue,rescued,rescues,rescuing,resentful,resist,resisted,resisting,resists,rest,rested,resting,restless,rests,result,results,resume,resumed,resumes,resuming,retreat,retreated,retreating,retreats,return,returned,returning,returns,reveal,revealed,revealing,reveals,review,reviewed,reviewing,reviews,revise,revised,revises,revising,rhythm,rhythms,rib,ribs,rice,rices,rich,richer,richest,ridden,riddle,riddles,ride,rides,riding,right,rights,rigid,ring,ringing,rings,rinse,rinsed,rinses,rinsing,ripe,rise,risen,rises,rising,risky,river,rivers,road,roads,roam,roamed,roaming,roams,roast,roasted,roasting,roasts,rob,robbed,robbing,robot,robots,robs,rock,rocket,rockets,rocks,rode,roll,rolled,rolling,rolls,roof,roofs,room,rooms,rooster,roosters,root,roots,rope,ropes,rose,rotate,rotated,rotates,rotating,rotten,rough,rougher,roughest,roughly,round,rounder,roundest,rude,ruin,ruined,ruining,ruins,rule,rules,run,rung,running,runs,rush,rushed,rushes,rushing,sad,sadder,saddest,sadly,sadness,sadnesses,safe,safer,safest,said,sailor,sailors,salad,salads,salaries,salary,salt,salted,salting,salts,salty,same,sample,sampled,samples,sampling,sand,sands,sandwich,sandwiches,sang,sat,satellite,satellites,satisfied,savage,save,saved,saves,saving,savor,savored,savoring,savors,saw,saws,say,saying,says,scan,scanned,scanning,scans,scared,scarf,scarfs,scepter,scepters,school,schools,science,sciences,score,scored,scores,scoring,scream,screamed,screaming,screams,screen,screens,screw,screwed,screwing,screws,scripture,scriptures,scroll,scrolled,scrolling,scrolls,sculpt,sculpted,sculpting,sculpts,sea,search,searched,searches,searching,seas,season,seasoned,seasoning,seasons,second,seconds,secret,secrets,see,seed,seeds,seeing,seek,seeked,seeking,seeks,seemingly,seen,seep,seeped,seeping,seeps,sees,selfish,sell,selling,sells,senator,senators,send,sending,sends,sent,sentence,sentences,separate,separated,separates,separating,serve,served,serves,serving,set,sets,setting,several,severe,sew,sewed,sewing,sews,shade,shades,shadow,shadows,shadowy,shake,shaken,shakes,shaking,shall,shallow,shape,shaped,shapes,shaping,share,shared,shares,sharing,shark,sharks,sharp,sharper,sharpest,shattered,she,shelf,shelfs,shield,shields,shier,shiest,shine,shines,shining,shiny,ship,ships,shirt,shirts,shoe,shoes,shone,shook,shoot,shooting,shoots,shop,shops,shore,shores,short,shorter,shortest,shot,should,shout,shouted,shouting,shouts,shove,shoved,shovel,shovels,shoves,shoving,show,showed,showing,shows,shrimp,shrimps,shrine,shrines,shy,silence,silences,silent,silently,silk,silks,silver,silvers,simmer,simmered,simmering,simmers,simple,simpler,simplest,simply,since,sincere,sing,singer,singers,singing,single,sings,sink,sinked,sinking,sinks,sip,sipped,sipping,sips,sister,sisters,sit,sits,sitting,sizzle,sizzled,sizzles,sizzling,sketch,sketched,sketches,sketching,skies,skin,skins,skirt,skirts,skull,skulls,sky,sleep,sleeping,sleeps,sleepy,slept,slice,sliced,slices,slicing,slither,slithered,slithering,slithers,sloppy,slow,slower,slowest,slowly,sluggish,small,smaller,smallest,smart,smile,smiled,smiles,smiling,smoke,smokes,smooth,smoother,smoothest,snail,snails,snake,snakes,snap,snapped,snapping,snaps,sneak,sneaked,sneaking,sneaks,snow,snows,snug,so,soak,soaked,soaking,soaks,soar,soared,soaring,soars,sock,socket,sockets,socks,soft,softer,softest,softly,sold,soldier,soldiers,solid,solution,solutions,some,sometimes,somewhere,son,song,songs,sons,sorrow,sorrowful,sorrows,sort,sorted,sorting,sorts,soul,souls,sound,sounds,soup,soups,sour,space,spaces,spark,sparkle,sparkled,sparkles,sparkling,sparks,sparrow,sparrows,speak,speaker,speakers,speaking,speaks,spear,spears,special,speedy,spelling,spellings,spend,spending,spends,spent,spice,spiced,spices,spicing,spicy,spider,spiders,spill,spilled,spilling,spills,spin,spine,spines,spinning,spins,spirit,spirits,splash,splashed,splashes,splashing,split,splits,splitting,spoiled,spoke,spoken,spoon,spoons,sport,sports,spray,sprayed,spraying,sprays,spring,springs,sprinkle,sprinkled,sprinkles,sprinkling,spun,square,squash,squashed,squashes,squashing,squeeze,squeezed,squeezes,squeezing,stage,stages,stair,stairs,stale,staler,stalest,stamp,stamps,stand,standing,stands,star,stare,stared,stares,staring,stars,start,started,starting,starts,starve,starved,starves,starving,state,stated,states,stating,stay,stayed,staying,stays,steady,steal,stealing,steals,steam,steamed,steaming,steams,stew,stews,still,stingy,stir,stirred,stirring,stirs,stitch,stitched,stitches,stitching,stole,stolen,stomach,stomaches,stone,stones,stood,stop,stopped,stopping,stops,store,stores,stories,storm,storms,story,stove,stoves,straight,straightforward,stranger,strangers,stream,streamed,streaming,streams,street,streets,stretch,stretched,stretches,stretching,strict,stricter,strictest,stride,strided,strides,striding,stroll,strolled,strolling,strolls,strong,stronger,strongest,struggle,struggles,student,students,studied,studies,study,studying,stunning,stupid,sturdy,subtract,subtracted,subtracting,subtracts,succeed,succeeded,succeeding,succeeds,success,successes,such,sudden,suddenly,sugar,sugars,suggest,suggested,suggesting,suggests,suitcase,suitcases,summer,summers,sun,sung,sunrise,sunrises,suns,sunset,sunsets,support,supported,supporting,supports,surely,surprise,surprises,swallow,swallowed,swallowing,swallows,swam,swan,swans,sweep,sweeping,sweeps,sweet,sweeten,sweetened,sweetening,sweetens,sweeter,sweetest,sweetly,swept,swift,swim,swimming,swims,swipe,swiped,swipes,swiping,switch,switches,sword,swords,synthetic,table,tables,tablet,tablets,tackle,tackled,tackles,tackling,tail,tails,take,taken,takes,taking,tale,tales,talk,talked,talking,talks,tall,taller,tallest,tame,tamer,tamest,tap,tape,taped,tapes,taping,tapped,tapping,taps,taste,tasted,tastes,tasting,tasty,tea,teach,teached,teacher,teachers,teaches,teaching,team,teams,tear,tears,teas,telescope,telescopes,tell,telling,tells,temperature,temperatures,temple,temples,temporary,tense,terrible,terrified,test,tested,testing,tests,text,texted,texting,texts,thankful,that,the,their,theirs,them,then,there,these,they,thick,thicker,thickest,thin,think,thinking,thinks,thinner,thinnest,thirsty,this,those,though,thought,thoughts,threaten,threatened,threatening,threatens,threw,thrilled,throne,thrones,through,throw,throwing,thrown,throws,thunder,thunders,ticket,tickets,tide,tides,tidier,tidiest,tidy,tie,tied,ties,tiger,tigers,tight,tighter,tightest,time,timeless,times,timid,tiny,tiptoe,tiptoed,tiptoeing,tiptoes,tire,tired,tires,title,titles,toast,toasted,toasting,toasts,today,together,told,tomato,tomatoes,tomorrow,tongue,tongues,tonight,took,tool,tools,tooth,tooths,torch,torches,tornado,tornadoes,totally,tour,toured,touring,tours,toward,tower,towers,town,towns,trace,traced,traces,tracing,track,tracked,tracking,tracks,trade,traded,trades,trading,train,trained,training,trains,trapped,travel,travelled,travelling,travels,treat,treated,treaties,treating,treatment,treatments,treats,treaty,tree,trees,tremble,trembled,trembles,trembling,trickle,trickled,trickles,trickling,tried,tries,trip,triple,trips,triumph,triumphs,trophies,trophy,true,truer,truest,truly,trunk,trunks,trust,trusted,trusting,trusts,truth,truths,try,trying,turn,turned,turning,turns,turtle,turtles,twice,twist,twisted,twisting,twists,tying,type,typed,types,typically,typing,uglier,ugliest,ugly,unbalanced,uncle,unclear,uncles,uncomfortable,uncover,uncovered,uncovering,uncovers,under,understand,understanded,understanding,understands,uneasy,unequal,uneven,unfair,unfaithful,unfortunate,unfriendly,ungrateful,unhappy,unique,unite,united,unites,uniting,universe,universes,universities,university,unjust,unknown,unless,unlucky,unstable,untamed,until,unveil,unveiled,unveiling,unveils,unwilling,update,updated,updates,updating,upgrade,upgraded,upgrades,upgrading,upload,uploaded,uploading,uploads,upon,upward,us,usually,vacant,vague,vaguer,vaguest,vain,valley,valleys,valuable,value,values,vegetable,vegetables,vein,veins,verdict,verdicts,vibrate,vibrated,vibrates,vibrating,victories,victory,video,videoes,village,villages,villain,villains,vine,vines,vintage,violin,violins,virus,viruses,visa,visas,visible,visit,visited,visiting,visits,visualize,visualized,visualizes,visualizing,vivid,vocabularies,vocabulary,voice,voices,vow,vows,voyage,voyages,wait,waited,waiting,waits,wake,wakes,waking,walk,walked,walking,walks,wall,wallet,wallets,walls,wander,wandered,wandering,wanders,want,wanted,wanting,wants,war,warehouse,warehouses,warm,warmed,warmer,warmest,warming,warmly,warms,warmth,warmths,warn,warned,warning,warns,wars,was,wash,washed,washes,washing,waste,wasted,wastes,wasting,watch,watched,watches,watching,water,waterfall,waterfalls,waters,wave,waves,we,weak,weaker,weakest,wealthy,weapon,weapons,wear,wearing,wears,weather,weathers,weave,weaved,weaves,weaving,wedding,weddings,week,weeks,weep,weeping,weeps,weigh,weighed,weighing,weighs,weightless,welcome,welcomed,welcomes,welcoming,went,wept,were,wet,wetter,wettest,whale,whales,what,wheat,wheats,wheel,wheelchair,wheelchairs,wheels,when,where,while,whisper,whispered,whispering,whispers,whistle,whistled,whistles,whistling,white,whites,who,whole,why,wide,wider,widest,wife,wifes,wild,wilder,wildest,will,willing,willow,willows,win,wind,window,windows,winds,wine,wines,wing,wings,winning,wins,winter,winters,wipe,wiped,wipes,wiping,wire,wires,wise,wiser,wisest,wish,wished,wishes,wishing,witch,witches,with,withdraw,withdrawed,withdrawing,withdraws,within,without,witness,witnesses,wizard,wizards,woke,woken,wolf,wolfs,woman,womans,won,wonder,wondered,wonderful,wondering,wonders,wood,woods,wool,wools,word,words,wore,work,worked,worker,workers,working,works,worm,worms,worn,worried,worries,worry,worrying,worthless,would,wrap,wrapped,wrapping,wraps,wrench,wrenches,wring,wringed,wringing,wrings,write,writer,writers,writes,writing,written,wrote,yard,yards,yawn,yawned,yawning,yawns,year,years,yellow,yellows,yes,yesterday,yet,yogurt,yogurts,you,young,younger,youngest,your,yours,zebra,zebras,zip,zipped,zipper,zippers,zipping,zips';
 
   outputScrollRef = React.createRef();
-  state = {tab:'home',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false};
+  waveformCanvasRef = React.createRef();
+  state = {tab:'home',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,
+    practiceMode:'switch',practiceScore:0,practiceStreak:0,
+    practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
+    practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
+    practiceScaleName:'Ionian (Major)',practiceScaleQuestion:null,practiceScaleFeedback:null,
+    practiceMemoryPhase:'idle',practiceMemorySeq:[],practiceMemoryPool:[],practiceMemoryPicked:[],
+    renamingRecId:null,renameDraft:'',currentSongArtist:'',currentSongNotes:'',pdfExporting:false,pdfError:'',showVoiceLeading:false,expandedMoodStyle:null};
 
   componentDidMount(){
     let saved=null;
@@ -973,6 +1249,8 @@ class Component extends DCLogic {
     });
     if(typeof patch.currentSongName!=='string') patch.currentSongName='';
     if(typeof patch.currentSongTags!=='string') patch.currentSongTags='';
+    if(typeof patch.currentSongArtist!=='string') patch.currentSongArtist='';
+    if(typeof patch.currentSongNotes!=='string') patch.currentSongNotes='';
     patch.songSearchQuery='';
     let cp=Number(patch.capo); if(!isFinite(cp)||cp<0||cp>11) cp=0; patch.capo=cp;
     if(!Array.isArray(patch.tabGrids)||!patch.tabGrids.length) patch.tabGrids=[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}];
@@ -984,8 +1262,8 @@ class Component extends DCLogic {
     this.setState(patch);
   }
   componentDidUpdate(){
-    try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,scrollSpeed}=this.state;
-      localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,scrollSpeed}));
+    try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}=this.state;
+      localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}));
     }catch(e){}
   }
   componentWillUnmount(){
@@ -993,9 +1271,24 @@ class Component extends DCLogic {
     if(this.recTimer) clearInterval(this.recTimer);
     if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive'){ try{ this.mediaRecorder.stop(); }catch(e){} }
     if(this.recStream){ this.recStream.getTracks().forEach(t=>t.stop()); }
+    if(this.switchTimer) clearInterval(this.switchTimer);
+    if(this.memoryTimer) clearTimeout(this.memoryTimer);
+    this.stopWaveform();
   }
 
   pcOf(name){ let pc=this.LPC[name[0]]; for(let i=1;i<name.length;i++){ if(name[i]==='#')pc++; else if(name[i]==='b')pc--; } return ((pc%12)+12)%12; }
+  sharedTones(pcsA,pcsB){ const setB=new Set(pcsB||[]); return (pcsA||[]).filter(pc=>setB.has(pc)); }
+  voiceLeadingFor(pcsA,pcsB){
+    const remaining=(pcsB||[]).slice();
+    return (pcsA||[]).map(a=>{
+      if(!remaining.length) return null;
+      let bestIdx=0, bestDist=99;
+      remaining.forEach((b,i)=>{ const d=Math.min(Math.abs(a-b),12-Math.abs(a-b)); if(d<bestDist){ bestDist=d; bestIdx=i; } });
+      const b=remaining.splice(bestIdx,1)[0];
+      const kind=bestDist===0?'common':(bestDist<=2?'step':'leap');
+      return {fromPc:a,toPc:b,distance:bestDist,kind};
+    }).filter(Boolean);
+  }
   spell(root,semi,deg){
     if(typeof root!=='string'||!root.length||this.LETTERS.indexOf(root[0])<0) root='C';
     const rl=this.LETTERS.indexOf(root[0]);
@@ -1183,7 +1476,7 @@ class Component extends DCLogic {
     const estSeconds=wordCount?Math.round(syllableCount*60/(1.5*bpmSafe)):0;
     const estSingingDuration=Math.floor(estSeconds/60)+':'+String(estSeconds%60).padStart(2,'0');
     return {wordCount,uniqueWordCount,syllableCount,avgLineLength,repeatedWords,hasRepeatedWords:repeatedWords.length>0,
-      repeatedPhrases,hasRepeatedPhrases:repeatedPhrases.length>0,rhymeDensity,estSingingDuration,
+      repeatedPhrases,hasRepeatedPhrases:repeatedPhrases.length>0,rhymeDensity,estSingingDuration,estSingingDurationSeconds:estSeconds,
       chordFrequency,hasChordFrequency:chordFrequency.length>0,mostCommonChord,keyChanges:keyChanges||1,
       hasAnyContent:wordCount>0};
   }
@@ -1292,7 +1585,7 @@ class Component extends DCLogic {
       const name=(st.currentSongName||'').trim()||'Untitled';
       const id=st.currentSongId||this.uidSong();
       const keyHistory=(st.keyHistory&&st.keyHistory.length)?st.keyHistory:[st.keyRoot+' '+st.keyMode];
-      const entry={id,name,songText:st.songText,chordMap:st.chordMap,tabGrids:st.tabGrids,capo:st.capo,keyRoot:st.keyRoot,keyMode:st.keyMode,keyHistory,bpm:st.bpm,tsIndex:st.tsIndex,sub:st.sub,tags:this.parseTagsInput(st.currentSongTags),savedAt:Date.now()};
+      const entry={id,name,songText:st.songText,chordMap:st.chordMap,tabGrids:st.tabGrids,capo:st.capo,keyRoot:st.keyRoot,keyMode:st.keyMode,keyHistory,bpm:st.bpm,tsIndex:st.tsIndex,sub:st.sub,tags:this.parseTagsInput(st.currentSongTags),artist:(st.currentSongArtist||'').trim(),notes:st.currentSongNotes||'',savedAt:Date.now()};
       const exists=(st.savedSongs||[]).some(s=>s.id===id);
       const savedSongs=exists?st.savedSongs.map(s=>s.id===id?entry:s):[...(st.savedSongs||[]),entry];
       return {savedSongs,currentSongId:id,currentSongName:name};
@@ -1305,10 +1598,10 @@ class Component extends DCLogic {
     let tsIndex=Number(s.tsIndex); if(!isFinite(tsIndex)||tsIndex<0||tsIndex>=this.TIME_SIGS.length) tsIndex=this.state.tsIndex;
     const sub=typeof s.sub==='boolean'?s.sub:this.state.sub;
     const keyHistory=(s.keyHistory&&s.keyHistory.length)?s.keyHistory:[(s.keyRoot||this.state.keyRoot)+' '+(s.keyMode||this.state.keyMode)];
-    this.setState({songText:s.songText||'',chordMap:s.chordMap||{},tabGrids:(s.tabGrids&&s.tabGrids.length)?s.tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:s.capo||0,keyRoot:s.keyRoot||this.state.keyRoot,keyMode:s.keyMode||this.state.keyMode,keyHistory,bpm,tsIndex,sub,currentSongId:s.id,currentSongName:s.name,currentSongTags:(s.tags||[]).join(', '),activeChordSlot:null});
+    this.setState({songText:s.songText||'',chordMap:s.chordMap||{},tabGrids:(s.tabGrids&&s.tabGrids.length)?s.tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:s.capo||0,keyRoot:s.keyRoot||this.state.keyRoot,keyMode:s.keyMode||this.state.keyMode,keyHistory,bpm,tsIndex,sub,currentSongId:s.id,currentSongName:s.name,currentSongTags:(s.tags||[]).join(', '),currentSongArtist:s.artist||'',currentSongNotes:s.notes||'',activeChordSlot:null});
   }
   newSong(){
-    this.setState({songText:'',chordMap:{},tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:0,keyHistory:[],currentSongId:null,currentSongName:'',currentSongTags:'',activeChordSlot:null});
+    this.setState({songText:'',chordMap:{},tabGrids:[{id:this.uidTab(),grid:Array(6).fill(0).map(()=>Array(16).fill(''))}],capo:0,keyHistory:[],currentSongId:null,currentSongName:'',currentSongTags:'',currentSongArtist:'',currentSongNotes:'',activeChordSlot:null});
   }
   deleteSong(id){
     this.setState(st=>({savedSongs:(st.savedSongs||[]).filter(s=>s.id!==id),currentSongId:st.currentSongId===id?null:st.currentSongId,currentSongName:st.currentSongId===id?'':st.currentSongName}));
@@ -1350,59 +1643,197 @@ class Component extends DCLogic {
       this.setState({isRecording:true,recSeconds:0});
       this.recTimer=setInterval(()=>{ this.setState({recSeconds:Math.floor((Date.now()-this.recStartTs)/1000)}); },250);
       this.mediaRecorder.start();
+      try{
+        this.ensureAudio();
+        const src=this.ac.createMediaStreamSource(stream);
+        const analyser=this.ac.createAnalyser();
+        analyser.fftSize=256;
+        src.connect(analyser);
+        this.waveformSrc=src; this.waveformAnalyser=analyser;
+        const dataArray=new Uint8Array(analyser.frequencyBinCount);
+        const draw=()=>{
+          const canvas=this.waveformCanvasRef.current;
+          if(canvas&&this.waveformAnalyser){
+            this.waveformAnalyser.getByteTimeDomainData(dataArray);
+            const ctx=canvas.getContext('2d'); const w=canvas.width, h=canvas.height;
+            ctx.clearRect(0,0,w,h);
+            ctx.beginPath(); ctx.strokeStyle='#f0b429'; ctx.lineWidth=1.5;
+            const slice=w/dataArray.length; let x=0;
+            for(let i=0;i<dataArray.length;i++){ const v=dataArray[i]/128.0; const y=(v*h)/2; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); x+=slice; }
+            ctx.stroke();
+          }
+          this.waveformRaf=requestAnimationFrame(draw);
+        };
+        draw();
+      }catch(e){}
     }catch(e){
       this.setState({recordError:'Microphone access was blocked or unavailable.'});
     }
   }
+  stopWaveform(){
+    if(this.waveformRaf){ cancelAnimationFrame(this.waveformRaf); this.waveformRaf=null; }
+    if(this.waveformAnalyser){ try{ this.waveformAnalyser.disconnect(); }catch(e){} this.waveformAnalyser=null; }
+    if(this.waveformSrc){ try{ this.waveformSrc.disconnect(); }catch(e){} this.waveformSrc=null; }
+  }
   stopRecording(){
     if(this.recTimer){ clearInterval(this.recTimer); this.recTimer=null; }
+    this.stopWaveform();
     this.setState({isRecording:false});
     if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive') this.mediaRecorder.stop();
+  }
+  renameRecording(id,name){
+    this.setState(st=>{ const recordings=(st.recordings||[]).map(r=>r.id===id?{...r,name}:r); this.persistRecordings(recordings); return {recordings}; });
   }
   toggleRecording(){ if(this.state.isRecording) this.stopRecording(); else this.startRecording(); }
   deleteRecording(id){
     this.setState(st=>{ const recordings=(st.recordings||[]).filter(r=>r.id!==id); this.persistRecordings(recordings); return {recordings}; });
   }
   async saveRecordingToDevice(entry){
+    let blob, ext, safeName;
     try{
       const res=await fetch(entry.dataUrl);
-      const blob=await res.blob();
-      const ext=(blob.type||'').includes('mp4')?'m4a':(blob.type||'').includes('webm')?'webm':'m4a';
-      const safeName=(entry.name||'Voice memo').replace(/[^\w\- ]+/g,'').trim()||'Voice memo';
+      blob=await res.blob();
+      ext=(blob.type||'').includes('mp4')?'m4a':(blob.type||'').includes('webm')?'webm':'m4a';
+      safeName=(entry.name||'Voice memo').replace(/[^\w\- ]+/g,'').trim()||'Voice memo';
+    }catch(e){
+      this.setState({recordError:'Couldn\'t save that recording to your device.'});
+      return;
+    }
+    try{
       const file=new File([blob],safeName+'.'+ext,{type:blob.type||'audio/mp4'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:safeName});
         return;
       }
+    }catch(e){
+      if(e&&e.name==='AbortError') return;
+      // sharing failed for a non-abort reason — fall through to a direct download instead
+    }
+    try{
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a'); a.href=url; a.download=safeName+'.'+ext; a.rel='noopener';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url),10000);
     }catch(e){
-      if(e&&e.name==='AbortError') return;
       this.setState({recordError:'Couldn\'t save that recording to your device.'});
     }
   }
 
+  loadJsPdf(){
+    if(window.jspdf&&window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if(this._jspdfReady) return this._jspdfReady;
+    this._jspdfReady=new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js';
+      s.crossOrigin='anonymous';
+      s.onload=()=>{ if(window.jspdf&&window.jspdf.jsPDF) resolve(window.jspdf.jsPDF); else reject(new Error('jsPDF failed to load')); };
+      s.onerror=()=>reject(new Error('jsPDF failed to load'));
+      document.head.appendChild(s);
+    });
+    return this._jspdfReady;
+  }
+  async exportSongPdf(entry){
+    this.setState({pdfError:'',pdfExporting:true});
+    try{
+      const jsPDFCtor=await this.loadJsPdf();
+      const doc=new jsPDFCtor({unit:'pt',format:'letter'});
+      const pageW=doc.internal.pageSize.getWidth(), pageH=doc.internal.pageSize.getHeight();
+      const marginX=54, marginTop=60, marginBottom=54;
+      let y=marginTop, pageNum=1;
+      const addFooter=()=>{ doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(150); doc.text(String(pageNum),pageW/2,pageH-28,{align:'center'}); pageNum++; };
+      const ensureRoom=(lineH)=>{ if(y+lineH>pageH-marginBottom){ addFooter(); doc.addPage(); y=marginTop; } };
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(20,20,20);
+      doc.text(entry.name||'Untitled',marginX,y); y+=26;
+      if(entry.artist){ doc.setFont('helvetica','normal'); doc.setFontSize(13); doc.setTextColor(90); doc.text(entry.artist,marginX,y); y+=20; }
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120);
+      const capoTxt=entry.capo>0?(' · Capo '+entry.capo):'';
+      const meta=(entry.keyRoot||'')+' '+(entry.keyMode==='major'?'major':'minor')+' · '+(entry.bpm||100)+' BPM'+capoTxt;
+      doc.text(meta,marginX,y); y+=18;
+      doc.setDrawColor(220); doc.line(marginX,y,pageW-marginX,y); y+=20;
+
+      const view=this.buildOutputView(entry);
+      view.lineViews.forEach(ln=>{
+        if(ln.isLabel){
+          ensureRoom(22);
+          doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(180,140,30);
+          doc.text((ln.labelText||'').toUpperCase(),marginX,y); y+=18;
+        } else if(ln.isLyricLine){
+          ensureRoom(30);
+          let x=marginX; const chordY=y, wordY=y+13;
+          (ln.wordViews||[]).forEach(w=>{
+            doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(180,140,30);
+            if(w.chordName) doc.text(w.chordName,x,chordY);
+            const chordW=w.chordName?doc.getTextWidth(w.chordName):0;
+            doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(20,20,20);
+            doc.text(w.word,x,wordY);
+            const wordW=doc.getTextWidth(w.word);
+            x+=Math.max(wordW,chordW)+8;
+          });
+          y+=26;
+        }
+      });
+
+      if(view.tabHasInput){
+        ensureRoom(26); y+=8;
+        doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(20,20,20); doc.text('Tab',marginX,y); y+=16;
+        doc.setFont('courier','normal'); doc.setFontSize(9); doc.setTextColor(60);
+        view.outputTabBlocks.forEach(tb=>{
+          tb.gridRows.forEach(row=>{
+            ensureRoom(12);
+            const line=row.label+' |'+row.cells.map(c=>(c.val!==''?String(c.val):'-').padStart(2,'-')).join('-')+'|';
+            doc.text(line,marginX,y); y+=12;
+          });
+          y+=10;
+        });
+      }
+
+      if(entry.notes){
+        ensureRoom(26); y+=8;
+        doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(20,20,20); doc.text('Notes',marginX,y); y+=16;
+        doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(60);
+        const noteLines=doc.splitTextToSize(entry.notes,pageW-marginX*2);
+        noteLines.forEach(l=>{ ensureRoom(14); doc.text(l,marginX,y); y+=14; });
+      }
+
+      addFooter();
+      const dateStr=new Date().toISOString().slice(0,10);
+      const filename=(entry.name||'song').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'-'+dateStr+'.pdf';
+      doc.save(filename);
+      this.setState({pdfExporting:false});
+    }catch(e){
+      this.setState({pdfExporting:false,pdfError:'Couldn\'t generate the PDF — check your connection and try again.'});
+    }
+  }
   async exportBackup(){
+    let blob, filename;
     try{
       let mtsa_v3={}; try{ mtsa_v3=JSON.parse(localStorage.getItem('mtsa_v3')||'{}'); }catch(e){}
       let mtsa_v3_recordings=[]; try{ mtsa_v3_recordings=JSON.parse(localStorage.getItem('mtsa_v3_recordings')||'[]'); }catch(e){}
       const payload={version:1,exportedAt:new Date().toISOString(),mtsa_v3,mtsa_v3_recordings};
       const dateStr=new Date().toISOString().slice(0,10);
-      const filename='musicman-backup-'+dateStr+'.json';
-      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      filename='musicman-backup-'+dateStr+'.json';
+      blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    }catch(e){
+      this.setState({backupError:'Couldn\'t export your backup.'});
+      return;
+    }
+    try{
       const file=new File([blob],filename,{type:'application/json'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:filename});
         return;
       }
+    }catch(e){
+      if(e&&e.name==='AbortError') return;
+      // sharing failed for a non-abort reason — fall through to a direct download instead
+    }
+    try{
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a'); a.href=url; a.download=filename; a.rel='noopener';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url),10000);
     }catch(e){
-      if(e&&e.name==='AbortError') return;
       this.setState({backupError:'Couldn\'t export your backup.'});
     }
   }
@@ -1481,6 +1912,127 @@ class Component extends DCLogic {
   playArp(pcs){ this.ensureAudio(); const t=this.ac.currentTime+0.02; const ms=this.midiChord(pcs); ms.push(ms[0]+12); ms.forEach((m,i)=>this.voice(this.midiFreq(m),t+i*0.15,0.9,0.17)); }
   playScaleNotes(rootPC,semis){ this.ensureAudio(); const t=this.ac.currentTime+0.02; const base=60; const seq=semis.map(s=>base+rootPC+s); seq.push(base+rootPC+12); seq.forEach((m,i)=>this.voice(this.midiFreq(m),t+i*0.16,0.7,0.17)); }
   playSeq(chords,arp){ this.ensureAudio(); const t0=this.ac.currentTime+0.05; const step=0.62; chords.forEach((c,i)=>{ const t=t0+i*step; if(arp){ const ms=this.midiChord(c.pcs); ms.forEach((m,k)=>this.voice(this.midiFreq(m),t+k*0.075,0.7,0.15)); } else { this.midiChord(c.pcs).forEach(m=>this.voice(this.midiFreq(m),t,step*1.05,0.14)); } }); }
+
+  shuffle(arr){ const a=(arr||[]).slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  // practice mode — chord switching trainer
+  startSwitchPractice(){
+    this.ensureAudio(); this.stopSwitchPractice();
+    let chords;
+    if(this.state.builderChords&&this.state.builderChords.length){
+      chords=this.state.builderChords.map(c=>{
+        const rootPC=c.pcs[0];
+        let quality='maj';
+        for(const q in this.QUAL){ const ivs=this.QUAL[q]; const testPcs=ivs.map(iv=>(rootPC+iv)%12); if(testPcs.length===c.pcs.length&&testPcs.every((pc,i)=>pc===c.pcs[i])){ quality=q; break; } }
+        return {name:c.name,roman:c.roman,pcs:c.pcs,rootPC,quality};
+      });
+    } else {
+      const p=this.PROGS[Math.floor(Math.random()*this.PROGS.length)];
+      chords=p.specs.map(sp=>{ const c=this.chordFromSpec(this.state.keyRoot,sp); return {name:c.name,roman:c.roman,pcs:c.pcs,rootPC:c.rootPC,quality:c.quality}; });
+    }
+    this.setState({practiceSwitchOn:true,practiceSwitchChords:chords,practiceSwitchIdx:0,practiceSwitchBeat:0});
+    const bpm=this.state.practiceSwitchBpm||80;
+    const beatMs=Math.max(150,60000/bpm);
+    this.switchTimer=setInterval(()=>{
+      this.setState(st=>{
+        const t=this.ac.currentTime+0.01;
+        const accent=st.practiceSwitchBeat===0;
+        this.blip(accent?1600:920,t,0.045,accent?0.5:0.26,'square');
+        let beat=st.practiceSwitchBeat+1, idx=st.practiceSwitchIdx;
+        if(beat>=4){ beat=0; idx=(idx+1)%((st.practiceSwitchChords||[]).length||1); }
+        return {practiceSwitchBeat:beat,practiceSwitchIdx:idx};
+      });
+    },beatMs);
+  }
+  stopSwitchPractice(){ if(this.switchTimer){ clearInterval(this.switchTimer); this.switchTimer=null; } this.setState({practiceSwitchOn:false}); }
+
+  // practice mode — ear training
+  nextEarQuestion(typeOverride){
+    this.ensureAudio();
+    const type=typeOverride||this.state.practiceEarType||'note';
+    const t=this.ac.currentTime+0.05;
+    let question;
+    if(type==='note'){
+      const pc=Math.floor(Math.random()*12);
+      const correct=this.GTR_ROOTS[pc];
+      const distractors=this.shuffle(this.GTR_ROOTS.filter(n=>n!==correct)).slice(0,3);
+      question={prompt:'What note is this?',correct,choices:this.shuffle([correct,...distractors]),replay:()=>this.voice(this.midiFreq(60+pc),this.ac.currentTime+0.02,1.1,0.2)};
+      question.replay();
+    } else if(type==='interval'){
+      const INTERVAL_NAMES=['Minor 2nd','Major 2nd','Minor 3rd','Major 3rd','Perfect 4th','Tritone','Perfect 5th','Minor 6th','Major 6th','Minor 7th','Major 7th','Octave'];
+      const rootPc=Math.floor(Math.random()*12), semi=1+Math.floor(Math.random()*12);
+      const correct=INTERVAL_NAMES[semi-1];
+      const distractors=this.shuffle(INTERVAL_NAMES.filter(n=>n!==correct)).slice(0,3);
+      question={prompt:'What interval is this?',correct,choices:this.shuffle([correct,...distractors]),
+        replay:()=>{ const tt=this.ac.currentTime+0.02; this.voice(this.midiFreq(60+rootPc),tt,0.6,0.2); this.voice(this.midiFreq(60+rootPc+semi),tt+0.65,0.7,0.2); }};
+      question.replay();
+    } else {
+      const QUAL_LABELS={maj:'Major',min:'Minor',dim:'Diminished',aug:'Augmented',dom7:'Dominant 7th',maj7:'Major 7th',min7:'Minor 7th'};
+      const ids=Object.keys(QUAL_LABELS);
+      const q=ids[Math.floor(Math.random()*ids.length)];
+      const rootPc=Math.floor(Math.random()*12);
+      const pcs=this.QUAL[q].map(iv=>(rootPc+iv)%12);
+      const correct=QUAL_LABELS[q];
+      const distractors=this.shuffle(ids.filter(id=>id!==q).map(id=>QUAL_LABELS[id])).slice(0,3);
+      question={prompt:'What chord quality is this?',correct,choices:this.shuffle([correct,...distractors]),replay:()=>this.playChord(pcs)};
+      question.replay();
+    }
+    this.setState({practiceEarQuestion:question,practiceEarFeedback:null});
+  }
+  answerEar(choice){
+    this.setState(st=>{
+      const q=st.practiceEarQuestion; if(!q) return {};
+      const correct=choice===q.correct;
+      return {practiceEarFeedback:correct?'correct':'wrong',practiceScore:st.practiceScore+(correct?1:0),practiceStreak:correct?st.practiceStreak+1:0};
+    });
+  }
+
+  // practice mode — scale practice
+  nextScaleQuestion(scaleNameOverride){
+    const scaleObj=this.SCALES.find(s=>s.name===(scaleNameOverride||this.state.practiceScaleName))||this.SCALES[0];
+    const keyRoot=this.state.keyRoot;
+    const di=Math.floor(Math.random()*scaleObj.semis.length);
+    const correct=this.spell(keyRoot,scaleObj.semis[di],scaleObj.degs[di]);
+    const otherNotes=scaleObj.semis.map((s,i)=>this.spell(keyRoot,s,scaleObj.degs[i])).filter(n=>n!==correct);
+    const distractors=this.shuffle(otherNotes).slice(0,3);
+    while(distractors.length<3) distractors.push(this.spell(keyRoot,(scaleObj.semis[di]+distractors.length+1)%12,(scaleObj.degs[di]+distractors.length+1)%7));
+    const question={degree:scaleObj.degs[di]+1,correct,choices:this.shuffle([correct,...distractors]),
+      replay:()=>{ this.ensureAudio(); this.voice(this.midiFreq(60+this.pcOf(keyRoot)+scaleObj.semis[di]),this.ac.currentTime+0.02,0.9,0.2); }};
+    question.replay();
+    this.setState({practiceScaleQuestion:question});
+  }
+  answerScale(choice){
+    this.setState(st=>{
+      const q=st.practiceScaleQuestion; if(!q) return {};
+      const correct=choice===q.correct;
+      return {practiceScaleFeedback:correct?'correct':'wrong',practiceScore:st.practiceScore+(correct?1:0),practiceStreak:correct?st.practiceStreak+1:0};
+    });
+  }
+
+  // practice mode — progression memorization
+  startMemoryPractice(){
+    const p=this.PROGS[Math.floor(Math.random()*this.PROGS.length)];
+    const seq=p.specs.map(sp=>{ const c=this.chordFromSpec(this.state.keyRoot,sp); return {name:c.name,roman:c.roman,pcs:c.pcs}; });
+    const pool=this.shuffle(seq.map((c,i)=>({...c,srcIdx:i})));
+    this.setState({practiceMemoryPhase:'show',practiceMemorySeq:seq,practiceMemoryPool:pool,practiceMemoryPicked:[]});
+    this.playSeq(seq,false);
+    if(this.memoryTimer) clearTimeout(this.memoryTimer);
+    this.memoryTimer=setTimeout(()=>{ this.setState(st=>st.practiceMemoryPhase==='show'?{practiceMemoryPhase:'quiz'}:{}); },4200);
+  }
+  skipMemoryReveal(){ if(this.memoryTimer) clearTimeout(this.memoryTimer); this.setState(st=>st.practiceMemoryPhase==='show'?{practiceMemoryPhase:'quiz'}:{}); }
+  pickMemoryChord(poolIdx){
+    this.setState(st=>{
+      if(st.practiceMemoryPhase!=='quiz') return {};
+      if((st.practiceMemoryPicked||[]).includes(poolIdx)) return {};
+      const picked=[...(st.practiceMemoryPicked||[]),poolIdx];
+      if(picked.length>=(st.practiceMemorySeq||[]).length){
+        const correct=picked.every((pi,i)=>{ const chosen=st.practiceMemoryPool[pi]; const target=st.practiceMemorySeq[i]; return chosen&&target&&chosen.name===target.name&&chosen.roman===target.roman; });
+        return {practiceMemoryPicked:picked,practiceMemoryPhase:'result',practiceScore:st.practiceScore+(correct?1:0),practiceStreak:correct?st.practiceStreak+1:0};
+      }
+      return {practiceMemoryPicked:picked};
+    });
+  }
+  resetMemoryPractice(){ if(this.memoryTimer) clearTimeout(this.memoryTimer); this.setState({practiceMemoryPhase:'idle',practiceMemorySeq:[],practiceMemoryPool:[],practiceMemoryPicked:[]}); }
 
   toggleMetro(){ if(this.state.playing) this.stopMetro(); else this.startMetro(); }
   tapTempo(){
@@ -1743,6 +2295,68 @@ class Component extends DCLogic {
       }
     }
     const relativeInfo=(mode==='major'?('Relative minor: '+this.spell(keyRoot,9,5)+'m'):('Relative major: '+this.spell(keyRoot,3,2)))+' · '+sigLabel;
+
+    // chord relationship wheel — second mode of the Home wheel
+    const isWheelChords = S.wheelMode==='chords';
+    const isWheelKeys = !isWheelChords;
+    const setWheelModeKeys=()=>self.setState({wheelMode:'keys',chordWheelSel:null});
+    const setWheelModeChords=()=>self.setState({wheelMode:'chords'});
+    const wheelModeKeysStyle=segS(!isWheelChords);
+    const wheelModeChordsStyle=segS(isWheelChords);
+    const pcSlotIndex=(pc)=>((pc*7)%12+12)%12;
+    const degSpecsArrHome = mode==='major'?this.MAJ_TRI:this.MIN_TRI;
+    const diatonicHome = degSpecsArrHome.map(sp=>this.chordFromSpec(keyRoot,sp));
+    const cxHarmHome = this.complexHarmony(keyRoot,mode);
+    const usedPcsHome = new Set(diatonicHome.map(c=>c.rootPC));
+    const extraChordsHome=[];
+    [...cxHarmHome.sd,...cxHarmHome.mi,...cxHarmHome.dm].forEach(c=>{ if(!usedPcsHome.has(c.rootPC)){ usedPcsHome.add(c.rootPC); extraChordsHome.push(c); } });
+    const allWheelChords=[...diatonicHome.map(c=>({...c,isDiatonic:true})),...extraChordsHome.map(c=>({...c,isDiatonic:false}))];
+    const chordWheelSel = isWheelChords ? (S.chordWheelSel||null) : null;
+    const selChordObj = chordWheelSel ? allWheelChords.find(c=>c.roman===chordWheelSel) : null;
+    const targetingSel=new Set(), substituteSel=new Set();
+    let relativeRoman=null;
+    if(selChordObj){
+      [...cxHarmHome.sd,...cxHarmHome.mi,...cxHarmHome.dm].forEach(c=>{
+        const t=(c.hint||'').replace('→ ','').trim();
+        if(t===chordWheelSel) targetingSel.add(c.roman);
+      });
+      diatonicHome.forEach(c=>{ if(c.roman!==chordWheelSel && this.sharedTones(c.pcs,selChordObj.pcs).length>=2) substituteSel.add(c.roman); });
+      if(chordWheelSel==='I'||chordWheelSel==='i') relativeRoman = mode==='major'?'vi':'♭III';
+    }
+    const chordNodes=[];
+    if(isWheelChords){
+      allWheelChords.forEach(c=>{
+        const slot=pcSlotIndex(c.rootPC);
+        const ang=(slot*30-90)*Math.PI/180, x=cx+oR*Math.cos(ang), y=cy+oR*Math.sin(ang);
+        const isSel=chordWheelSel===c.roman, isTarget=targetingSel.has(c.roman), isSub=substituteSel.has(c.roman), isRel=relativeRoman===c.roman;
+        let bg='#1c1c1e',border='#2c2c2e',fg=c.isDiatonic?'#f2f2f7':'#8e8e93';
+        if(isSel){ bg=A; border=A; fg='#000'; }
+        else if(isTarget){ bg='#1c3a3a'; border='#2dd4bf'; fg='#5eead4'; }
+        else if(isRel){ bg='#2e2410'; border='#6b551f'; fg='#f7d488'; }
+        else if(isSub){ bg='#2a1c33'; border='#bf7af0'; fg='#d8b4f8'; }
+        chordNodes.push(h('button',{key:'c'+c.roman,onClick:()=>self.setState(st=>({chordWheelSel:st.chordWheelSel===c.roman?null:c.roman})),
+          style:{position:'absolute',left:x+'px',top:y+'px',transform:'translate(-50%,-50%)',width:(c.isDiatonic?'46px':'40px'),height:(c.isDiatonic?'46px':'40px'),borderRadius:'50%',
+            border:'1px solid '+border,background:bg,color:fg,fontSize:(c.isDiatonic?'12px':'10.5px'),fontWeight:700,cursor:'pointer',
+            boxShadow:'0 1px 3px rgba(0,0,0,0.3)',transition:'background .15s,border-color .15s',padding:0}},
+          h('div',{key:'w',style:{transform:'rotate('+unrot+'deg)',display:'flex',flexDirection:'column',alignItems:'center',lineHeight:1.15}},[
+            h('span',{key:'r',style:{fontSize:'8.5px',opacity:0.85}},c.roman),
+            h('span',{key:'n'},c.name)
+          ])));
+      });
+    }
+    const chordRing=h('div',{key:'cring',style:{position:'absolute',left:0,top:0,width:'300px',height:'300px',transform:'rotate('+rot+'deg)',transition:'transform .6s cubic-bezier(.2,.8,.2,1)'}},chordNodes);
+    const chordWheelDiagram=h('div',{style:{position:'relative',width:'300px',height:'300px'}},[bezel,chordRing,pointer]);
+    const chordWheelCenterLabel = selChordObj ? selChordObj.name : 'Tap a chord';
+    let chordWheelCaption = 'Diatonic chords in the outer ring · secondary dominants, borrowed, and passing chords fill the rest — tap any chord to see how it connects.';
+    if(selChordObj){
+      const parts=[];
+      if(targetingSel.size) parts.push(Array.from(targetingSel).join(', ')+' resolve'+(targetingSel.size===1?'s':'')+' into '+selChordObj.name+'.');
+      if(substituteSel.size) parts.push('Shares tones with '+Array.from(substituteSel).join(', ')+' — works as a substitute.');
+      if(relativeRoman) parts.push((mode==='major'?'Relative minor: ':'Relative major: ')+relativeRoman+'.');
+      chordWheelCaption = selChordObj.name+' ('+selChordObj.roman+')'+(parts.length?' — '+parts.join(' '):' — a diatonic chord in this key.');
+    }
+    const hasChordWheelSel=!!selChordObj;
+    const addWheelChordToProg = selChordObj ? ()=>self.setState(st=>{ const nb=[...(st.builderChords||[]),{name:selChordObj.name,roman:selChordObj.roman,pcs:selChordObj.pcs}]; return {builderChords:nb,insightIdx:nb.length-1,tab:'prog'}; }) : ()=>{};
 
     // scales
     const scaleObj=this.SCALES.find(s=>s.name===S.scaleName)||this.SCALES[0];
@@ -2047,6 +2661,33 @@ class Component extends DCLogic {
     const toggleAdvAnalysis=()=>self.setState({showAdvAnalysis:!S.showAdvAnalysis});
     const advAnalysisChevronStyle=`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${S.showAdvAnalysis?180:0}deg);`;
 
+    // voice leading visualizer
+    const vlNoteName=(pc)=>this.GTR_ROOTS[((pc%12)+12)%12];
+    const vlColorFor={common:'#32d74b',step:A,leap:'#ff375f'};
+    const voiceLeadingPairs=[];
+    for(let vi=0;vi<builderChords.length-1;vi++){
+      const va=builderChords[vi], vb=builderChords[vi+1];
+      const vl=this.voiceLeadingFor(va.pcs,vb.pcs);
+      const rowH=22;
+      const lines=vl.map((v,idx)=>{
+        const j=vb.pcs.indexOf(v.toPc);
+        return {key:idx,x1:28,y1:14+idx*rowH,x2:112,y2:14+(j>=0?j:idx)*rowH,color:vlColorFor[v.kind]};
+      });
+      const notesA=va.pcs.map((pc,idx)=>({key:idx,label:vlNoteName(pc),y:18+idx*rowH}));
+      const notesB=vb.pcs.map((pc,idx)=>({key:idx,label:vlNoteName(pc),y:18+idx*rowH}));
+      const svgH=Math.max(va.pcs.length,vb.pcs.length)*rowH+10;
+      const commonCount=vl.filter(v=>v.kind==='common').length, leapCount=vl.filter(v=>v.kind==='leap').length;
+      let summary;
+      if(leapCount===0&&commonCount>0) summary='Smooth — '+commonCount+' common tone'+(commonCount>1?'s':'')+' held, the rest move by step.';
+      else if(leapCount>0) summary=leapCount+' voice'+(leapCount>1?'s':'')+' jump'+(leapCount>1?'':'s')+' more than a step — a smoother inversion may sound less jumpy.';
+      else summary='Fully stepwise motion — no held tones.';
+      voiceLeadingPairs.push({key:vi,fromName:va.name,toName:vb.name,svgH,lines,notesA,notesB,summary});
+    }
+    const hasVoiceLeading=voiceLeadingPairs.length>0;
+    const showVoiceLeading=!!S.showVoiceLeading;
+    const toggleVoiceLeading=()=>self.setState({showVoiceLeading:!S.showVoiceLeading});
+    const voiceLeadingChevronStyle=`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${S.showVoiceLeading?180:0}deg);`;
+
     // write tab — one continuous notepad: lyrics + inline "# Label" headings + click-to-chord + one tab grid
     const allPickerRaw=[...romanArrB.map((rb,d)=>{ const c=this.chordFromSpec(keyRoot,degSpecsArr[d]); return {roman:rb,name:c.name,pcs:c.pcs}; }),...cxHarm.mi.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs})),...cxHarm.sd.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs}))];
     const seenPk={}; const allPickerChords=allPickerRaw.filter(c=>{ if(seenPk[c.name])return false; seenPk[c.name]=true; return true; });
@@ -2115,6 +2756,25 @@ class Component extends DCLogic {
     const toggleLiveStats=()=>self.setState({showLiveStats:!S.showLiveStats});
     const liveStatsChevronStyle=`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${S.showLiveStats?180:0}deg);`;
 
+    // recording-mode teleprompter — best-effort scroll/chord-highlight aid, not audio-synced
+    const showTeleprompter=!!S.isRecording;
+    const lyricLineIdxs=lineViews.map((ln,i)=>ln.isLyricLine?i:-1).filter(i=>i>=0);
+    const totalEstSec=Math.max(1,liveStats.estSingingDurationSeconds||1);
+    const progressFrac=lyricLineIdxs.length?Math.min(0.999,(S.recSeconds||0)/totalEstSec):0;
+    const teleActiveOrdinal=lyricLineIdxs.length?Math.floor(progressFrac*lyricLineIdxs.length):-1;
+    const teleActiveLi=teleActiveOrdinal>=0?lyricLineIdxs[teleActiveOrdinal]:-1;
+    let teleCurrentChord='—';
+    if(teleActiveLi>=0){
+      const activeLn=lineViews[teleActiveLi];
+      const firstChorded=(activeLn.wordViews||[]).find(w=>w.chordName);
+      if(firstChorded) teleCurrentChord=firstChorded.chordName;
+    }
+    const teleLineViews=lineViews.map((ln,i)=>{
+      const text=ln.isLyricLine?(ln.wordViews||[]).map(w=>w.word).join(' '):(ln.labelText||'');
+      const active=i===teleActiveLi;
+      return {text,style:`font-size:${ln.isLabel?'11px':'14px'};font-weight:${active?700:(ln.isLabel?700:400)};text-transform:${ln.isLabel?'uppercase':'none'};letter-spacing:${ln.isLabel?'0.03em':'normal'};color:${active?'#f7d488':(ln.isLabel?'#f0b429':'#8e8e93')};padding:2px 0;`};
+    });
+
     const tabOrder=[5,4,3,2,1,0], tabLabelsArr=['e','B','G','D','A','E'];
     const tabGridsArr=(S.tabGrids&&S.tabGrids.length)?S.tabGrids:[{id:'__default',grid:Array(6).fill(0).map(()=>Array(16).fill(''))}];
     const tabBlocks=tabGridsArr.map((g,bi)=>{
@@ -2159,7 +2819,14 @@ class Component extends DCLogic {
     const recordBtnStyle=`border:1px solid ${S.isRecording?'#ff375f':'#2c2c2e'};background:${S.isRecording?'#ff375f':'#1c1c1e'};color:${S.isRecording?'#fff':'#f2f2f7'};font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:980px;cursor:pointer;margin-top:10px;display:inline-flex;align-items:center;gap:6px;transition:transform .12s ease;${S.isRecording?'animation:mmRecPulse 1.1s ease-in-out infinite;':''}`;
     const hasRecordError=!!S.recordError;
     const recordingsSorted=(S.recordings||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    const recordingItems=recordingsSorted.map(r=>({id:r.id,name:r.name,dataUrl:r.dataUrl,remove:()=>self.deleteRecording(r.id),save:()=>self.saveRecordingToDevice(r)}));
+    const renamingRecId=S.renamingRecId||null;
+    const renameDraft=S.renameDraft||'';
+    const onRenameDraftChange=(e)=>self.setState({renameDraft:e.target.value});
+    const commitRename=()=>self.setState(st=>{ const t=(st.renameDraft||'').trim(); if(t&&st.renamingRecId) self.renameRecording(st.renamingRecId,t); return {renamingRecId:null,renameDraft:''}; });
+    const cancelRename=()=>self.setState({renamingRecId:null,renameDraft:''});
+    const recordingItems=recordingsSorted.map(r=>({id:r.id,name:r.name,dataUrl:r.dataUrl,isRenaming:renamingRecId===r.id,
+      remove:()=>self.deleteRecording(r.id),save:()=>self.saveRecordingToDevice(r),
+      startRename:()=>self.setState({renamingRecId:r.id,renameDraft:r.name})}));
     const hasRecordings=recordingItems.length>0;
     const noRecordings=!hasRecordings;
 
@@ -2183,13 +2850,18 @@ class Component extends DCLogic {
     const viewingSongEntry=(S.savedSongs||[]).find(s=>s.id===S.viewingSongId)||null;
     const hasViewingSong=!!viewingSongEntry;
     const viewingSongName=viewingSongEntry?viewingSongEntry.name:'';
-    const emptyStats={wordCount:0,uniqueWordCount:0,syllableCount:0,avgLineLength:0,repeatedWords:[],hasRepeatedWords:false,repeatedPhrases:[],hasRepeatedPhrases:false,rhymeDensity:0,estSingingDuration:'0:00',chordFrequency:[],hasChordFrequency:false,mostCommonChord:'—',keyChanges:1,hasAnyContent:false};
+    const emptyStats={wordCount:0,uniqueWordCount:0,syllableCount:0,avgLineLength:0,repeatedWords:[],hasRepeatedWords:false,repeatedPhrases:[],hasRepeatedPhrases:false,rhymeDensity:0,estSingingDuration:'0:00',estSingingDurationSeconds:0,chordFrequency:[],hasChordFrequency:false,mostCommonChord:'—',keyChanges:1,hasAnyContent:false};
     const songView=viewingSongEntry?this.buildOutputView(viewingSongEntry):{lineViews:[],outputTabBlocks:[],tabHasInput:false,capo:0,hasCapo:false,capoLabel:'',soundingKeyLabel:'',stats:emptyStats};
     const showViewStats=!!S.showViewStats;
     const toggleViewStats=()=>self.setState({showViewStats:!S.showViewStats});
     const viewStatsChevronStyle=`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${S.showViewStats?180:0}deg);`;
     const backToList=()=>self.backToList();
     const editViewingSong=()=>{ if(viewingSongEntry){ self.loadSong(viewingSongEntry.id); self.setState({tab:'songs',writeSubTab:'lyrics'}); } };
+    const pdfExporting=!!S.pdfExporting;
+    const exportSongPdfBtn=viewingSongEntry?(()=>self.exportSongPdf(viewingSongEntry)):(()=>{});
+    const pdfExportBtnLabel=pdfExporting?'Generating…':'Export PDF';
+    const pdfExportBtnStyle=`border:1px solid #2c2c2e;background:#1c1c1e;color:#f0b429;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:${pdfExporting?'default':'pointer'};transition:transform .12s ease,filter .12s ease;opacity:${pdfExporting?0.6:1};`;
+    const hasPdfError=!!S.pdfError;
 
     const ghostSmallStyle=`border:1px solid #2c2c2e;background:#1c1c1e;color:#c7c7cc;font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:9px;cursor:pointer;transition:background .15s,transform .12s ease;`;
     const stepBtnStyleSmall=`width:32px;height:32px;border-radius:50%;border:1px solid #2c2c2e;background:#1c1c1e;font-size:17px;color:#f2f2f7;cursor:pointer;flex:none;transition:transform .12s ease,filter .12s ease;`;
@@ -2197,6 +2869,8 @@ class Component extends DCLogic {
 
     const onSongNameChange=(e)=>self.setState({currentSongName:e.target.value});
     const onSongTagsChange=(e)=>self.setState({currentSongTags:e.target.value});
+    const onSongArtistChange=(e)=>self.setState({currentSongArtist:e.target.value});
+    const onSongNotesChange=(e)=>self.setState({currentSongNotes:e.target.value});
     const saveSongBtn=()=>self.saveSong();
     const newSongBtn=()=>self.newSong();
     const savedSongsSorted=(S.savedSongs||[]).slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
@@ -2212,19 +2886,105 @@ class Component extends DCLogic {
 
     // mood generator
     const loadMood=(i)=>{ const m=this.MOODS[i]; const chords=m.specs.map(sp=>this.chordFromSpec(m.keyRoot,sp)); self.stopAutoScroll(); self.setState({keyRoot:m.keyRoot,keyMode:m.keyMode,bpm:m.bpm,tsIndex:m.tsIndex,builderChords:chords.map(c=>({name:c.name,roman:c.roman,pcs:c.pcs})),moodIndex:i,progIndex:0,tab:'prog',autoScroll:false}); };
+    const expandedMoodStyle=(S.expandedMoodStyle!=null)?S.expandedMoodStyle:null;
     const moodList = this.MOODS.map((m,i)=>{
       const moodSel=i===S.moodIndex;
+      const styleOpen=expandedMoodStyle===i;
       return {mood:m.mood,keyLabel:m.keyRoot+' '+(m.keyMode==='major'?'major':'minor'),bpm:m.bpm,tsLabel:this.TIME_SIGS[m.tsIndex].label,why:m.why,artistStyle:m.artistStyle,instrumentsStr:m.instruments.join(' · '),
         style:`text-align:left;border:1px solid ${moodSel?A:'#2c2c2e'};background:${moodSel?'#2e2410':'#1c1c1e'};border-radius:14px;padding:14px 16px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`,
-        onClick:()=>loadMood(i)};
+        onClick:()=>loadMood(i),
+        styleOpen,styleChevronStyle:`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${styleOpen?180:0}deg);`,
+        toggleStyleNotes:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); self.setState(st=>({expandedMoodStyle:st.expandedMoodStyle===i?null:i})); },
+        styleCommonChords:m.styleNotes.commonChords,styleHarmonicTendencies:m.styleNotes.harmonicTendencies,
+        styleRhythmStyle:m.styleNotes.rhythmStyle,styleVoicingStyle:m.styleNotes.voicingStyle,styleCharacteristics:m.styleNotes.characteristics};
     });
+    // practice mode
+    const practiceModeVal=S.practiceMode||'switch';
+    const isPracticeSwitch=practiceModeVal==='switch', isPracticeEar=practiceModeVal==='ear', isPracticeScale=practiceModeVal==='scale', isPracticeMemory=practiceModeVal==='memory';
+    const goPracticeSwitch=()=>self.setState({practiceMode:'switch'});
+    const goPracticeEar=()=>{ self.setState({practiceMode:'ear'}); if(!S.practiceEarQuestion) self.nextEarQuestion(); };
+    const goPracticeScale=()=>{ self.setState({practiceMode:'scale'}); if(!S.practiceScaleQuestion) self.nextScaleQuestion(); };
+    const goPracticeMemory=()=>self.setState({practiceMode:'memory'});
+    const practiceModeSwitchStyle=segS(isPracticeSwitch), practiceModeEarStyle=segS(isPracticeEar), practiceModeScaleStyle=segS(isPracticeScale), practiceModeMemoryStyle=segS(isPracticeMemory);
+    const practiceScore=S.practiceScore||0, practiceStreak=S.practiceStreak||0;
+
+    const switchChords=S.practiceSwitchChords||[];
+    const switchOn=!!S.practiceSwitchOn;
+    const switchOff=!switchOn;
+    const switchCurChord = switchChords.length ? switchChords[S.practiceSwitchIdx%switchChords.length] : null;
+    const hasSwitchChord=!!switchCurChord;
+    let switchDiagram=null;
+    if(switchCurChord && switchCurChord.rootPC!=null && switchCurChord.quality){
+      const vs=this.buildVoicings({rootPC:switchCurChord.rootPC,quality:switchCurChord.quality});
+      if(vs.length) switchDiagram=vs[0].diagram;
+    }
+    const hasSwitchDiagram=!!switchDiagram;
+    const switchBpm=S.practiceSwitchBpm||80;
+    const practiceStartBtnStyle=`border:none;background:${A};color:#000;font-size:15px;font-weight:700;padding:12px 44px;border-radius:980px;cursor:pointer;box-shadow:0 2px 14px rgba(240,180,41,0.28);`;
+    const startSwitch=()=>self.startSwitchPractice();
+    const stopSwitch=()=>self.stopSwitchPractice();
+    const switchBpmUp=()=>self.setState({practiceSwitchBpm:Math.min(200,switchBpm+4)});
+    const switchBpmDown=()=>self.setState({practiceSwitchBpm:Math.max(40,switchBpm-4)});
+    const switchBeatDots=[0,1,2,3].map(i=>({key:i,style:`width:9px;height:9px;border-radius:50%;background:${S.practiceSwitchBeat===i&&switchOn?A:'#2c2c2e'};transition:background .1s;`}));
+
+    const earType=S.practiceEarType||'note';
+    const setEarNote=()=>{ self.setState({practiceEarType:'note'}); self.nextEarQuestion('note'); };
+    const setEarInterval=()=>{ self.setState({practiceEarType:'interval'}); self.nextEarQuestion('interval'); };
+    const setEarChord=()=>{ self.setState({practiceEarType:'chord'}); self.nextEarQuestion('chord'); };
+    const earTypeNoteStyle=pill(earType==='note'), earTypeIntervalStyle=pill(earType==='interval'), earTypeChordStyle=pill(earType==='chord');
+    const earQ=S.practiceEarQuestion;
+    const hasEarQuestion=!!earQ;
+    const earQPrompt=earQ?earQ.prompt:'';
+    const earFeedback=S.practiceEarFeedback||null;
+    const hasEarFeedback=!!earFeedback;
+    const earFeedbackIsCorrect=earFeedback==='correct';
+    const earFeedbackIsWrong=earFeedback==='wrong';
+    const earCorrectAnswer=earQ?earQ.correct:'';
+    const earChoices=earQ?earQ.choices.map(c=>({label:c,onClick:earFeedback?(()=>{}):(()=>self.answerEar(c)),
+      style:`border:1px solid ${earFeedback&&c===earQ.correct?'#32d74b':'#2c2c2e'};background:${earFeedback&&c===earQ.correct?'#0f2e1a':'#1c1c1e'};color:#f2f2f7;font-size:14px;font-weight:600;padding:11px 16px;border-radius:12px;cursor:${earFeedback?'default':'pointer'};transition:transform .12s ease,filter .12s ease;`})):[];
+    const earReplay=earQ?()=>earQ.replay():()=>{};
+    const earNext=()=>self.nextEarQuestion();
+
+    const scaleListPractice = this.SCALES.map(sc=>({name:sc.name,style:pill(sc.name===S.practiceScaleName),onClick:()=>{ self.setState({practiceScaleName:sc.name}); self.nextScaleQuestion(sc.name); }}));
+    const scaleQ=S.practiceScaleQuestion;
+    const hasScaleQuestion=!!scaleQ;
+    const scaleFeedback=S.practiceScaleFeedback||null;
+    const hasScaleFeedback=!!scaleFeedback;
+    const scaleFeedbackIsCorrect=scaleFeedback==='correct';
+    const scaleFeedbackIsWrong=scaleFeedback==='wrong';
+    const scaleCorrectAnswer=scaleQ?scaleQ.correct:'';
+    const scaleChoices=scaleQ?scaleQ.choices.map(c=>({label:c,onClick:scaleFeedback?(()=>{}):(()=>self.answerScale(c)),
+      style:`border:1px solid ${scaleFeedback&&c===scaleQ.correct?'#32d74b':'#2c2c2e'};background:${scaleFeedback&&c===scaleQ.correct?'#0f2e1a':'#1c1c1e'};color:#f2f2f7;font-size:14px;font-weight:600;padding:11px 16px;border-radius:12px;cursor:${scaleFeedback?'default':'pointer'};transition:transform .12s ease,filter .12s ease;`})):[];
+    const scaleReplay=scaleQ?()=>scaleQ.replay():()=>{};
+    const scaleNext=()=>self.nextScaleQuestion();
+    const scaleQDegree=scaleQ?scaleQ.degree:'';
+
+    const memoryPhase=S.practiceMemoryPhase||'idle';
+    const memoryIsIdle=memoryPhase==='idle', memoryIsShow=memoryPhase==='show', memoryIsQuiz=memoryPhase==='quiz', memoryIsResult=memoryPhase==='result';
+    const memorySeq=S.practiceMemorySeq||[];
+    const memoryPool=S.practiceMemoryPool||[];
+    const memoryPicked=S.practiceMemoryPicked||[];
+    const memoryShowChips=memorySeq.map(c=>({name:c.name,roman:c.roman}));
+    const pickedSet=new Set(memoryPicked);
+    const memoryPoolChips=memoryPool.map((c,i)=>({name:c.name,used:pickedSet.has(i),onClick:pickedSet.has(i)?(()=>{}):(()=>self.pickMemoryChord(i)),
+      style:`border:1px solid ${pickedSet.has(i)?'#2c2c2e':'#3a2c1e'};background:${pickedSet.has(i)?'#161616':'#1c1c1e'};color:${pickedSet.has(i)?'#4a4a4a':'#f2f2f7'};font-size:14px;font-weight:600;padding:9px 15px;border-radius:12px;cursor:${pickedSet.has(i)?'default':'pointer'};transition:transform .12s ease,filter .12s ease;`}));
+    const memoryPickedChips=memoryPicked.map((pi,i)=>{ const target=memorySeq[i]; const chosen=memoryPool[pi]; const ok=target&&chosen&&target.name===chosen.name&&target.roman===chosen.roman;
+      return {name:chosen?chosen.name:'',correct:memoryIsResult?ok:null,style:`border:1px solid ${memoryIsResult?(ok?'#32d74b':'#ff375f'):'#2c2c2e'};background:${memoryIsResult?(ok?'#0f2e1a':'#2e1a1c'):'#1c1c1e'};color:#f2f2f7;font-size:14px;font-weight:600;padding:9px 15px;border-radius:12px;`}; });
+    const memoryAllCorrect = memoryIsResult && memoryPicked.every((pi,i)=>{ const t=memorySeq[i],c=memoryPool[pi]; return t&&c&&t.name===c.name&&t.roman===c.roman; });
+    const memoryIncorrect = memoryIsResult && !memoryAllCorrect;
+    const startMemory=()=>self.startMemoryPractice();
+    const skipMemoryReveal=()=>self.skipMemoryReveal();
+    const resetMemory=()=>self.resetMemoryPractice();
+
     const clearBuilder=()=>self.setState({builderChords:[]});
     const playBuilder=()=>self.playSeq(builderChords,false);
     const playBuilderArp=()=>self.playSeq(builderChords,true);
 
     return {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
-      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',
+      isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
+      chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,hasChordWheelSel,addWheelChordToProg,
+      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',
       goHome:()=>{self.stopAutoScroll();self.setState({tab:'home',autoScroll:false});},
       goTheory:()=>{self.stopAutoScroll();self.setState({tab:'theory',autoScroll:false});},
       goGuitar:()=>{self.stopAutoScroll();self.setState({tab:'guitar',autoScroll:false});},
@@ -2232,8 +2992,17 @@ class Component extends DCLogic {
       goRhythm:()=>{self.stopAutoScroll();self.setState({tab:'rhythm',autoScroll:false});},
       goSongs:()=>{self.stopAutoScroll();self.setState({tab:'songs',autoScroll:false});},
       goMood:()=>{self.stopAutoScroll();self.setState({tab:'mood',autoScroll:false});},
-      tTheory:seg(S.tab==='theory'),tGuitar:seg(S.tab==='guitar'),tProg:seg(S.tab==='prog'),tRhythm:seg(S.tab==='rhythm'),tSongs:seg(S.tab==='songs'),tMood:seg(S.tab==='mood'),
+      goPractice:()=>{self.stopAutoScroll();self.setState({tab:'practice',autoScroll:false});},
+      tTheory:seg(S.tab==='theory'),tGuitar:seg(S.tab==='guitar'),tProg:seg(S.tab==='prog'),tRhythm:seg(S.tab==='rhythm'),tSongs:seg(S.tab==='songs'),tMood:seg(S.tab==='mood'),tPractice:seg(S.tab==='practice'),
       moodList,
+      isPracticeSwitch,isPracticeEar,isPracticeScale,isPracticeMemory,goPracticeSwitch,goPracticeEar,goPracticeScale,goPracticeMemory,
+      practiceModeSwitchStyle,practiceModeEarStyle,practiceModeScaleStyle,practiceModeMemoryStyle,practiceScore,practiceStreak,
+      practiceStartBtnStyle,
+      switchOn,switchOff,hasSwitchChord,switchCurChord,hasSwitchDiagram,switchDiagram,switchBpm,startSwitch,stopSwitch,switchBpmUp,switchBpmDown,switchBeatDots,
+      earTypeNoteStyle,earTypeIntervalStyle,earTypeChordStyle,setEarNote,setEarInterval,setEarChord,
+      hasEarQuestion,earQPrompt,earChoices,hasEarFeedback,earFeedbackIsCorrect,earFeedbackIsWrong,earCorrectAnswer,earReplay,earNext,
+      scaleListPractice,hasScaleQuestion,scaleQDegree,scaleChoices,hasScaleFeedback,scaleFeedbackIsCorrect,scaleFeedbackIsWrong,scaleCorrectAnswer,scaleReplay,scaleNext,
+      memoryIsIdle,memoryIsShow,memoryIsQuiz,memoryIsResult,memoryShowChips,memoryPoolChips,memoryPickedChips,memoryAllCorrect,memoryIncorrect,startMemory,skipMemoryReveal,resetMemory,
       metroWidgetBtnStyle:`border:none;width:34px;height:34px;border-radius:50%;background:${S.playing?'#ff375f':A};color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex:none;transition:all .2s;`,
       metroWidgetIcon: S.playing
         ? h('svg',{width:13,height:13,viewBox:'0 0 16 16',fill:'currentColor','aria-hidden':true},h('rect',{x:3,y:2.5,width:3.6,height:11,rx:1}),h('rect',{x:9.4,y:2.5,width:3.6,height:11,rx:1}))
@@ -2267,6 +3036,7 @@ class Component extends DCLogic {
       hasInsight,insightChordName,insightVerdict,insightText,
       suggestedChips,hasSuggestions,
       hasAdvAnalysis,showAdvAnalysis,toggleAdvAnalysis,advAnalysisChevronStyle,advAnalysisSections,
+      hasVoiceLeading,showVoiceLeading,toggleVoiceLeading,voiceLeadingChevronStyle,voiceLeadingPairs,
       progressionMessages,hasProgressionMessages,allGoodMessage,
       presetList,
       songText,onSongTextChange,lineViews,activeHere,activeWordText,pickerOptions,clearChord,closePicker,
@@ -2276,12 +3046,17 @@ class Component extends DCLogic {
       ghostSmallStyle,stepBtnStyleSmall,metroBtnStyleSmall,
       currentSongName:S.currentSongName||'',onSongNameChange,saveSongBtn,newSongBtn,savedSongChips,hasSavedSongs,
       currentSongTags:S.currentSongTags||'',onSongTagsChange,songSearchQuery,onSongSearchChange,
+      currentSongArtist:S.currentSongArtist||'',onSongArtistChange,currentSongNotes:S.currentSongNotes||'',onSongNotesChange,
       tabHasInput,capo,capoLabel,capoUp,capoDown,hasCapo,soundingKeyLabel,transposeUp,transposeDown,
       toggleAutoScroll,autoScrollBtnLabel,autoScrollBtnStyle,scrollSpeed:S.scrollSpeed||3,setScrollSpeed,
       outputScrollRef:this.outputScrollRef,
       songsListItems,hasSongsListItems,noSongsListItems,hasViewingSong,viewingSongName,songView,backToList,editViewingSong,
+      exportSongPdfBtn,pdfExportBtnLabel,pdfExportBtnStyle,hasPdfError,pdfError:S.pdfError||'',
       showViewStats,toggleViewStats,viewStatsChevronStyle,
       toggleRecording,recordBtnLabel,recordBtnStyle,hasRecordError,recordError:S.recordError||'',recordingItems,hasRecordings,noRecordings,
+      isRecording:!!S.isRecording,recSecondsLabel,waveformCanvasRef:this.waveformCanvasRef,
+      showTeleprompter,teleCurrentChord,teleLineViews,
+      renameDraft,onRenameDraftChange,commitRename,cancelRename,
       livePreviewTabBlocks,hasLivePreviewTab,
       exportBackup:()=>self.exportBackup(),importBackupBtn:()=>self.pickBackupFile(),
       confirmImportBackup:()=>self.confirmImportBackup(),cancelImportBackup:()=>self.cancelImportBackup(),
