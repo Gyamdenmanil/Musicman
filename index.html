@@ -86,6 +86,7 @@
       <button onClick="{{ goSongs }}" style="{{ tSongs }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">S</span><span style="font-size:10px;">Songs</span></button>
       <button onClick="{{ goRhythm }}" style="{{ tRhythm }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">R</span><span style="font-size:10px;">Rhythm</span></button>
       <button onClick="{{ goPractice }}" style="{{ tPractice }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Pr</span><span style="font-size:10px;">Practice</span></button>
+      <button onClick="{{ goTuner }}" style="{{ tTuner }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Tu</span><span style="font-size:10px;">Tuner</span></button>
     </div>
   </div>
 
@@ -608,6 +609,52 @@
         Eighth-note subdivision<button onClick="{{ toggleSub }}" style="{{ subToggleStyle }}" style-active="transform:scale(0.92);"><span style="{{ subKnobStyle }}"></span></button>
       </div>
     </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isTuner }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:640px;margin:0 auto;animation:mmTabFade .18s ease-out;">
+    <div style="display:flex;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);margin-bottom:16px;">
+      <button onClick="{{ goTunerPitch }}" style="{{ tunerSubPitchStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Tuner</button>
+      <button onClick="{{ goTunerChord }}" style="{{ tunerSubChordStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chord ID</button>
+    </div>
+
+    <sc-if value="{{ tunerSubIsPitch }}" hint-placeholder-val="{{ true }}">
+    <div style="background:#1c1c1e;border-radius:24px;padding:34px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);text-align:center;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Chromatic Tuner</div>
+      <div style="font-size:96px;font-weight:700;letter-spacing:-0.03em;margin:10px 0 0;line-height:1;color:#f2f2f7;">{{ tunerNoteName }}</div>
+      <div style="font-size:14px;color:#98989d;font-weight:600;margin-top:4px;">{{ tunerFreqLabel }}</div>
+
+      <div style="position:relative;height:52px;background:#000000;border-radius:10px;overflow:hidden;margin:26px 0 8px;">
+        <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;background:#3a3a3c;"></div>
+        <div style="{{ tunerNeedleStyle }}"></div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:{{ tunerCentsColor }};">{{ tunerCentsLabel }}</div>
+
+      <div style="margin-top:26px;">
+        <button onClick="{{ toggleTuner }}" style="{{ tunerBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ tunerBtnLabel }}</button>
+      </div>
+      <sc-if value="{{ hasTunerError }}" hint-placeholder-val="{{ false }}">
+      <div style="color:#ff375f;font-size:12.5px;margin-top:14px;">{{ tunerError }}</div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ tunerSubIsChord }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#1c1c1e;border-radius:24px;padding:34px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);text-align:center;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Chord Detector</div>
+      <div style="font-size:52px;font-weight:700;letter-spacing:-0.02em;margin:14px 0 0;line-height:1;color:#f2f2f7;">{{ tunerChordName }}</div>
+      <div style="font-size:13px;color:#98989d;font-weight:600;margin-top:8px;">{{ tunerChordNotesLabel }}</div>
+      <div style="font-size:12px;color:#6e6e73;margin-top:18px;line-height:1.5;">Strum a chord clearly near the mic and hold it — works best with fewer overlapping harmonics (acoustic guitar, piano).</div>
+
+      <div style="margin-top:22px;">
+        <button onClick="{{ toggleTuner }}" style="{{ tunerBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ tunerBtnLabel }}</button>
+      </div>
+      <sc-if value="{{ hasTunerError }}" hint-placeholder-val="{{ false }}">
+      <div style="color:#ff375f;font-size:12.5px;margin-top:14px;">{{ tunerError }}</div>
+      </sc-if>
+    </div>
+    </sc-if>
   </div>
   </sc-if>
 
@@ -1227,7 +1274,8 @@ class Component extends DCLogic {
     practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
     practiceScaleName:'Ionian (Major)',practiceScaleQuestion:null,practiceScaleFeedback:null,
     practiceMemoryPhase:'idle',practiceMemorySeq:[],practiceMemoryPool:[],practiceMemoryPicked:[],
-    renamingRecId:null,renameDraft:'',currentSongArtist:'',currentSongNotes:'',pdfExporting:false,pdfError:'',showVoiceLeading:false,expandedMoodStyle:null};
+    renamingRecId:null,renameDraft:'',currentSongArtist:'',currentSongNotes:'',pdfExporting:false,pdfError:'',showVoiceLeading:false,expandedMoodStyle:null,
+    tunerSubTab:'pitch',tunerListening:false,tunerError:'',tunerNote:null,tunerChord:null};
 
   componentDidMount(){
     let saved=null;
@@ -1274,6 +1322,7 @@ class Component extends DCLogic {
     if(this.switchTimer) clearInterval(this.switchTimer);
     if(this.memoryTimer) clearTimeout(this.memoryTimer);
     this.stopWaveform();
+    this.teardownTuner();
   }
 
   pcOf(name){ let pc=this.LPC[name[0]]; for(let i=1;i<name.length;i++){ if(name[i]==='#')pc++; else if(name[i]==='b')pc--; } return ((pc%12)+12)%12; }
@@ -1914,6 +1963,142 @@ class Component extends DCLogic {
   playSeq(chords,arp){ this.ensureAudio(); const t0=this.ac.currentTime+0.05; const step=0.62; chords.forEach((c,i)=>{ const t=t0+i*step; if(arp){ const ms=this.midiChord(c.pcs); ms.forEach((m,k)=>this.voice(this.midiFreq(m),t+k*0.075,0.7,0.15)); } else { this.midiChord(c.pcs).forEach(m=>this.voice(this.midiFreq(m),t,step*1.05,0.14)); } }); }
 
   shuffle(arr){ const a=(arr||[]).slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  // ---- tuner & chord detection (mic input) ----
+  async startTuner(){
+    if(this.state.tunerListening) return;
+    this.setState({tunerError:''});
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      this.setState({tunerError:'Microphone access isn\'t supported in this browser.'}); return;
+    }
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      this.tunerStream=stream;
+      this.ensureAudio();
+      const src=this.ac.createMediaStreamSource(stream);
+      const analyser=this.ac.createAnalyser();
+      analyser.fftSize=8192;
+      analyser.smoothingTimeConstant=0.65;
+      src.connect(analyser);
+      this.tunerSource=src; this.tunerAnalyser=analyser;
+      this.tunerTimeData=new Float32Array(analyser.fftSize);
+      this.tunerFreqData=new Float32Array(analyser.frequencyBinCount);
+      this._tunerLastUpdate=0;
+      this.setState({tunerListening:true,tunerNote:null,tunerChord:null});
+      this.tunerTick();
+    }catch(e){
+      this.setState({tunerError:'Microphone access was blocked or unavailable.'});
+    }
+  }
+  teardownTuner(){
+    if(this.tunerRaf){ cancelAnimationFrame(this.tunerRaf); this.tunerRaf=null; }
+    if(this.tunerAnalyser){ try{ this.tunerAnalyser.disconnect(); }catch(e){} this.tunerAnalyser=null; }
+    if(this.tunerSource){ try{ this.tunerSource.disconnect(); }catch(e){} this.tunerSource=null; }
+    if(this.tunerStream){ this.tunerStream.getTracks().forEach(t=>t.stop()); this.tunerStream=null; }
+  }
+  stopTuner(){
+    this.teardownTuner();
+    this.setState({tunerListening:false,tunerNote:null,tunerChord:null});
+  }
+  toggleTuner(){ if(this.state.tunerListening) this.stopTuner(); else this.startTuner(); }
+  tunerTick(){
+    if(!this.tunerAnalyser) return;
+    const now=Date.now();
+    if(!this._tunerLastUpdate||now-this._tunerLastUpdate>90){
+      this._tunerLastUpdate=now;
+      if(this.state.tunerSubTab==='chord'){
+        const {chroma,total}=this.computeChroma();
+        if(total>1e-6){
+          const match=this.matchChord(chroma);
+          if(match&&match.score>0.32){
+            this.setState({tunerChord:{name:this.GTR_ROOTS[match.root]+(this.SUF[match.quality]||''),pcs:match.pcs,score:match.score}});
+          } else {
+            this.setState({tunerChord:null});
+          }
+        } else {
+          this.setState({tunerChord:null});
+        }
+      } else {
+        this.tunerAnalyser.getFloatTimeDomainData(this.tunerTimeData);
+        const freq=this.autoCorrelate(this.tunerTimeData,this.ac.sampleRate);
+        this.setState({tunerNote:freq>0?this.freqToNoteInfo(freq):null});
+      }
+    }
+    this.tunerRaf=requestAnimationFrame(()=>this.tunerTick());
+  }
+  autoCorrelate(buf,sampleRate){
+    const SIZE=buf.length;
+    let rms=0;
+    for(let i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
+    rms=Math.sqrt(rms/SIZE);
+    if(rms<0.01) return -1;
+    let start=0,end=SIZE-1;
+    const thresh=rms*0.35;
+    while(start<SIZE/2&&Math.abs(buf[start])<thresh) start++;
+    while(end>SIZE/2&&Math.abs(buf[end])<thresh) end--;
+    const trimmed=buf.slice(start,end);
+    const n=trimmed.length;
+    if(n<2) return -1;
+    const minFreq=60,maxFreq=1200;
+    const minLag=Math.floor(sampleRate/maxFreq), maxLag=Math.min(n-1,Math.ceil(sampleRate/minFreq));
+    const corr=new Float32Array(maxLag+1);
+    for(let lag=minLag;lag<=maxLag;lag++){
+      let sum=0;
+      for(let i=0;i<n-lag;i++) sum+=trimmed[i]*trimmed[i+lag];
+      corr[lag]=sum;
+    }
+    let bestLag=-1,bestVal=-Infinity;
+    for(let lag=minLag;lag<=maxLag;lag++){ if(corr[lag]>bestVal){ bestVal=corr[lag]; bestLag=lag; } }
+    if(bestLag<=minLag||bestLag>=maxLag) return sampleRate/bestLag;
+    const x1=corr[bestLag-1],x2=corr[bestLag],x3=corr[bestLag+1];
+    const denom=(x1-2*x2+x3);
+    const shift=denom?0.5*(x1-x3)/denom:0;
+    const refinedLag=bestLag+Math.max(-1,Math.min(1,shift));
+    return sampleRate/refinedLag;
+  }
+  freqToNoteInfo(freq){
+    if(!freq||!isFinite(freq)||freq<=0) return null;
+    const midi=69+12*Math.log2(freq/440);
+    const rounded=Math.round(midi);
+    const cents=Math.round((midi-rounded)*100);
+    const pc=((rounded%12)+12)%12;
+    const octave=Math.floor(rounded/12)-1;
+    return {name:this.GTR_ROOTS[pc],octave,cents,freq};
+  }
+  computeChroma(){
+    const analyser=this.tunerAnalyser, sampleRate=this.ac.sampleRate;
+    analyser.getFloatFrequencyData(this.tunerFreqData);
+    const data=this.tunerFreqData, n=data.length;
+    const chroma=new Array(12).fill(0);
+    const minFreq=75,maxFreq=2200;
+    for(let i=1;i<n;i++){
+      const freq=i*sampleRate/analyser.fftSize;
+      if(freq<minFreq||freq>maxFreq) continue;
+      const db=data[i];
+      if(!isFinite(db)) continue;
+      const mag=Math.pow(10,db/20);
+      const midi=69+12*Math.log2(freq/440);
+      const pc=((Math.round(midi)%12)+12)%12;
+      chroma[pc]+=mag;
+    }
+    const total=chroma.reduce((a,b)=>a+b,0);
+    const norm=total>0?chroma.map(v=>v/total):chroma;
+    return {chroma:norm,total};
+  }
+  matchChord(chroma){
+    let best=null;
+    for(const q in this.QUAL){
+      const ivs=this.QUAL[q];
+      for(let root=0;root<12;root++){
+        const pcSet=new Set(ivs.map(iv=>(root+iv)%12));
+        let inSum=0; pcSet.forEach(pc=>{ inSum+=chroma[pc]; });
+        let outSum=0; for(let pc=0;pc<12;pc++){ if(!pcSet.has(pc)) outSum+=chroma[pc]; }
+        const score=inSum/pcSet.size-0.6*(outSum/(12-pcSet.size));
+        if(!best||score>best.score) best={root,quality:q,score,pcs:[...pcSet]};
+      }
+    }
+    return best;
+  }
 
   // practice mode — chord switching trainer
   startSwitchPractice(){
@@ -2976,6 +3161,20 @@ class Component extends DCLogic {
     const skipMemoryReveal=()=>self.skipMemoryReveal();
     const resetMemory=()=>self.resetMemoryPractice();
 
+    const tunerNoteObj=S.tunerNote;
+    const tunerNoteName=tunerNoteObj?tunerNoteObj.name+tunerNoteObj.octave:'—';
+    const tunerFreqLabel=tunerNoteObj?tunerNoteObj.freq.toFixed(1)+' Hz':(S.tunerListening?'Listening…':'Press Start and play a single note');
+    const tunerCents=tunerNoteObj?tunerNoteObj.cents:0;
+    const tunerCentsClamped=Math.max(-50,Math.min(50,tunerCents));
+    const tunerCentsColor=!tunerNoteObj?'#98989d':(Math.abs(tunerCents)<=5?'#32d74b':(Math.abs(tunerCents)<=15?'#f0b429':'#ff375f'));
+    const tunerCentsLabel=tunerNoteObj?(tunerCents===0?'In tune':(tunerCents>0?'+'+tunerCents+' cents':tunerCents+' cents')):'';
+    const tunerNeedleStyle=`position:absolute;top:0;bottom:0;left:${50+(tunerCentsClamped/50)*45}%;width:3px;margin-left:-1.5px;border-radius:2px;background:${tunerCentsColor};transition:left .1s linear,background .15s;`;
+    const tunerChordObj=S.tunerChord;
+    const tunerChordName=tunerChordObj?tunerChordObj.name:(S.tunerListening?'Listening…':'—');
+    const tunerChordNotesLabel=tunerChordObj?tunerChordObj.pcs.slice().sort((a,b)=>a-b).map(pc=>this.GTR_ROOTS[pc]).join(' · '):'';
+    const tunerBtnLabel=S.tunerListening?'Stop Listening':'Start Listening';
+    const tunerBtnStyle=`border:none;background:${S.tunerListening?'#ff375f':A};color:#fff;font-size:17px;font-weight:600;padding:13px 46px;border-radius:980px;cursor:pointer;transition:all .2s;`;
+
     const clearBuilder=()=>self.setState({builderChords:[]});
     const playBuilder=()=>self.playSeq(builderChords,false);
     const playBuilderArp=()=>self.playSeq(builderChords,true);
@@ -2984,16 +3183,24 @@ class Component extends DCLogic {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
       isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
       chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,hasChordWheelSel,addWheelChordToProg,
-      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',
-      goHome:()=>{self.stopAutoScroll();self.setState({tab:'home',autoScroll:false});},
-      goTheory:()=>{self.stopAutoScroll();self.setState({tab:'theory',autoScroll:false});},
-      goGuitar:()=>{self.stopAutoScroll();self.setState({tab:'guitar',autoScroll:false});},
-      goProg:()=>{self.stopAutoScroll();self.setState({tab:'prog',autoScroll:false});},
-      goRhythm:()=>{self.stopAutoScroll();self.setState({tab:'rhythm',autoScroll:false});},
-      goSongs:()=>{self.stopAutoScroll();self.setState({tab:'songs',autoScroll:false});},
-      goMood:()=>{self.stopAutoScroll();self.setState({tab:'mood',autoScroll:false});},
-      goPractice:()=>{self.stopAutoScroll();self.setState({tab:'practice',autoScroll:false});},
-      tTheory:seg(S.tab==='theory'),tGuitar:seg(S.tab==='guitar'),tProg:seg(S.tab==='prog'),tRhythm:seg(S.tab==='rhythm'),tSongs:seg(S.tab==='songs'),tMood:seg(S.tab==='mood'),tPractice:seg(S.tab==='practice'),
+      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',
+      goHome:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'home',autoScroll:false});},
+      goTheory:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'theory',autoScroll:false});},
+      goGuitar:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'guitar',autoScroll:false});},
+      goProg:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'prog',autoScroll:false});},
+      goRhythm:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'rhythm',autoScroll:false});},
+      goSongs:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'songs',autoScroll:false});},
+      goMood:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'mood',autoScroll:false});},
+      goPractice:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'practice',autoScroll:false});},
+      goTuner:()=>{self.stopAutoScroll();self.setState({tab:'tuner',autoScroll:false});},
+      tTheory:seg(S.tab==='theory'),tGuitar:seg(S.tab==='guitar'),tProg:seg(S.tab==='prog'),tRhythm:seg(S.tab==='rhythm'),tSongs:seg(S.tab==='songs'),tMood:seg(S.tab==='mood'),tPractice:seg(S.tab==='practice'),tTuner:seg(S.tab==='tuner'),
+      tunerSubIsPitch:S.tunerSubTab!=='chord',tunerSubIsChord:S.tunerSubTab==='chord',
+      tunerSubPitchStyle:segS(S.tunerSubTab!=='chord'),tunerSubChordStyle:segS(S.tunerSubTab==='chord'),
+      goTunerPitch:()=>self.setState({tunerSubTab:'pitch'}),goTunerChord:()=>self.setState({tunerSubTab:'chord'}),
+      tunerNoteName,tunerFreqLabel,tunerCentsLabel,tunerCentsColor,tunerNeedleStyle,
+      tunerChordName,tunerChordNotesLabel,
+      tunerBtnLabel,tunerBtnStyle,toggleTuner:()=>self.toggleTuner(),
+      hasTunerError:!!S.tunerError,tunerError:S.tunerError,
       moodList,
       isPracticeSwitch,isPracticeEar,isPracticeScale,isPracticeMemory,goPracticeSwitch,goPracticeEar,goPracticeScale,goPracticeMemory,
       practiceModeSwitchStyle,practiceModeEarStyle,practiceModeScaleStyle,practiceModeMemoryStyle,practiceScore,practiceStreak,
