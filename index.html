@@ -55,6 +55,9 @@
         <div style="font-size:12px;font-weight:700;color:#f0b429;letter-spacing:0.08em;">SONGWRITER'S WORKBENCH</div>
         <h1 style="margin:3px 0 0;font-size:clamp(22px,5vw,28px);font-weight:700;letter-spacing:-0.02em;">Musicman</h1>
       </div>
+      <sc-if value="{{ notHome }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ goHome }}" style="border:1px solid #2c2c2e;background:#1c1c1e;color:#c7c7cc;font-size:11px;font-weight:700;padding:5px 12px 5px 9px;border-radius:980px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:6px;transition:border-color .15s,color .15s;" style-hover="border-color:#f0b429;color:#f0b429;" style-active="transform:scale(0.95);"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>All sections</button>
+      </sc-if>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <button onClick="{{ toggleRecording }}" style="{{ recordBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ recordBtnLabel }}</button>
         <sc-if value="{{ isRecording }}" hint-placeholder-val="{{ false }}">
@@ -87,21 +90,20 @@
     </div>
   </div>
 
-  <div style="display:flex;justify-content:center;margin-bottom:26px;max-width:100%;">
-    <div ref="{{ navTrackRef }}" style="position:relative;display:inline-flex;background:#000000;border-radius:16px;padding:4px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;">
-      <div ref="{{ navIndicatorRef }}" style="position:absolute;top:4px;left:4px;width:0;height:0;border-radius:10px;background:#1c1c1e;box-shadow:0 1px 3px rgba(0,0,0,0.12),inset 0 0 0 1px rgba(240,180,41,0.22),0 0 12px rgba(240,180,41,0.14);pointer-events:none;opacity:0;z-index:0;"></div>
-      <button data-hero-item data-tab="theory" onClick="{{ goTheory }}" style="{{ tTheory }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">T</span><span style="font-size:10px;">Theory</span></button>
-      <button data-hero-item data-tab="guitar" onClick="{{ goGuitar }}" style="{{ tGuitar }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">G</span><span style="font-size:10px;">Guitar</span></button>
-      <button data-hero-item data-tab="prog" onClick="{{ goProg }}" style="{{ tProg }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">P</span><span style="font-size:10px;">Progression</span></button>
-      <button data-hero-item data-tab="mood" onClick="{{ goMood }}" style="{{ tMood }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">M</span><span style="font-size:10px;">Mood</span></button>
-      <button data-hero-item data-tab="songs" onClick="{{ goSongs }}" style="{{ tSongs }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">S</span><span style="font-size:10px;">Songs</span></button>
-      <button data-hero-item data-tab="rhythm" onClick="{{ goRhythm }}" style="{{ tRhythm }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:12px;font-weight:700;margin:0 auto 4px;">R</span><span style="font-size:10px;">Rhythm</span></button>
-      <button data-hero-item data-tab="practice" onClick="{{ goPractice }}" style="{{ tPractice }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Pr</span><span style="font-size:10px;">Practice</span></button>
-      <button data-hero-item data-tab="tuner" onClick="{{ goTuner }}" style="{{ tTuner }}text-align:center;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);"><span style="display:block;width:26px;height:26px;line-height:23px;border-radius:50%;border:1.5px solid #6b551f;color:#f0b429;font-size:11px;font-weight:700;margin:0 auto 4px;">Tu</span><span style="font-size:10px;">Tuner</span></button>
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div style="max-width:900px;margin:0 auto 28px;animation:mmTabFade .18s ease-out;">
+    <div ref="{{ homeHubRef }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
+      <sc-for list="{{ homeHubTiles }}" as="t" hint-placeholder-count="8">
+      <button data-hero-item onClick="{{ t.onClick }}" style="text-align:left;border:1px solid #2c2c2e;background:linear-gradient(160deg,#1c1c1e,#161616);border-radius:18px;padding:18px 18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;" style-hover="{{ t.hoverStyle }}" style-active="transform:scale(0.97);">
+        <div style="position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;background:{{ t.accent }};opacity:0.16;filter:blur(6px);"></div>
+        <div style="position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:{{ t.accent }};color:#0b0b0c;font-weight:800;font-size:14px;margin-bottom:12px;box-shadow:0 4px 14px {{ t.accentShadow }};">{{ t.badge }}</div>
+        <div style="position:relative;font-size:16px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px;">{{ t.label }}</div>
+        <div style="position:relative;font-size:12px;color:#98989d;line-height:1.4;">{{ t.desc }}</div>
+      </button>
+      </sc-for>
     </div>
   </div>
 
-  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div style="max-width:400px;margin:0 auto;animation:mmTabFade .18s ease-out;">
     <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
@@ -1293,9 +1295,8 @@ class Component extends DCLogic {
 
   outputScrollRef = React.createRef();
   waveformCanvasRef = React.createRef();
-  navTrackRef = React.createRef();
-  navIndicatorRef = React.createRef();
   heroRef = React.createRef();
+  homeHubRef = React.createRef();
   chordHeroRef = React.createRef();
   keyShortcutsRef = React.createRef();
   liveStatsRef = React.createRef();
@@ -1342,21 +1343,15 @@ class Component extends DCLogic {
     patch.recordings=Array.isArray(recordings)?recordings:[];
     patch.isRecording=false; patch.recSeconds=0; patch.recordError='';
     this.setState(patch,()=>{
-      this._lastTab=this.state.tab;
       this._lastGChord=this.state.gRoot+'|'+this.state.gQual;
       this._lastKey=this.state.keyRoot+'|'+this.state.keyMode;
-      this.positionNavIndicator(false);
-      this.whenAnime(()=>{ this.positionNavIndicator(false); this.playHeroIntro(); });
+      this.whenAnime(()=>{ this.playHeroIntro(); });
     });
   }
   componentDidUpdate(){
     try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}=this.state;
       localStorage.setItem('mtsa_v3',JSON.stringify({tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}));
     }catch(e){}
-    if(this._lastTab!==this.state.tab){
-      this._lastTab=this.state.tab;
-      this.positionNavIndicator(true);
-    }
     const gChordKey=this.state.gRoot+'|'+this.state.gQual;
     if(this._lastGChord!==gChordKey){
       this._lastGChord=gChordKey;
@@ -1379,23 +1374,6 @@ class Component extends DCLogic {
       this.pulseBeatDot(this.practiceSwitchDotsRef,this.state.practiceSwitchBeat);
     }
     this._lastSwitchBeat=this.state.practiceSwitchBeat;
-  }
-  positionNavIndicator(animate){
-    const track=this.navTrackRef.current, ind=this.navIndicatorRef.current;
-    if(!track||!ind) return;
-    const btn=track.querySelector('[data-tab="'+this.state.tab+'"]');
-    if(!btn){
-      if(animate&&window.anime) window.anime.animate(ind,{opacity:0,duration:200,ease:'outQuad'});
-      else ind.style.opacity=0;
-      return;
-    }
-    const tRect=track.getBoundingClientRect(), bRect=btn.getBoundingClientRect();
-    const left=bRect.left-tRect.left+track.scrollLeft, top=bRect.top-tRect.top, width=bRect.width, height=bRect.height;
-    if(animate&&window.anime){
-      window.anime.animate(ind,{left,top,width,height,opacity:1,duration:480,ease:'outElastic(1,.75)'});
-    }else{
-      ind.style.left=left+'px'; ind.style.top=top+'px'; ind.style.width=width+'px'; ind.style.height=height+'px'; ind.style.opacity=1;
-    }
   }
   playHeroIntro(){
     const hero=this.heroRef.current;
@@ -2564,10 +2542,24 @@ class Component extends DCLogic {
     const keyModeLabel=mode==='major'?'major':'minor';
     const keyLabel=keyRoot+' '+keyModeLabel;
     const seg=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;box-shadow:${on?'0 1px 3px rgba(0,0,0,0.12)':'none'};transition:all .2s;`;
-    const navSeg=(on)=>`border:none;background:transparent;color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;position:relative;z-index:1;transition:color .2s;`;
     const segS=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:13px;font-weight:600;padding:5px 13px;border-radius:7px;cursor:pointer;box-shadow:${on?'0 1px 2px rgba(0,0,0,0.1)':'none'};transition:all .2s;`;
     const pill=(active)=>`border:1px solid ${active?A:'#2c2c2e'};background:${active?A:'#1c1c1e'};color:${active?'#fff':'#f2f2f7'};font-size:13px;font-weight:500;padding:7px 13px;border-radius:980px;cursor:pointer;transition:all .15s;`;
     const romanChip=(bg)=>`border:1px solid #2c2c2e;background:${bg};color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
+    const goTab=(t)=>()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:t,autoScroll:false});};
+    const HUB_TILE_DEFS=[
+      {tab:'theory',badge:'T',label:'Theory',desc:'Scales, modes & diatonic chords in your key.',accent:'#f0b429'},
+      {tab:'guitar',badge:'G',label:'Guitar',desc:'Voicings, fingerings & fretboard shapes.',accent:'#ff8a3d'},
+      {tab:'prog',badge:'P',label:'Progression',desc:'Build a progression & get smart suggestions.',accent:'#c77dff'},
+      {tab:'mood',badge:'M',label:'Mood',desc:'Pick a vibe, get a starter key & groove.',accent:'#5ac8fa'},
+      {tab:'songs',badge:'S',label:'Songs',desc:'Write lyrics, chords, and song structure.',accent:'#34c759'},
+      {tab:'rhythm',badge:'R',label:'Rhythm',desc:'Metronome, tap tempo & time signatures.',accent:'#ff5c72'},
+      {tab:'practice',badge:'Pr',label:'Practice',desc:'Chord switching, ear training & more.',accent:'#30d6c4'},
+      {tab:'tuner',badge:'Tu',label:'Tuner',desc:'Chromatic tuner & chord ID from the mic.',accent:'#ff6fae'},
+    ];
+    const hexToRgba=(hex,a)=>{ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
+    const homeHubTiles=HUB_TILE_DEFS.map(t=>({...t,onClick:goTab(t.tab),
+      accentShadow:hexToRgba(t.accent,0.35),
+      hoverStyle:`transform:translateY(-3px);border-color:${hexToRgba(t.accent,0.5)};box-shadow:0 10px 28px ${hexToRgba(t.accent,0.16)};`}));
     const toggle=(on)=>`position:relative;width:44px;height:26px;border-radius:980px;border:none;background:${on?A:'#2c2c2e'};cursor:pointer;transition:all .2s;padding:0;`;
     const knob=(on)=>`position:absolute;top:3px;left:${on?'21px':'3px'};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:all .2s;`;
     const playPill=`border:none;background:linear-gradient(135deg,#ffc861,${A} 55%,#e8720c);color:#1a0e00;font-size:14px;font-weight:700;padding:9px 18px;border-radius:980px;cursor:pointer;box-shadow:0 2px 14px rgba(240,180,41,0.28);transition:filter .15s,transform .12s ease,box-shadow .15s;animation:mmWarmGlow 3.2s ease-in-out infinite;`;
@@ -3332,7 +3324,7 @@ class Component extends DCLogic {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
       isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
       chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,hasChordWheelSel,addWheelChordToProg,
-      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',
+      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',notHome:S.tab!=='home',
       goHome:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'home',autoScroll:false});},
       goTheory:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'theory',autoScroll:false});},
       goGuitar:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'guitar',autoScroll:false});},
@@ -3342,7 +3334,6 @@ class Component extends DCLogic {
       goMood:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'mood',autoScroll:false});},
       goPractice:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'practice',autoScroll:false});},
       goTuner:()=>{self.stopAutoScroll();self.setState({tab:'tuner',autoScroll:false});},
-      tTheory:navSeg(S.tab==='theory'),tGuitar:navSeg(S.tab==='guitar'),tProg:navSeg(S.tab==='prog'),tRhythm:navSeg(S.tab==='rhythm'),tSongs:navSeg(S.tab==='songs'),tMood:navSeg(S.tab==='mood'),tPractice:navSeg(S.tab==='practice'),tTuner:navSeg(S.tab==='tuner'),
       tunerSubIsPitch:S.tunerSubTab!=='chord',tunerSubIsChord:S.tunerSubTab==='chord',
       tunerSubPitchStyle:segS(S.tunerSubTab!=='chord'),tunerSubChordStyle:segS(S.tunerSubTab==='chord'),
       goTunerPitch:()=>self.setState({tunerSubTab:'pitch'}),goTunerChord:()=>self.setState({tunerSubTab:'chord'}),
@@ -3406,7 +3397,7 @@ class Component extends DCLogic {
       tabHasInput,capo,capoLabel,capoUp,capoDown,hasCapo,soundingKeyLabel,transposeUp,transposeDown,
       toggleAutoScroll,autoScrollBtnLabel,autoScrollBtnStyle,scrollSpeed:S.scrollSpeed||3,setScrollSpeed,
       outputScrollRef:this.outputScrollRef,
-      navTrackRef:this.navTrackRef,navIndicatorRef:this.navIndicatorRef,heroRef:this.heroRef,chordHeroRef:this.chordHeroRef,keyShortcutsRef:this.keyShortcutsRef,
+      heroRef:this.heroRef,chordHeroRef:this.chordHeroRef,keyShortcutsRef:this.keyShortcutsRef,homeHubTiles,homeHubRef:this.homeHubRef,
       liveStatsRef:this.liveStatsRef,viewStatsRef:this.viewStatsRef,beatDotsRef:this.beatDotsRef,practiceSwitchDotsRef:this.practiceSwitchDotsRef,
       songsListItems,hasSongsListItems,noSongsListItems,hasViewingSong,viewingSongName,songView,backToList,editViewingSong,
       exportSongPdfBtn,pdfExportBtnLabel,pdfExportBtnStyle,hasPdfError,pdfError:S.pdfError||'',
