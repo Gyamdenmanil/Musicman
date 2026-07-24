@@ -205,22 +205,25 @@
       <div style="border-top:1px solid #2c2c2e;padding-top:12px;margin-top:6px;">
         <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:6px;">Quick jump · diatonic chords in {{ keyLabel }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <sc-for list="{{ keyShortcuts }}" as="k" hint-placeholder-count="7"><button onClick="{{ k.onClick }}" style="border:1px solid #2c2c2e;background:#232325;color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
+          <sc-for list="{{ keyShortcuts }}" as="k" hint-placeholder-count="7"><button onClick="{{ k.onClick }}" style="{{ k.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
         </div>
       </div>
       <div style="border-top:1px solid #2c2c2e;padding-top:12px;margin-top:12px;">
-        <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:2px;">Borrowed · color chords</div>
-        <div style="font-size:10.5px;color:#6e6e73;margin-bottom:6px;line-height:1.4;">{{ borrowedSectionHelp }}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <sc-for list="{{ borrowedShortcuts }}" as="k" hint-placeholder-count="5"><button onClick="{{ k.onClick }}" style="border:1px solid #2c2c2e;background:#2e2410;color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
+        <button onClick="{{ toggleAdvChords }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ advChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Borrowed &amp; secondary dominant chords</button>
+        <sc-if value="{{ showAdvChords }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:2px;">Borrowed · color chords</div>
+          <div style="font-size:10.5px;color:#6e6e73;margin-bottom:6px;line-height:1.4;">{{ borrowedSectionHelp }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+            <sc-for list="{{ borrowedShortcuts }}" as="k" hint-placeholder-count="5"><button onClick="{{ k.onClick }}" style="{{ k.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
+          </div>
+          <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:2px;">Secondary dominants</div>
+          <div style="font-size:10.5px;color:#6e6e73;margin-bottom:6px;line-height:1.4;">{{ secDomSectionHelp }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <sc-for list="{{ secDomShortcuts }}" as="k" hint-placeholder-count="5"><button onClick="{{ k.onClick }}" style="{{ k.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
+          </div>
         </div>
-      </div>
-      <div style="border-top:1px solid #2c2c2e;padding-top:12px;margin-top:12px;">
-        <div style="font-size:11px;color:#8e8e93;font-weight:600;margin-bottom:2px;">Secondary dominants</div>
-        <div style="font-size:10.5px;color:#6e6e73;margin-bottom:6px;line-height:1.4;">{{ secDomSectionHelp }}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <sc-for list="{{ secDomShortcuts }}" as="k" hint-placeholder-count="5"><button onClick="{{ k.onClick }}" style="border:1px solid #2c2c2e;background:#2e2410;color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.94);"><span style="color:#f0b429;font-weight:700;margin-right:4px;">{{ k.roman }}</span>{{ k.name }}</button></sc-for>
-        </div>
+        </sc-if>
       </div>
     </div>
 
@@ -292,8 +295,43 @@
         <div style="font-size:11.5px;color:#8e8e93;margin-top:10px;">Tap any chord chip above to see how it moves from the one before it.</div>
       </div>
       </sc-if>
+      </sc-if>
+      <sc-if value="{{ noBuilderChords }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:14px;color:#98989d;">Nothing here yet — add a chord below, or ask for a suggestion.</div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ hasSuggestions }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;margin-bottom:10px;">Suggested next chord</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ suggestedChips }}" as="s" hint-placeholder-count="4">
+          <div style="{{ s.style }}">
+            <div onClick="{{ s.onClick }}" style="cursor:pointer;transition:filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="opacity:0.7;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-size:9px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:{{ s.tierColor }};">{{ s.tier }}</span>
+                <span style="font-size:11px;color:#f0b429;font-weight:700;">{{ s.roman }}</span>
+                <span style="font-size:15px;font-weight:700;">{{ s.name }}</span>
+              </div>
+              <div style="font-size:11.5px;color:#98989d;margin-top:3px;line-height:1.4;">{{ s.reason }}</div>
+            </div>
+            <sc-if value="{{ s.hasVariants }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid #2c2c2e;">
+              <sc-for list="{{ s.variants }}" as="v" hint-placeholder-count="6"><button onClick="{{ v.onClick }}" style="border:1px solid #2c2c2e;background:#232325;color:#c7c7cc;font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;cursor:pointer;transition:filter .12s ease,transform .1s ease;" style-hover="filter:brightness(1.25);" style-active="transform:scale(0.92);">{{ v.name }}</button></sc-for>
+            </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ hasAnalysisCard }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;margin-bottom:2px;">Analysis</div>
+      <div style="font-size:11px;color:#6e6e73;margin-bottom:12px;line-height:1.4;">Optional deeper theory on the progression you've built.</div>
       <sc-if value="{{ hasAdvAnalysis }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-top:18px;padding-top:16px;border-top:1px solid #2c2c2e;">
+      <div>
         <button onClick="{{ toggleAdvAnalysis }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ advAnalysisChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Advanced analysis</button>
         <sc-if value="{{ showAdvAnalysis }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
@@ -308,7 +346,7 @@
       </div>
       </sc-if>
       <sc-if value="{{ hasVoiceLeading }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-top:18px;padding-top:16px;border-top:1px solid #2c2c2e;">
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #2c2c2e;">
         <button onClick="{{ toggleVoiceLeading }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ voiceLeadingChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Voice leading</button>
         <sc-if value="{{ showVoiceLeading }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:14px;justify-content:center;">
@@ -327,35 +365,8 @@
         </sc-if>
       </div>
       </sc-if>
-      </sc-if>
-      <sc-if value="{{ noBuilderChords }}" hint-placeholder-val="{{ true }}">
-      <div style="font-size:14px;color:#98989d;">Nothing here yet — add a chord below, or ask for a suggestion.</div>
-      </sc-if>
-      <sc-if value="{{ hasSuggestions }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-top:18px;padding-top:16px;border-top:1px solid #2c2c2e;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;margin-bottom:10px;">Suggested next chord</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <sc-for list="{{ suggestedChips }}" as="s" hint-placeholder-count="4">
-            <div style="{{ s.style }}">
-              <div onClick="{{ s.onClick }}" style="cursor:pointer;transition:filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="opacity:0.7;">
-                <div style="display:flex;align-items:baseline;gap:8px;">
-                  <span style="font-size:9px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:{{ s.tierColor }};">{{ s.tier }}</span>
-                  <span style="font-size:11px;color:#f0b429;font-weight:700;">{{ s.roman }}</span>
-                  <span style="font-size:15px;font-weight:700;">{{ s.name }}</span>
-                </div>
-                <div style="font-size:11.5px;color:#98989d;margin-top:3px;line-height:1.4;">{{ s.reason }}</div>
-              </div>
-              <sc-if value="{{ s.hasVariants }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid #2c2c2e;">
-                <sc-for list="{{ s.variants }}" as="v" hint-placeholder-count="6"><button onClick="{{ v.onClick }}" style="border:1px solid #2c2c2e;background:#232325;color:#c7c7cc;font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;cursor:pointer;transition:filter .12s ease,transform .1s ease;" style-hover="filter:brightness(1.25);" style-active="transform:scale(0.92);">{{ v.name }}</button></sc-for>
-              </div>
-              </sc-if>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-      </sc-if>
     </div>
+    </sc-if>
 
     <div style="background:#1c1c1e;border-radius:20px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
@@ -447,11 +458,11 @@
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#98989d;">Practice</div>
         <div style="font-size:12px;color:#98989d;">Score <b style="color:#f0b429;">{{ practiceScore }}</b> · Streak <b style="color:#f0b429;">{{ practiceStreak }}</b></div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);margin-bottom:20px;gap:2px;">
-        <button onClick="{{ goPracticeSwitch }}" style="{{ practiceModeSwitchStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chord Switching</button>
-        <button onClick="{{ goPracticeEar }}" style="{{ practiceModeEarStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Ear Training</button>
-        <button onClick="{{ goPracticeScale }}" style="{{ practiceModeScaleStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Scale Practice</button>
-        <button onClick="{{ goPracticeMemory }}" style="{{ practiceModeMemoryStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Progression Memory</button>
+      <div style="display:flex;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);margin-bottom:20px;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;">
+        <button onClick="{{ goPracticeSwitch }}" style="{{ practiceModeSwitchStyle }}white-space:nowrap;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chord Switching</button>
+        <button onClick="{{ goPracticeEar }}" style="{{ practiceModeEarStyle }}white-space:nowrap;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Ear Training</button>
+        <button onClick="{{ goPracticeScale }}" style="{{ practiceModeScaleStyle }}white-space:nowrap;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Scale Practice</button>
+        <button onClick="{{ goPracticeMemory }}" style="{{ practiceModeMemoryStyle }}white-space:nowrap;" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Progression Memory</button>
       </div>
 
       <sc-if value="{{ isPracticeSwitch }}" hint-placeholder-val="{{ true }}">
@@ -663,7 +674,9 @@
 
     <div>
       <div style="font-size:18px;font-weight:700;letter-spacing:-0.01em;margin-bottom:14px;">Write a Song</div>
-      <div style="background:#1c1c1e;border-radius:20px;padding:30px 34px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <div style="background:#1c1c1e;border-radius:20px;padding:24px 28px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
         <input value="{{ currentSongName }}" onInput="{{ onSongNameChange }}" placeholder="Untitled song" style="font-size:20px;font-weight:700;letter-spacing:-0.01em;color:#f2f2f7;border:none;background:transparent;padding:0;flex:1;min-width:160px;">
         <button onClick="{{ saveSongBtn }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);">Save</button>
@@ -673,9 +686,9 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
         <input value="{{ currentSongArtist }}" onInput="{{ onSongArtistChange }}" placeholder="Artist (for PDF export)" style="font-size:13px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;flex:1;min-width:160px;">
       </div>
-      <textarea value="{{ currentSongNotes }}" onInput="{{ onSongNotesChange }}" placeholder="Notes (performance notes, ideas — included in PDF export)" style="font-size:12.5px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;min-height:44px;margin-bottom:14px;font-family:inherit;resize:vertical;"></textarea>
+      <textarea value="{{ currentSongNotes }}" onInput="{{ onSongNotesChange }}" placeholder="Notes (performance notes, ideas — included in PDF export)" style="font-size:12.5px;color:#c7c7cc;border:1px solid #2c2c2e;background:#1c1c1e;border-radius:9px;padding:8px 12px;width:100%;min-height:44px;font-family:inherit;resize:vertical;"></textarea>
       <sc-if value="{{ hasSavedSongs }}" hint-placeholder-val="{{ false }}">
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
         <sc-for list="{{ savedSongChips }}" as="s" hint-placeholder-count="3">
           <div style="{{ s.style }}">
             <button onClick="{{ s.load }}" style="border:none;background:transparent;font-size:13px;font-weight:600;color:inherit;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">{{ s.name }}</button>
@@ -684,7 +697,10 @@
         </sc-for>
       </div>
       </sc-if>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #2c2c2e;font-size:12px;color:#8e8e93;">Saved songs show up below in <b style="color:#f2f2f7;">Your Songs</b>, where you can view and auto-scroll them.</div>
+      </div>
 
+      <div style="background:#1c1c1e;border-radius:20px;padding:24px 28px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
       <div style="display:flex;background:#000000;border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);margin-bottom:16px;">
         <button onClick="{{ goWriteLyrics }}" style="{{ writeSubLyricsStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Lyrics</button>
         <button onClick="{{ goWriteChords }}" style="{{ writeSubChordsStyle }}" style-hover="background:rgba(0,0,0,0.06);" style-active="transform:scale(0.96);">Chords &amp; Tab</button>
@@ -878,9 +894,10 @@
         </div>
       </div>
       </sc-if>
+      </div>
 
       <sc-if value="{{ hasLiveStats }}" hint-placeholder-val="{{ false }}">
-      <div style="border-top:1px solid #2c2c2e;margin-top:24px;padding-top:16px;">
+      <div style="background:#1c1c1e;border-radius:20px;padding:24px 28px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);">
         <button onClick="{{ toggleLiveStats }}" style="display:flex;align-items:center;gap:6px;width:100%;border:none;background:transparent;color:#98989d;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;padding:0;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="{{ liveStatsChevronStyle }}" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>Song stats</button>
         <sc-if value="{{ showLiveStats }}" hint-placeholder-val="{{ false }}">
         <div style="margin-top:14px;">
@@ -923,10 +940,7 @@
       </div>
       </sc-if>
 
-      <div style="border-top:1px solid #2c2c2e;margin-top:24px;padding-top:16px;">
-        <div style="font-size:12px;color:#8e8e93;">Saved songs show up below in <b style="color:#f2f2f7;">Your Songs</b>, where you can view and auto-scroll them.</div>
       </div>
-    </div>
     </div>
 
     <div>
@@ -2430,6 +2444,7 @@ class Component extends DCLogic {
     const seg=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;box-shadow:${on?'0 1px 3px rgba(0,0,0,0.12)':'none'};transition:all .2s;`;
     const segS=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:13px;font-weight:600;padding:5px 13px;border-radius:7px;cursor:pointer;box-shadow:${on?'0 1px 2px rgba(0,0,0,0.1)':'none'};transition:all .2s;`;
     const pill=(active)=>`border:1px solid ${active?A:'#2c2c2e'};background:${active?A:'#1c1c1e'};color:${active?'#fff':'#f2f2f7'};font-size:13px;font-weight:500;padding:7px 13px;border-radius:980px;cursor:pointer;transition:all .15s;`;
+    const romanChip=(bg)=>`border:1px solid #2c2c2e;background:${bg};color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
     const toggle=(on)=>`position:relative;width:44px;height:26px;border-radius:980px;border:none;background:${on?A:'#2c2c2e'};cursor:pointer;transition:all .2s;padding:0;`;
     const knob=(on)=>`position:absolute;top:3px;left:${on?'21px':'3px'};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:all .2s;`;
     const playPill=`border:none;background:${A};color:#fff;font-size:14px;font-weight:600;padding:9px 18px;border-radius:980px;cursor:pointer;box-shadow:0 2px 14px rgba(240,180,41,0.28);transition:filter .15s,transform .12s ease,box-shadow .15s;`;
@@ -2585,10 +2600,10 @@ class Component extends DCLogic {
     const gChord=this.chordFromRootPC(gRoot,gQual);
     const voicings=this.buildVoicings(gChord);
     const chordVibeText=this.chordVibe(keyRoot,mode,gRoot,gQual);
-    const keyShortcuts=(mode==='major'?this.MAJ_TRI:this.MIN_TRI).map((sp,d)=>{ const c=this.chordFromSpec(keyRoot,sp); return {roman:c.roman,name:c.name,onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}; });
+    const keyShortcuts=(mode==='major'?this.MAJ_TRI:this.MIN_TRI).map((sp,d)=>{ const c=this.chordFromSpec(keyRoot,sp); return {roman:c.roman,name:c.name,style:romanChip('#232325'),onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}; });
     const cxHarmGuitar=this.complexHarmony(keyRoot,mode);
-    const borrowedShortcuts=cxHarmGuitar.mi.map(c=>({roman:c.roman,name:c.name,onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}));
-    const secDomShortcuts=cxHarmGuitar.sd.map(c=>({roman:c.roman,name:c.name,onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}));
+    const borrowedShortcuts=cxHarmGuitar.mi.map(c=>({roman:c.roman,name:c.name,style:romanChip('#2e2410'),onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}));
+    const secDomShortcuts=cxHarmGuitar.sd.map(c=>({roman:c.roman,name:c.name,style:romanChip('#2e2410'),onClick:()=>self.setState({gRoot:c.rootPC,gQual:c.quality})}));
 
     // metronome
     const ts=this.TIME_SIGS[S.tsIndex];
@@ -2882,6 +2897,7 @@ class Component extends DCLogic {
     const showVoiceLeading=!!S.showVoiceLeading;
     const toggleVoiceLeading=()=>self.setState({showVoiceLeading:!S.showVoiceLeading});
     const voiceLeadingChevronStyle=`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${S.showVoiceLeading?180:0}deg);`;
+    const hasAnalysisCard=hasAdvAnalysis||hasVoiceLeading;
 
     // write tab — one continuous notepad: lyrics + inline "# Label" headings + click-to-chord + one tab grid
     const allPickerRaw=[...romanArrB.map((rb,d)=>{ const c=this.chordFromSpec(keyRoot,degSpecsArr[d]); return {roman:rb,name:c.name,pcs:c.pcs}; }),...cxHarm.mi.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs})),...cxHarm.sd.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs}))];
@@ -3253,7 +3269,7 @@ class Component extends DCLogic {
       hasInsight,insightChordName,insightVerdict,insightText,
       suggestedChips,hasSuggestions,
       hasAdvAnalysis,showAdvAnalysis,toggleAdvAnalysis,advAnalysisChevronStyle,advAnalysisSections,
-      hasVoiceLeading,showVoiceLeading,toggleVoiceLeading,voiceLeadingChevronStyle,voiceLeadingPairs,
+      hasVoiceLeading,showVoiceLeading,toggleVoiceLeading,voiceLeadingChevronStyle,voiceLeadingPairs,hasAnalysisCard,
       progressionMessages,hasProgressionMessages,allGoodMessage,
       presetList,
       songText,onSongTextChange,lineViews,activeHere,activeWordText,pickerOptions,clearChord,closePicker,
