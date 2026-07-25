@@ -45,8 +45,18 @@
   @keyframes mmChipPop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.06);opacity:1;}100%{transform:scale(1);opacity:1;}}
   @keyframes mmTabFade{0%{opacity:0;transform:translateY(4px);}100%{opacity:1;transform:translateY(0);}}
   @keyframes mmWarmGlow{0%,100%{box-shadow:0 2px 14px rgba(240,180,41,0.28),0 0 0 rgba(255,140,20,0);}50%{box-shadow:0 2px 20px rgba(240,180,41,0.4),0 0 16px rgba(255,140,20,0.18);}}
+  @keyframes mmSpin{to{transform:rotate(360deg);}}
 </style>
 </helmet>
+<sc-if value="{{ splashVisible }}" hint-placeholder-val="{{ true }}">
+<div style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#000000;opacity:{{ splashOpacity }};transition:opacity .4s ease;">
+  <div style="text-align:center;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#f0b429;">Musicman</div>
+    <div style="font-size:23px;font-weight:800;letter-spacing:-0.01em;margin-top:10px;">Wanna make music, bro???</div>
+    <div style="margin:24px auto 0;width:32px;height:32px;border-radius:50%;border:3px solid #2c2c2e;border-top-color:#f0b429;animation:mmSpin 0.8s linear infinite;"></div>
+  </div>
+</div>
+</sc-if>
 <div ref="{{ heroRef }}" style="max-width:1120px;margin:0 auto;padding:calc(clamp(16px,4vw,28px) + env(safe-area-inset-top)) clamp(14px,4vw,24px) calc(90px + env(safe-area-inset-bottom));">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid #000000;">
@@ -89,16 +99,6 @@
       </div>
     </div>
   </div>
-
-  <sc-if value="{{ hasWelcome }}" hint-placeholder-val="{{ true }}">
-  <div style="max-width:900px;margin:0 auto 22px;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;animation:mmTabFade .18s ease-out;">
-    <div>
-      <div style="font-size:17px;font-weight:800;letter-spacing:-0.01em;">Wanna make music, bro???</div>
-      <div style="font-size:12.5px;color:#98989d;margin-top:3px;">Pick a key, tune up, find a chord — let's get into it.</div>
-    </div>
-    <button onClick="{{ dismissWelcome }}" style="border:none;background:transparent;color:#6e6e73;font-size:20px;line-height:1;cursor:pointer;padding:4px 6px;flex:none;transition:filter .12s ease,transform .12s ease;" style-hover="filter:brightness(1.4);" style-active="transform:scale(0.85);">×</button>
-  </div>
-  </sc-if>
 
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div style="max-width:900px;margin:0 auto 28px;animation:mmTabFade .18s ease-out;">
@@ -1321,7 +1321,7 @@ class Component extends DCLogic {
     practiceScaleName:'Ionian (Major)',practiceScaleQuestion:null,practiceScaleFeedback:null,
     practiceMemoryPhase:'idle',practiceMemorySeq:[],practiceMemoryPool:[],practiceMemoryPicked:[],
     renamingRecId:null,renameDraft:'',currentSongArtist:'',currentSongNotes:'',pdfExporting:false,pdfError:'',showVoiceLeading:false,expandedMoodStyle:null,
-    tunerSubTab:'pitch',tunerListening:false,tunerError:'',tunerNote:null,tunerChord:null,showWelcome:true};
+    tunerSubTab:'pitch',tunerListening:false,tunerError:'',tunerNote:null,tunerChord:null,splashPhase:'visible'};
 
   componentDidMount(){
     let saved=null;
@@ -1358,6 +1358,8 @@ class Component extends DCLogic {
       this._lastKey=this.state.keyRoot+'|'+this.state.keyMode;
       this.whenAnime(()=>{ this.playHeroIntro(); });
     });
+    this._splashFadeTimer=setTimeout(()=>this.setState({splashPhase:'fading'}),1100);
+    this._splashGoneTimer=setTimeout(()=>this.setState({splashPhase:'gone'}),1500);
   }
   componentDidUpdate(){
     try{const {tab,keyRoot,keyMode,diatExt,progExt,scaleName,gRoot,gQual,bpm,tsIndex,sub,builderChords,progIndex,moodIndex,songText,chordMap,tabGrids,capo,keyHistory,savedSongs,currentSongId,currentSongName,currentSongTags,currentSongArtist,currentSongNotes,scrollSpeed}=this.state;
@@ -1423,6 +1425,8 @@ class Component extends DCLogic {
     window.anime.animate(dot,{scale:[1.5,1],duration:260,ease:'outQuad'});
   }
   componentWillUnmount(){
+    if(this._splashFadeTimer) clearTimeout(this._splashFadeTimer);
+    if(this._splashGoneTimer) clearTimeout(this._splashGoneTimer);
     if(this.metroTimer) clearInterval(this.metroTimer); this.stopAutoScroll();
     if(this.recTimer) clearInterval(this.recTimer);
     if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive'){ try{ this.mediaRecorder.stop(); }catch(e){} }
@@ -2566,6 +2570,8 @@ class Component extends DCLogic {
 
   renderVals(){
     const S=this.state; const A='#f0b429'; const self=this;
+    const splashVisible=S.splashPhase!=='gone';
+    const splashOpacity=S.splashPhase==='fading'?0:1;
     const keyRoot=S.keyRoot, mode=S.keyMode;
     const keyModeLabel=mode==='major'?'major':'minor';
     const keyLabel=keyRoot+' '+keyModeLabel;
@@ -3352,8 +3358,8 @@ class Component extends DCLogic {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
       isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
       chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,hasChordWheelSel,addWheelChordToProg,
+      splashVisible,splashOpacity,
       isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',notHome:S.tab!=='home',
-      hasWelcome:!!S.showWelcome,dismissWelcome:()=>self.setState({showWelcome:false}),
       goHome:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'home',autoScroll:false});},
       goTheory:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'theory',autoScroll:false});},
       goGuitar:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'guitar',autoScroll:false});},
