@@ -82,7 +82,9 @@
         <h1 style="margin:3px 0 0;font-size:clamp(22px,5vw,28px);font-weight:700;letter-spacing:-0.02em;">Musicman</h1>
       </div>
       <sc-if value="{{ notHome }}" hint-placeholder-val="{{ false }}">
-      <button onClick="{{ goHome }}" style="border:1px solid #2c2c2e;background:#1c1c1e;color:#c7c7cc;font-size:11px;font-weight:700;padding:5px 12px 5px 9px;border-radius:980px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:6px;transition:border-color .15s,color .15s;" style-hover="border-color:#f0b429;color:#f0b429;" style-active="transform:scale(0.95);"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>All sections</button>
+      <div style="margin-top:8px;">
+      <button onClick="{{ goHome }}" style="border:1px solid #2c2c2e;background:#1c1c1e;color:#c7c7cc;font-size:11px;font-weight:700;padding:5px 12px 5px 9px;border-radius:980px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:border-color .15s,color .15s;" style-hover="border-color:#f0b429;color:#f0b429;" style-active="transform:scale(0.95);"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>All sections</button>
+      </div>
       </sc-if>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <button onClick="{{ toggleRecording }}" style="{{ recordBtnStyle }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">{{ recordBtnLabel }}</button>
@@ -2593,7 +2595,7 @@ class Component extends DCLogic {
     const keyLabel=keyRoot+' '+keyModeLabel;
     const seg=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;box-shadow:${on?'0 1px 3px rgba(0,0,0,0.12)':'none'};transition:all .2s;`;
     const segS=(on)=>`border:none;background:${on?'#1c1c1e':'transparent'};color:${on?'#f2f2f7':'#98989d'};font-size:13px;font-weight:600;padding:5px 13px;border-radius:7px;cursor:pointer;box-shadow:${on?'0 1px 2px rgba(0,0,0,0.1)':'none'};transition:all .2s;`;
-    const pill=(active)=>`border:1px solid ${active?A:'#2c2c2e'};background:${active?A:'#1c1c1e'};color:${active?'#fff':'#f2f2f7'};font-size:13px;font-weight:500;padding:7px 13px;border-radius:980px;cursor:pointer;transition:all .15s;`;
+    const pill=(active)=>`border:1px solid ${active?'transparent':'#2c2c2e'};background:${active?'linear-gradient(135deg,#ffc861,'+A+' 60%,#e8720c)':'#1c1c1e'};color:${active?'#1a0e00':'#c7c7cc'};font-size:13px;font-weight:${active?'700':'500'};padding:7px 13px;border-radius:980px;cursor:pointer;box-shadow:${active?'0 2px 10px rgba(240,180,41,0.28)':'none'};transition:transform .15s ease,box-shadow .18s ease,background .18s ease,color .18s ease;`;
     const romanChip=(bg)=>`border:1px solid #2c2c2e;background:${bg};color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
     const goTab=(t)=>()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:t,autoScroll:false});};
     const HUB_TILE_DEFS=[
