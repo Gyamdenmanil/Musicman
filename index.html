@@ -2599,14 +2599,14 @@ class Component extends DCLogic {
     const romanChip=(bg)=>`border:1px solid #2c2c2e;background:${bg};color:#f2f2f7;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:9px;cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
     const goTab=(t)=>()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:t,autoScroll:false});};
     const HUB_TILE_DEFS=[
-      {tab:'theory',badge:'T',label:'Theory',desc:'Scales, modes & diatonic chords in your key.',accent:'#f0b429'},
-      {tab:'guitar',badge:'G',label:'Guitar',desc:'Voicings, fingerings & fretboard shapes.',accent:'#ff8a3d'},
-      {tab:'prog',badge:'P',label:'Progression',desc:'Build a progression & get smart suggestions.',accent:'#c77dff'},
-      {tab:'mood',badge:'M',label:'Mood',desc:'Pick a vibe, get a starter key & groove.',accent:'#5ac8fa'},
-      {tab:'songs',badge:'S',label:'Songs',desc:'Write lyrics, chords, and song structure.',accent:'#34c759'},
-      {tab:'rhythm',badge:'R',label:'Rhythm',desc:'Metronome, tap tempo & time signatures.',accent:'#ff5c72'},
-      {tab:'practice',badge:'Pr',label:'Practice',desc:'Chord switching, ear training & more.',accent:'#30d6c4'},
-      {tab:'tuner',badge:'Tu',label:'Tuner',desc:'Chromatic tuner & chord ID from the mic.',accent:'#ff6fae'},
+      {tab:'theory',badge:'T',label:'Theory',desc:'Scales, modes & diatonic chords in your key.',accent:A},
+      {tab:'guitar',badge:'G',label:'Guitar',desc:'Voicings, fingerings & fretboard shapes.',accent:A},
+      {tab:'prog',badge:'P',label:'Progression',desc:'Build a progression & get smart suggestions.',accent:A},
+      {tab:'mood',badge:'M',label:'Mood',desc:'Pick a vibe, get a starter key & groove.',accent:A},
+      {tab:'songs',badge:'S',label:'Songs',desc:'Write lyrics, chords, and song structure.',accent:A},
+      {tab:'rhythm',badge:'R',label:'Rhythm',desc:'Metronome, tap tempo & time signatures.',accent:A},
+      {tab:'practice',badge:'Pr',label:'Practice',desc:'Chord switching, ear training & more.',accent:A},
+      {tab:'tuner',badge:'Tu',label:'Tuner',desc:'Chromatic tuner & chord ID from the mic.',accent:A},
     ];
     const hexToRgba=(hex,a)=>{ const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
     const homeHubTiles=HUB_TILE_DEFS.map(t=>({...t,onClick:goTab(t.tab),
