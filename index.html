@@ -10,6 +10,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Musicman">
 <meta name="theme-color" content="#000000">
+<script>
+(function(){
+  var isStandalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+  if(!isStandalone) return;
+  Promise.all([
+    fetch(location.href,{cache:'reload'}).then(function(r){return r.headers.get('etag')||r.headers.get('last-modified')||'';}).catch(function(){return '';}),
+    fetch('./support.js',{cache:'reload'}).then(function(r){return r.headers.get('etag')||r.headers.get('last-modified')||'';}).catch(function(){return '';})
+  ]).then(function(tags){
+    var tag=tags.join('|');
+    if(!tag.trim()) return;
+    var prev=localStorage.getItem('mm_build_tag');
+    localStorage.setItem('mm_build_tag',tag);
+    if(prev&&prev!==tag) location.reload();
+  });
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
