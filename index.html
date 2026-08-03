@@ -166,7 +166,7 @@
   <div style="margin:0 0 18px;">
     <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--mm-border);background:var(--mm-surface);border-radius:14px;padding:11px 14px;transition:border-color .15s ease;" style-hover="border-color:rgba(240,180,41,0.45);">
       <span style="font-size:15px;font-weight:700;color:var(--mm-accent);font-family:var(--mm-font-display);line-height:1;">&rsaquo;</span>
-      <input value="{{ askQuery }}" onInput="{{ onAskChange }}" placeholder="Ask for anything — “something sadder”, “92 bpm”, “rhyme for gasoline”" style="flex:1;min-width:0;border:none;background:transparent;color:var(--mm-text);font-size:14px;font-weight:500;padding:2px 0;">
+      <input value="{{ askQuery }}" onInput="{{ onAskChange }}" placeholder="Ask for anything — “something sadder”, “92 bpm”, “rhyme for gasoline”" style="flex:1;min-width:0;border:none;background:transparent;color:var(--mm-text);font-size:14px;font-weight:500;padding:2px 0;text-overflow:ellipsis;">
       <sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ clearAsk }}" style="border:none;background:var(--mm-border);color:var(--mm-text-3);width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:700;cursor:pointer;flex:none;padding:0;line-height:24px;" style-hover="filter:brightness(1.4);" style-active="transform:scale(0.9);">&times;</button>
       </sc-if>
