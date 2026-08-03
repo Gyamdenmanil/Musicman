@@ -69,7 +69,7 @@
   @keyframes mmRecPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
   @keyframes mmChipPop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.06);opacity:1;}100%{transform:scale(1);opacity:1;}}
   @keyframes mmTabFade{0%{opacity:0;transform:translateY(4px);}100%{opacity:1;transform:translateY(0);}}
-  @keyframes mmWarmGlow{0%,100%{box-shadow:4px 4px 0 0 var(--mm-accent-lo);}50%{box-shadow:4px 4px 0 0 var(--mm-accent-hi),0 0 12px rgba(255,200,97,0.35);}}
+  @keyframes mmWarmGlow{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 3px rgba(240,180,41,0.13);}}
   @keyframes mmSpin{to{transform:rotate(360deg);}}
   @keyframes mmBgDrift{0%{background-position:0% 0%;}100%{background-position:100% 100%;}}
   :root{
@@ -86,15 +86,15 @@
     --mm-accent-lo:#e8720c;
     --mm-danger:#ff375f;
     --mm-success:#32d74b;
-    --mm-purple:#bf7af0;
+    --mm-purple:#8ecbe6;
     --mm-blue:#8ecbe6;
     --mm-r-pill:980px;
     --mm-r-card:16px;
     --mm-r-chip:12px;
     --mm-r-sm:9px;
     --mm-r-btn:14px;
-    --mm-shadow-hard: 4px 4px 0 0 var(--mm-border);
-    --mm-shadow-hard-accent: 4px 4px 0 0 var(--mm-accent-lo);
+    --mm-shadow-hard: none;
+    --mm-shadow-hard-accent: none;
     --mm-font-display:'Space Grotesk',-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
     --mm-font-body:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
   }
@@ -147,18 +147,141 @@
       <div style="display:flex;align-items:center;gap:8px;">
         <button onClick="{{ toggleMetro }}" style="{{ metroWidgetBtnStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.88);">{{ metroWidgetIcon }}</button>
         <button onClick="{{ goRhythm }}" style="border:none;background:transparent;cursor:pointer;padding:0;text-align:left;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">
-          <div style="font-size:13px;font-weight:700;color:var(--mm-text);font-family:var(--mm-font-display);">{{ bpm }} BPM</div>
+          <div style="font-size:13px;font-weight:700;color:var(--mm-text);font-family:var(--mm-font-display);white-space:nowrap;">{{ bpm }} BPM</div>
           <div style="font-size:10px;color:var(--mm-text-4);">{{ tempoMark }}</div>
         </button>
       </div>
+      <div style="width:1px;height:36px;background:var(--mm-border);"></div>
+      <button onClick="{{ cycleNerd }}" style="border:none;background:transparent;cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:36px;justify-content:center;transition:opacity .15s ease;" style-hover="opacity:0.78;" style-active="transform:scale(0.96);">
+        <div style="font-size:9.5px;font-weight:700;letter-spacing:0.08em;color:var(--mm-text-4);">SKILL LEVEL</div>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div style="display:flex;gap:3px;"><sc-for list="{{ nerdDots }}" as="nd" hint-placeholder-count="3"><span style="{{ nd.style }}"></span></sc-for></div>
+          <span style="font-size:11.5px;font-weight:700;color:var(--mm-accent);">{{ nerdLabel }}</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <sc-if value="{{ askVisible }}" hint-placeholder-val="{{ true }}">
+  <div style="margin:0 0 18px;">
+    <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--mm-border);background:var(--mm-surface);border-radius:14px;padding:11px 14px;transition:border-color .15s ease;" style-hover="border-color:rgba(240,180,41,0.45);">
+      <span style="font-size:15px;font-weight:700;color:var(--mm-accent);font-family:var(--mm-font-display);line-height:1;">&rsaquo;</span>
+      <input value="{{ askQuery }}" onInput="{{ onAskChange }}" placeholder="Ask for anything — “something sadder”, “92 bpm”, “rhyme for gasoline”" style="flex:1;min-width:0;border:none;background:transparent;color:var(--mm-text);font-size:14px;font-weight:500;padding:2px 0;">
+      <sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ clearAsk }}" style="border:none;background:var(--mm-border);color:var(--mm-text-3);width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:700;cursor:pointer;flex:none;padding:0;line-height:24px;" style-hover="filter:brightness(1.4);" style-active="transform:scale(0.9);">&times;</button>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ hasAskResults }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px;animation:mmTabFade .18s ease-out;">
+      <sc-for list="{{ askResults }}" as="ar" hint-placeholder-count="2">
+      <div style="border:1px solid var(--mm-border);background:linear-gradient(160deg,var(--mm-surface),#161616);border-radius:14px;padding:13px 15px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;font-family:var(--mm-font-display);">{{ ar.title }}</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <sc-if value="{{ ar.hasAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ ar.onAct }}" style="{{ askActStyle }}" style-hover="filter:brightness(1.08);" style-active="transform:scale(0.96);">{{ ar.actLabel }}</button></sc-if>
+            <sc-if value="{{ ar.hasAct2 }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ar.onAct2 }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">{{ ar.act2Label }}</button></sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ ar.hasDetail }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12.5px;color:var(--mm-text-2);line-height:1.55;margin-top:8px;">{{ ar.detail }}</div>
+        </sc-if>
+      </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ askNoResults }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:10px;border:2px dashed var(--mm-border);border-radius:14px;padding:13px 15px;font-size:12.5px;color:var(--mm-text-3);line-height:1.5;">No idea what that means, bro. Try a chord name, a tempo, a key, a feeling, or “rhyme for …”.</div>
+    </sc-if>
+
+    <sc-if value="{{ askIdle }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;">
+      <sc-for list="{{ askChips }}" as="ac" hint-placeholder-count="4"><button onClick="{{ ac.onClick }}" style="border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text-3);font-size:11.5px;font-weight:600;padding:7px 11px;border-radius:980px;cursor:pointer;transition:color .15s,border-color .15s;" style-hover="color:var(--mm-accent);border-color:var(--mm-accent);" style-active="transform:scale(0.96);">{{ ac.label }}</button></sc-for>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasSubTools }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;gap:7px;overflow-x:auto;padding:2px 0 6px;margin:0 0 20px;">
+    <sc-for list="{{ subTools }}" as="st" hint-placeholder-count="4"><button onClick="{{ st.onClick }}" style="{{ st.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">{{ st.label }}</button></sc-for>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:70;background:linear-gradient(180deg,#1c1c1e,#121213);border-top:2px solid var(--mm-accent);border-radius:22px 22px 0 0;box-shadow:0 -18px 44px rgba(0,0,0,0.62);animation:mmTabFade .18s ease-out;">
+    <div style="max-width:640px;margin:0 auto;padding:10px 16px 16px;">
+      <div style="width:38px;height:4px;border-radius:99px;background:var(--mm-border);margin:0 auto 12px;"></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="min-width:0;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--mm-text-4);">CHORD OVER “{{ sheetWord }}”</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <div style="font-size:26px;font-weight:700;letter-spacing:-0.02em;font-family:var(--mm-font-display);">{{ sheetChordName }}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--mm-accent);">{{ sheetRoman }}</div>
+          </div>
+          <div style="font-size:12.5px;color:var(--mm-text-2);margin-top:4px;">{{ sheetFeel }}</div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <sc-if value="{{ sheetHasChord }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ sheetPlay }}" style="{{ askActStyle }}" style-hover="filter:brightness(1.08);" style-active="transform:scale(0.96);">&#9654; Strum</button>
+          <button onClick="{{ sheetArp }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Arp</button>
+          <button onClick="{{ sheetShapes }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Shapes</button>
+          </sc-if>
+          <button onClick="{{ sheetClose }}" style="border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text-3);font-size:12px;font-weight:700;padding:0 12px;min-height:38px;border-radius:11px;cursor:pointer;" style-hover="border-color:#48484a;" style-active="transform:scale(0.96);">Done</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;margin-top:12px;">
+        <button onClick="{{ sheetPrev }}" style="{{ sheetNavStyle }}" style-hover="border-color:var(--mm-accent);color:var(--mm-accent);" style-active="transform:scale(0.94);">&lsaquo;</button>
+        <input type="range" min="0" max="{{ sheetSlotMax }}" value="{{ sheetSlotIdx }}" onInput="{{ onSheetScrub }}" style="flex:1;min-width:0;height:42px;background:transparent;cursor:pointer;">
+        <button onClick="{{ sheetNext }}" style="{{ sheetNavStyle }}" style-hover="border-color:var(--mm-accent);color:var(--mm-accent);" style-active="transform:scale(0.94);">&rsaquo;</button>
+        <span style="font-size:11px;font-weight:700;color:var(--mm-text-4);white-space:nowrap;font-variant-numeric:tabular-nums;">{{ sheetSlotLabel }}</span>
+      </div>
+      <div style="display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;">
+        <sc-for list="{{ sheetOptions }}" as="so" hint-placeholder-count="5">
+        <button onClick="{{ so.onClick }}" style="{{ so.style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-size:15px;font-weight:700;font-family:var(--mm-font-display);color:var(--mm-text);">{{ so.name }}</span>
+            <span style="font-size:10.5px;font-weight:700;color:var(--mm-accent);">{{ so.roman }}</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--mm-text-3);line-height:1.35;">{{ so.feel }}</div>
+        </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">
+        <sc-if value="{{ sheetHasChord }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ sheetClear }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:12px;font-weight:700;cursor:pointer;padding:6px 0;" style-hover="color:var(--mm-danger);" style-active="opacity:0.6;">Remove chord</button>
+        </sc-if>
+        <sc-if value="{{ sheetHasRhymes }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--mm-text-4);">RHYMES</span>
+          <sc-for list="{{ sheetRhymes }}" as="sr" hint-placeholder-count="5"><span style="border:1px solid #2c3e46;background:var(--mm-surface);color:var(--mm-text-2);font-size:11.5px;font-weight:600;padding:5px 9px;border-radius:980px;">{{ sr.word }}</span></sc-for>
+        </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="{{ navBarStyle }}">
+    <div style="max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);">
+      <sc-for list="{{ roomNav }}" as="rm" hint-placeholder-count="4">
+      <button onClick="{{ rm.onClick }}" style="{{ rm.style }}" style-active="transform:scale(0.92);">
+        <svg width="21" height="21" viewBox="0 0 20 20" fill="none" stroke="{{ rm.stroke }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <sc-for list="{{ rm.icon }}" as="ip" hint-placeholder-count="2"><path d="{{ ip }}"></path></sc-for>
+        </svg>
+        <span style="{{ rm.labelStyle }}">{{ rm.label }}</span>
+      </button>
+      </sc-for>
     </div>
   </div>
 
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <sc-if value="{{ showHub }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:900px;margin:0 auto 28px;animation:mmTabFade .18s ease-out;">
     <div ref="{{ homeHubRef }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
       <sc-for list="{{ homeHubTiles }}" as="t" hint-placeholder-count="8">
-      <button data-hero-item onClick="{{ t.onClick }}" style="text-align:left;border:2px solid var(--mm-border);background:linear-gradient(160deg,var(--mm-surface),#161616);border-radius:18px;padding:18px 18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;" style-hover="{{ t.hoverStyle }}" style-active="transform:scale(0.97);">
+      <button data-hero-item onClick="{{ t.onClick }}" style="text-align:left;border:1px solid var(--mm-border);background:linear-gradient(160deg,var(--mm-surface),#161616);border-radius:18px;padding:18px 18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;" style-hover="{{ t.hoverStyle }}" style-active="transform:scale(0.97);">
         <div style="position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;background:{{ t.accent }};opacity:0.16;filter:blur(6px);"></div>
         <div style="position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:13px;border:2px solid {{ t.accent }};background:{{ t.accent }};color:#0b0b0c;box-shadow:2px 2px 0 0 {{ t.accentShadow }};margin-bottom:12px;">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -172,8 +295,10 @@
     </div>
   </div>
 
+  </sc-if>
+
   <div style="max-width:400px;margin:0 auto;animation:mmTabFade .18s ease-out;">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Circle of Fifths</div>
         <div style="display:flex;background:var(--mm-bg);border-radius:9px;padding:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">
@@ -215,7 +340,7 @@
   <sc-if value="{{ isTheory }}" hint-placeholder-val="{{ false }}">
   <div style="display:flex;flex-direction:column;gap:20px;animation:mmTabFade .18s ease-out;">
 
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;min-width:0;width:100%;max-width:763px;height:auto;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:transform .2s ease,box-shadow .2s ease;min-width:0;width:100%;max-width:763px;height:auto;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Scales &amp; Modes</div>
           <button onClick="{{ playScaleBtn }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Play scale</button>
@@ -223,6 +348,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px;">
           <sc-for list="{{ scaleList }}" as="s" hint-placeholder-count="8"><button onClick="{{ s.onClick }}" style="{{ s.style }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.94);">{{ s.name }}</button></sc-for>
         </div>
+        <sc-if value="{{ showDiagrams }}" hint-placeholder-val="{{ true }}">
         <div style="font-size:12px;color:var(--mm-text-3);margin-bottom:8px;">Degrees of <b style="color:var(--mm-text);">{{ scaleTitle }}</b></div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;">
           <sc-for list="{{ scaleNotesList }}" as="n" hint-placeholder-count="7">
@@ -232,9 +358,10 @@
             </div>
           </sc-for>
         </div>
-        <div style="font-size:12px;color:var(--mm-text-3);margin:18px 0 8px;">On the fretboard <span style="color:var(--mm-text-4);">(root in purple, frets 0–22)</span></div>
+        <div style="font-size:12px;color:var(--mm-text-3);margin:18px 0 8px;">On the fretboard <span style="color:var(--mm-text-4);">(root in blue, frets 0–22)</span></div>
         <div style="overflow-x:auto;width:100%;max-width:719px;">{{ scaleFretboard }}</div>
-      </div><div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;width:100%;max-width:639px;height:auto;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+        </sc-if>
+      </div><div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;width:100%;max-width:639px;height:auto;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);display:flex;align-items:center;gap:6px;">Diatonic Chords · {{ keyLabel }}<button onClick="{{ toggleRomanHelp }}" style="border:1px solid var(--mm-border);background:var(--mm-surface-2);color:var(--mm-text-4);font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;line-height:1;cursor:pointer;padding:0;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.3);" style-active="transform:scale(0.88);">?</button></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -247,9 +374,10 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;">
         <sc-for list="{{ diatonic }}" as="c" hint-placeholder-count="7">
           <div style="border:1px solid var(--mm-border);border-radius:14px;padding:12px 10px;text-align:center;">
-            <div style="font-size:12px;color:var(--mm-accent);font-weight:700;height:16px;">{{ c.roman }}</div>
+            <div style="font-size:12px;color:var(--mm-accent);font-weight:700;min-height:16px;line-height:1.35;">{{ c.romanLabel }}</div>
             <div style="font-size:19px;font-weight:700;margin:3px 0;letter-spacing:-0.01em;font-family:var(--mm-font-display);">{{ c.name }}</div>
             <div style="font-size:11px;color:var(--mm-text-3);min-height:14px;">{{ c.notesStr }}</div>
+            <div style="font-size:11px;color:var(--mm-text-4);line-height:1.35;margin-top:4px;min-height:15px;">{{ c.feel }}</div>
             <div style="display:flex;gap:6px;justify-content:center;margin-top:9px;">
               <button onClick="{{ c.play }}" style="{{ miniPlayStyle }}" style-active="transform:scale(0.88);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg></button>
               <button onClick="{{ c.arp }}" style="{{ miniArpStyle }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.88);">arp</button>
@@ -264,7 +392,7 @@
 
   <sc-if value="{{ isGuitar }}" hint-placeholder-val="{{ false }}">
   <div style="display:flex;flex-direction:column;gap:20px;animation:mmTabFade .18s ease-out;">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Root</div>
         <button onClick="{{ toggleQualityHelp }}" style="border:1px solid var(--mm-border);background:var(--mm-surface-2);color:var(--mm-text-4);font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;line-height:1;cursor:pointer;padding:0;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.3);" style-active="transform:scale(0.88);">?</button>
@@ -308,7 +436,7 @@
       </div>
     </div>
 
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:6px;">
         <div>
           <div ref="{{ chordHeroRef }}" style="font-size:30px;font-weight:700;letter-spacing:-0.02em;display:inline-block;">{{ selChordName }}</div>
@@ -336,7 +464,7 @@
   <sc-if value="{{ isProg }}" hint-placeholder-val="{{ false }}">
   <div style="display:flex;flex-direction:column;gap:20px;max-width:760px;margin:0 auto;animation:mmTabFade .18s ease-out;">
 
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:14px;">Your progression · {{ keyLabel }}</div>
       <sc-if value="{{ hasBuilderChords }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ hasProgressionMessages }}" hint-placeholder-val="{{ false }}">
@@ -359,14 +487,35 @@
           <div onClick="{{ c.select }}" style="{{ c.style }}" style-hover="filter:brightness(1.1);" style-active="transform:scale(0.96);">
             <div style="font-size:11px;color:var(--mm-accent);font-weight:700;">{{ c.roman }}</div>
             <div style="font-size:17px;font-weight:700;margin-top:2px;font-family:var(--mm-font-display);">{{ c.name }}</div>
+            <button onClick="{{ c.cycleBars }}" style="{{ c.barsStyle }}" style-hover="filter:brightness(1.3);" style-active="transform:translateX(-50%) scale(0.9);">{{ c.barsLabel }}</button>
             <button onClick="{{ c.remove }}" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#6e6e73;color:#fff;font-size:11px;line-height:1;cursor:pointer;padding:0;transition:transform .12s ease,filter .12s ease;" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.85);">×</button>
           </div>
         </sc-for>
       </div>
-      <div style="display:flex;gap:10px;">
-        <button onClick="{{ playBuilder }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Play chords</button>
-        <button onClick="{{ playBuilderArp }}" style="{{ playPillGhostStyle }}" style-hover="background:#332812;" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Play arpeggiated</button>
-        <button onClick="{{ clearBuilder }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">Clear</button>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+        <button onClick="{{ toggleBuilderLoop }}" style="{{ loopBtnStyle }}" style-hover="filter:brightness(1.06);" style-active="transform:scale(0.97);">{{ loopBtnLabel }}</button>
+        <div style="display:flex;gap:3px;background:var(--mm-bg);border-radius:11px;padding:3px;">
+          <sc-for list="{{ loopVoiceOpts }}" as="lv" hint-placeholder-count="2"><button onClick="{{ lv.onClick }}" style="{{ lv.style }}" style-hover="color:var(--mm-text);" style-active="transform:scale(0.96);">{{ lv.label }}</button></sc-for>
+        </div>
+        <button onClick="{{ toggleLoopDrums }}" style="{{ loopDrumStyle }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">{{ loopDrumLabel }}</button>
+        <sc-if value="{{ loopOn }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;align-items:center;gap:5px;"><sc-for list="{{ loopBeatDots }}" as="bd" hint-placeholder-count="4"><span style="{{ bd.style }}"></span></sc-for></div>
+          <span style="font-size:13px;font-weight:700;color:var(--mm-accent);font-family:var(--mm-font-display);">{{ loopNowChord }}</span>
+        </div>
+        </sc-if>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center;">
+        <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--mm-text-4);margin-right:2px;">FEEL</span>
+        <sc-for list="{{ loopStyleOpts }}" as="ls" hint-placeholder-count="5"><button onClick="{{ ls.onClick }}" style="{{ ls.style }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.96);">{{ ls.label }}</button></sc-for>
+      </div>
+      <sc-if value="{{ loopIdle }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:11.5px;color:var(--mm-text-4);margin-top:9px;line-height:1.5;">{{ loopHint }}</div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:10px;align-items:center;">
+        <button onClick="{{ playBuilder }}" style="{{ linkBtnStyle }}" style-hover="color:var(--mm-accent);" style-active="opacity:0.6;">Play once</button>
+        <button onClick="{{ playBuilderArp }}" style="{{ linkBtnStyle }}" style-hover="color:var(--mm-accent);" style-active="opacity:0.6;">Arpeggiated</button>
+        <button onClick="{{ clearBuilder }}" style="{{ linkBtnStyle }}" style-hover="color:var(--mm-danger);" style-active="opacity:0.6;">Clear all</button>
       </div>
 
       <sc-if value="{{ hasInsight }}" hint-placeholder-val="{{ false }}">
@@ -383,7 +532,7 @@
     </div>
 
     <sc-if value="{{ hasSuggestions }}" hint-placeholder-val="{{ false }}">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:10px;">Suggested next chord</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <sc-for list="{{ suggestedChips }}" as="s" hint-placeholder-count="4">
@@ -408,7 +557,7 @@
     </sc-if>
 
     <sc-if value="{{ hasAnalysisCard }}" hint-placeholder-val="{{ false }}">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:2px;">Analysis</div>
       <div style="font-size:11px;color:#6e6e73;margin-bottom:12px;line-height:1.4;">Optional deeper theory on the progression you've built.</div>
       <sc-if value="{{ hasAdvAnalysis }}" hint-placeholder-val="{{ false }}">
@@ -449,7 +598,7 @@
     </div>
     </sc-if>
 
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Add a chord · diatonic</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -476,7 +625,7 @@
       </sc-if>
     </div>
 
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:14px;">Need an idea?</div>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
         <button onClick="{{ togglePresetPicker }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Suggest a full progression</button>
@@ -502,7 +651,7 @@
 
   <sc-if value="{{ isMood }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:900px;margin:0 auto;animation:mmTabFade .18s ease-out;">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-top:3px solid var(--mm-purple);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-top:3px solid var(--mm-purple);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:4px;">Mood generator</div>
       <div style="font-size:12.5px;color:var(--mm-text-4);margin-bottom:16px;line-height:1.5;">Pick a mood for a starter key, tempo, time signature, chord progression, and instrument palette — loads straight into Progression.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
@@ -534,7 +683,7 @@
 
   <sc-if value="{{ isPractice }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:640px;margin:0 auto;animation:mmTabFade .18s ease-out;">
-    <div data-reveal style="background:var(--mm-surface);border:2px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;box-shadow:4px 4px 0 0 var(--mm-border);transition:transform .2s ease,box-shadow .2s ease;" style-hover="transform:translate(-2px,-5px);box-shadow:6px 8px 0 0 var(--mm-border);">
+    <div data-reveal style="background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:var(--mm-r-card);padding:22px;transition:border-color .2s ease;" style-hover="border-color:#3a3a3c;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Practice</div>
         <div style="font-size:12px;color:var(--mm-text-3);">Score <b style="color:var(--mm-accent);">{{ practiceScore }}</b> · Streak <b style="color:var(--mm-accent);">{{ practiceStreak }}</b></div>
@@ -669,7 +818,7 @@
 
   <sc-if value="{{ isRhythm }}" hint-placeholder-val="{{ false }}">
   <div style="max-width:640px;margin:0 auto;animation:mmTabFade .18s ease-out;">
-    <div style="background:var(--mm-surface);border:2px solid var(--mm-border);border-top:3px solid var(--mm-blue);border-radius:24px;padding:34px;box-shadow:4px 4px 0 0 var(--mm-border);text-align:center;">
+    <div style="background:var(--mm-surface);border:1px solid var(--mm-border);border-top:3px solid var(--mm-blue);border-radius:24px;padding:34px;text-align:center;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--mm-text-3);">Metronome</div>
       <div style="font-size:72px;font-weight:700;letter-spacing:-0.03em;margin:6px 0 0;line-height:1;">{{ bpm }}</div>
       <div style="font-size:14px;color:var(--mm-text-3);font-weight:600;">BPM · {{ tempoMark }}</div>
@@ -821,7 +970,10 @@
         </div>
       </div>
       </sc-if>
-      <textarea value="{{ songText }}" onInput="{{ onSongTextChange }}" placeholder="Write your lyrics here…" style="width:100%;min-height:150px;border:none;background:transparent;padding:0;font-size:16px;line-height:1.9;font-family:inherit;resize:vertical;color:var(--mm-text);"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button onClick="{{ toggleFocus }}" style="{{ focusBtnStyle }}" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.96);">{{ focusBtnLabel }}</button>
+      </div>
+      <textarea value="{{ songText }}" onInput="{{ onSongTextChange }}" placeholder="Write your lyrics here…" style="{{ songTextStyle }}"></textarea>
 
       <div style="font-size:11px;color:var(--mm-text-4);font-weight:600;margin:16px 0 10px;">Tap a word to add a chord above it</div>
       <div style="display:flex;flex-direction:column;gap:6px;">
@@ -1195,9 +1347,9 @@ const TOKENS = {
   bg:'#000000', surface:'#1c1c1e', surface2:'#232325', border:'#2c2c2e',
   text:'#f2f2f7', text2:'#c7c7cc', text3:'#98989d', text4:'#8e8e93',
   accent:'#f0b429', accentHi:'#ffc861', accentLo:'#e8720c',
-  danger:'#ff375f', success:'#32d74b', purple:'#bf7af0', blue:'#8ecbe6',
+  danger:'#ff375f', success:'#32d74b', purple:'#8ecbe6', blue:'#8ecbe6',
   rPill:'980px', rCard:'16px', rChip:'12px', rSm:'9px', rBtn:'14px',
-  shadowHard:'4px 4px 0 0 #2c2c2e', shadowHardAccent:'4px 4px 0 0 #e8720c',
+  shadowHard:'none', shadowHardAccent:'none',
   fontDisplay:"'Space Grotesk',-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif",
   fontBody:"'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif",
 };
@@ -1205,12 +1357,12 @@ const TOKENS = {
 class Component extends DCLogic {
   LETTERS = ['C','D','E','F','G','A','B'];
   LPC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
-  QUAL = {maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8],dom7:[0,4,7,10],maj7:[0,4,7,11],min7:[0,3,7,10],m7b5:[0,3,6,10],dim7:[0,3,6,9],sus2:[0,2,7],sus4:[0,5,7],'6':[0,4,7,9],m6:[0,3,7,9],add9:[0,4,7,14],'9':[0,4,7,10,14],m9:[0,3,7,10,14]};
-  SUF = {maj:'',min:'m',dim:'°',aug:'+',dom7:'7',maj7:'maj7',min7:'m7',m7b5:'m7♭5',dim7:'°7',sus2:'sus2',sus4:'sus4','6':'6',m6:'m6',add9:'add9','9':'9',m9:'m9'};
+  QUAL = {maj:[0,4,7],min:[0,3,7],dim:[0,3,6],aug:[0,4,8],dom7:[0,4,7,10],maj7:[0,4,7,11],min7:[0,3,7,10],m7b5:[0,3,6,10],dim7:[0,3,6,9],sus2:[0,2,7],sus4:[0,5,7],'6':[0,4,7,9],m6:[0,3,7,9],add9:[0,4,7,14],'9':[0,4,7,10,14],m9:[0,3,7,10,14],'5':[0,7],'7sus4':[0,5,7,10],maj9:[0,4,7,11,14],'11':[0,7,10,14,17],m11:[0,3,7,10,14,17],'13':[0,4,7,10,14,21],m13:[0,3,7,10,14,21],'7b5':[0,4,6,10],'7#5':[0,4,8,10],'7b9':[0,4,7,10,13],'7#9':[0,4,7,10,15],mMaj7:[0,3,7,11],'69':[0,4,7,9,14]};
+  SUF = {maj:'',min:'m',dim:'°',aug:'+',dom7:'7',maj7:'maj7',min7:'m7',m7b5:'m7♭5',dim7:'°7',sus2:'sus2',sus4:'sus4','6':'6',m6:'m6',add9:'add9','9':'9',m9:'m9','5':'5','7sus4':'7sus4',maj9:'maj9','11':'11',m11:'m11','13':'13',m13:'m13','7b5':'7♭5','7#5':'7♯5','7b9':'7♭9','7#9':'7♯9',mMaj7:'m(maj7)','69':'6/9'};
   CHORD_ID_QUALS = ['maj','min','dim','aug','sus2','sus4','dom7','maj7','min7','m7b5','dim7'];
   MAJ_KEYS = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
   GTR_ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-  QUALITY_FLAVOR = {maj:'bright and settled',min:'melancholic and inward',dom7:'unresolved, dissolving — it wants to move',maj7:'dreamy, suspended in a nice way',min7:'smooth, a little wistful',m7b5:'hushed and uneasy',dim7:'maximally tense, built to pass through',dim:'unstable, sliding',aug:'queasy, floating upward',sus2:'open, unresolved, airy',sus4:'suspended, holding its breath','6':'nostalgic, sweet',m6:'noir, bittersweet',add9:'sparkling, wide open','9':'lush and a little jazzy',m9:'soft, moody, sophisticated'};
+  QUALITY_FLAVOR = {maj:'bright and settled',min:'melancholic and inward',dom7:'unresolved, dissolving — it wants to move',maj7:'dreamy, suspended in a nice way',min7:'smooth, a little wistful',m7b5:'hushed and uneasy',dim7:'maximally tense, built to pass through',dim:'unstable, sliding',aug:'queasy, floating upward',sus2:'open, unresolved, airy',sus4:'suspended, holding its breath','6':'nostalgic, sweet',m6:'noir, bittersweet',add9:'sparkling, wide open','9':'lush and a little jazzy',m9:'soft, moody, sophisticated','5':'bare bones — root and fifth, all muscle','7sus4':'suspended and restless at the same time',maj9:'wide and cinematic — film-score pretty','11':'hazy and open — the third steps aside',m11:'deep and spacious, late-night blue','13':'full jazz-blues, rich and rolling',m13:'smoky and wide open','7b5':'off-kilter, leaning sideways','7#5':'lurching, whole-tone menace','7b9':'flamenco heat — spicy and urgent','7#9':'the Hendrix chord — gritty and funky',mMaj7:'spy-movie minor: beautiful and wrong','69':'sweet and complete — nothing needs to move'};
   INTERVAL_VIBE = {0:'home base — the tonic itself',1:'a half-step above home, sliding and chromatic — rarely stays long',2:'the whole-tone neighbor — a cool, modal color a step above home',3:'borrowed from the parallel minor — moody, a little bruised',4:'a major-third relation — warm, leaning toward the dominant side',5:'the subdominant side — settling, like exhaling',6:'a tritone from home — the most unstable, restless spot on the wheel',7:'the dominant side — pulls hard back to home',8:'borrowed from the parallel minor — dark and cinematic',9:'the relative-minor side — wistful, introspective',10:'borrowed ♭VII territory — gritty, a rock/blues push',11:'the leading tone — tense, wants to resolve up to home'};
   SHAPES = {
     maj:{E:{f:[0,2,2,1,0,0],r:4}, A:{f:['x',0,2,2,2,0],r:9}},
@@ -1228,7 +1380,20 @@ class Component extends DCLogic {
     m6:{E:{f:[0,2,1,0,2,0],r:4},A:{f:['x',0,2,2,1,2],r:9}},
     add9:{E:{f:[0,2,4,1,0,0],r:4},A:{f:['x',0,2,4,2,0],r:9}},
     '9':{A:{f:['x',0,2,4,2,3],r:9},E:{f:[0,'x',0,1,0,2],r:4}},
-    m9:{A:{f:['x',0,2,4,1,3],r:9},E:{f:[0,'x',0,0,0,2],r:4}}
+    m9:{A:{f:['x',0,2,4,1,3],r:9},E:{f:[0,'x',0,0,0,2],r:4}},
+    '5':{E:{f:[0,2,'x','x','x','x'],r:4},A:{f:['x',0,2,'x','x','x'],r:9}},
+    '7sus4':{E:{f:[0,2,0,2,0,0],r:4},A:{f:['x',0,2,0,3,0],r:9}},
+    maj9:{E:{f:[0,2,1,1,0,2],r:4},A:{f:['x',0,6,4,5,'x'],r:9}},
+    '11':{E:{f:[0,2,0,2,0,2],r:4},A:{f:['x',0,0,0,2,0],r:9}},
+    m11:{E:{f:[0,0,0,0,0,0],r:4},A:{f:['x',0,0,0,0,0],r:9}},
+    '13':{E:{f:[0,2,0,1,2,0],r:4},A:{f:['x',0,2,0,2,2],r:9}},
+    m13:{A:{f:['x',0,2,0,1,2],r:9},E:{f:[0,2,0,0,2,0],r:4}},
+    '7b5':{E:{f:[0,1,0,1,'x','x'],r:4},A:{f:['x',0,1,0,2,'x'],r:9}},
+    '7#5':{E:{f:[0,3,0,1,1,'x'],r:4},A:{f:['x',0,3,0,2,1],r:9}},
+    '7b9':{E:{f:[0,2,0,1,0,1],r:4}},
+    '7#9':{E:{f:[0,2,0,1,3,3],r:4}},
+    mMaj7:{E:{f:[0,2,1,0,0,0],r:4},A:{f:['x',0,2,1,1,0],r:9}},
+    '69':{E:{f:[0,2,4,1,2,0],r:4},A:{f:['x',0,2,4,2,2],r:9}}
   };
   OPEN = {'C':['x',3,2,0,1,0],'A':['x',0,2,2,2,0],'G':[3,2,0,0,0,3],'E':[0,2,2,1,0,0],'D':['x','x',0,2,3,2],
     'Am':['x',0,2,2,1,0],'Em':[0,2,2,0,0,0],'Dm':['x','x',0,2,3,1],
@@ -1387,14 +1552,14 @@ class Component extends DCLogic {
   scaleFeedbackRef = React.createRef();
   wheelCenterLabelRef = React.createRef();
   wordmarkRef = React.createRef();
-  state = {tab:'home',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,
+  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,
     practiceMode:'switch',practiceScore:0,practiceStreak:0,
     practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
     practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
     practiceScaleName:'Ionian (Major)',practiceScaleQuestion:null,practiceScaleFeedback:null,
     practiceMemoryPhase:'idle',practiceMemorySeq:[],practiceMemoryPool:[],practiceMemoryPicked:[],
     renamingRecId:null,renameDraft:'',currentSongArtist:'',currentSongNotes:'',pdfExporting:false,pdfError:'',showVoiceLeading:false,expandedMoodStyle:null,
-    tunerSubTab:'pitch',tunerListening:false,tunerError:'',tunerNote:null,tunerChord:null,splashPhase:'visible'};
+    tunerSubTab:'pitch',tunerListening:false,tunerError:'',tunerNote:null,tunerChord:null,splashPhase:'visible',nerdLevel:1,askQuery:'',loopOn:false,loopIdx:0,loopBeat:0,loopStyle:'folk',loopVoice:'guitar',loopDrums:true,focusMode:false};
 
   componentDidMount(){
     let saved=null;
@@ -1622,6 +1787,11 @@ class Component extends DCLogic {
     const keyRoot=this.state.keyRoot, mode=this.state.keyMode;
     return this.MAJ_KEYS.findIndex(k=>this.pcOf(k)===this.pcOf(mode==='major'?keyRoot:this.spell(keyRoot,3,2)));
   }
+  setKeyFromWheel(ki){
+    const majName=this.MAJ_KEYS[((ki%12)+12)%12];
+    if(this.state.keyMode==='minor') this.selectKey(this.spell(majName,9,5),'minor');
+    else this.selectKey(majName,'major');
+  }
   onWheelPointerDown(e){
     const wrap=e.currentTarget;
     try{ wrap.setPointerCapture(e.pointerId); }catch(err){}
@@ -1646,10 +1816,10 @@ class Component extends DCLogic {
     try{ e.currentTarget.releasePointerCapture(e.pointerId); }catch(err){}
     const snapSteps=Math.round((this._wheelLiveRot!=null?this._wheelLiveRot:this._wheelStartRot)/30);
     const newKiTonic=(((-snapSteps)%12)+12)%12;
-    const newRoot=this.MAJ_KEYS[newKiTonic];
-    if(this._wheelRingNode){ this._wheelRingNode.style.transition=''; this._wheelRingNode.style.transform=''; }
+    if(this._wheelRingNode){ this._wheelRingNode.style.transition=''; this._wheelRingNode.style.transform='rotate('+(-newKiTonic*30)+'deg)'; }
     this._wheelRingNode=null;
-    this.selectKey(newRoot,this.state.keyMode);
+    this._wheelLiveRot=null;
+    this.setKeyFromWheel(newKiTonic);
   }
   wheelRingRefCallback=(node)=>{
     if(this._wheelWheelNode&&this._wheelWheelNode!==node){
@@ -1669,9 +1839,7 @@ class Component extends DCLogic {
     if(Math.abs(this._wheelAccum)>=50){
       const dir=this._wheelAccum>0?1:-1;
       this._wheelAccum=0;
-      const kiTonic=this.wheelKiTonic();
-      const newKiTonic=(((kiTonic+dir)%12)+12)%12;
-      this.selectKey(this.MAJ_KEYS[newKiTonic],this.state.keyMode);
+      this.setKeyFromWheel(this.wheelKiTonic()+dir);
     }
   };
   transposeKeyForCapo(keyRoot,mode,capo){
@@ -2075,6 +2243,7 @@ class Component extends DCLogic {
           if(!entry.isIntersecting) return;
           this._revealObserver.unobserve(entry.target);
           const target=entry.target;
+          target.style.opacity=1;
           this.whenAnime(()=>window.anime.animate(target,{opacity:[0,1],translateY:[28,0],scale:[0.94,1],duration:600,ease:'outBack'}));
         });
       },{threshold:0.15});
@@ -2753,6 +2922,313 @@ class Component extends DCLogic {
     return h('div',{style:{position:'relative',width:W+'px',height:H+'px'}},els);
   }
 
+  LOOP_PATTERNS={
+    block:{label:'Block',ev:(b,p)=>b===0?[{o:0,v:0.15,d:2.6,down:true}]:[]},
+    folk:{label:'Folk',ev:(b,p)=>{const e=[];if(b%2===0)e.push({o:0,v:b===0?0.15:0.11,d:1.5,down:true});e.push({o:0.5,v:0.062,d:0.8,down:false});return e;}},
+    ballad:{label:'Ballad',ev:(b,p)=>[{o:0,v:0.12,d:2.4,note:b}]},
+    funk:{label:'Funk',ev:(b,p)=>{const e=[];if(b%2===0)e.push({o:0,v:b===0?0.14:0.1,d:0.34,down:true});else e.push({o:0,v:0.1,d:0.2,down:true});e.push({o:0.5,v:0.07,d:0.18,down:false});return e;}},
+    arp:{label:'Arpeggio',ev:(b,p)=>[{o:0,v:0.11,d:1.0,note:b*2},{o:0.5,v:0.085,d:1.0,note:b*2+1}]}
+  };
+  plainRoman(r){
+    const s=String(r||'');
+    if(s.indexOf('/')>=0) return 'sets up the next chord';
+    const base=s.replace(/[^IiVv]/g,'').toUpperCase();
+    const map={I:'1',II:'2',III:'3',IV:'4',V:'5',VI:'6',VII:'7'};
+    const n=map[base];
+    if(!n) return 'colour chord';
+    const first=s.charAt(0);
+    return ((first==='b'||first==='\u266d'||first==='#')?'borrowed ':'')+'the '+n+' chord';
+  }
+  ROOM_DEFS=[
+    {id:'write',label:'Write',tabs:['songs'],icon:['M3.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M11.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M7.5 15.5V4','M15.5 15.5V4','M7.5 4H15.5']},
+    {id:'chords',label:'Chords',tabs:['home','theory','guitar','prog'],icon:['M10 2.5C13 2.5 15.5 5.5 15.5 9C15.5 13 11.5 16.5 10 17.5C8.5 16.5 4.5 13 4.5 9C4.5 5.5 7 2.5 10 2.5Z']},
+    {id:'tempo',label:'Tempo',tabs:['rhythm','tuner'],icon:['M6 18H14L12 4H8Z','M10 4L13 15']},
+    {id:'ideas',label:'Ideas',tabs:['mood','practice'],icon:['M10 2L13 7L18 10L13 13L10 18L7 13L2 10L7 7Z']}
+  ];
+  TOOL_LABELS={home:'Wheel',theory:'Scales',guitar:'Shapes',prog:'Build',rhythm:'Metronome',tuner:'Tuner',mood:'Vibe',practice:'Drills',songs:'Song'};
+  NERD_LABELS=['Beginner','Amateur','Professional'];
+  BASIC_SUFFIXES=['','m','7','m7','maj7','sus2','sus4','5'];
+  chordFitsLevel(c,level){
+    if(level>=1) return true;
+    const r=String((c&&c.roman)||'');
+    if(r.indexOf('/')>=0) return false;
+    const f=r.charAt(0);
+    if(f==='b'||f==='\u266d'||f==='#') return false;
+    if(r.indexOf('\u00b0')>=0||r.indexOf('+')>=0) return false;
+    const suf=String((c&&c.name)||'').replace(/^[A-G][#b\u266d\u266f]?/,'');
+    return this.BASIC_SUFFIXES.indexOf(suf)>=0;
+  }
+  FEEL_BY_ROMAN={'I':'home, solid ground','i':'home, but heavy','ii':'a step out, thinking','II':'brighter than it should be','iii':'wistful','III':'lifted, unexpected','IV':'opens up, big sky','iv':'opens up, then clouds over','V':'leaning, wants to land','V7':'leaning hard, wants home','v':'leaning, but tired','vi':'same house, lights off','VI':'a warm way out','vii':'edgy, will not sit still','VII':'swagger, straight out of rock'};
+  FEEL_BY_SUFFIX=[['maj7','dreamy, floating'],['m7\u266d5','half-lit and uneasy'],['m9','velvet'],['m7','smoky, easy'],['m6','bittersweet'],['\u00b07','wound tight'],['\u00b0','unstable, passing through'],['sus4','held breath'],['sus2','open, airy'],['add9','shimmer on top'],['9','lush and funky'],['7','restless, moving'],['+','weird, floating'],['6','sweet, retro'],['m','sad']];
+  feelFor(roman,name){
+    const r=String(roman||'').replace(/[^IiVv]/g,'');
+    if(this.FEEL_BY_ROMAN[r]) return this.FEEL_BY_ROMAN[r];
+    const suf=String(name||'').replace(/^[A-G][#b\u266d\u266f]?/,'');
+    const hit=this.FEEL_BY_SUFFIX.find(p=>p[0]&&suf.indexOf(p[0])===0);
+    return hit?hit[1]:'bright, settled';
+  }
+  roomOfTab(tab){ return this.ROOM_DEFS.find(r=>r.tabs.indexOf(tab)>=0)||null; }
+  goTool(tab){
+    this.stopBuilderLoop();
+    const r=this.roomOfTab(tab); this._roomLast=this._roomLast||{}; if(r) this._roomLast[r.id]=tab;
+    this.stopAutoScroll(); if(tab!=='tuner') this.stopTuner();
+    this.setState({tab,autoScroll:false,activeChordSlot:null,activeRhymeSlot:null});
+  }
+  goRoom(id){
+    const def=this.ROOM_DEFS.find(r=>r.id===id); if(!def) return;
+    this._roomLast=this._roomLast||{};
+    this.goTool(this._roomLast[id]||def.tabs[0]);
+  }
+  askAnswers(raw,ctx){
+    const self=this, q=String(raw||'').trim(), low=q.toLowerCase(); if(!q) return [];
+    const nerd=(typeof this.state.nerdLevel==='number')?this.state.nerdLevel:1;
+    const out=[]; const push=(o)=>{ if(out.length<4) out.push(o); };
+    const clear=(patch)=>()=>self.setState(Object.assign({askQuery:''},patch||{}));
+    const chords=ctx.allPickerChords||[];
+    const sufOf=(n)=>String(n||'').replace(/^[A-G][#b\u266d\u266f]?/,'');
+    const addToProg=(c)=>()=>{ self.playChord(c.pcs); self.setState(st=>({builderChords:[...(st.builderChords||[]),{name:c.name,roman:c.roman,pcs:c.pcs}],askQuery:''})); };
+
+    const bpmM=low.match(/(\d{2,3})\s*(?:bpm|beats)/)||(/(tempo|bpm|speed|click|slow|fast)/.test(low)?low.match(/\b(\d{2,3})\b/):null);
+    if(bpmM){ const v=Math.max(40,Math.min(240,parseInt(bpmM[1],10)));
+      push({title:v+' BPM',detail:'Sets the click everywhere \u2014 metronome, drills, and the length guess on your song.',actLabel:'Set tempo',onAct:clear({bpm:v,tab:'rhythm'})}); }
+
+    const tsM=low.match(/\b([2-9])\s*\/\s*([248])\b/);
+    if(tsM){ const lab=tsM[1]+'/'+tsM[2]; const i=this.TIME_SIGS.findIndex(t=>t.label===lab);
+      if(i>=0) push({title:lab+' time',detail:'Re-accents the click. Count it out loud first, trust me.',actLabel:'Switch',onAct:clear({tsIndex:i,tab:'rhythm'})}); }
+
+    const keyM=q.match(/(?:\bin\b|key of)\s+([A-Ga-g])([#b\u266d\u266f]?)\s*(major|minor|maj|min|m)?\b/);
+    if(keyM){ const acc=(keyM[2]==='b'||keyM[2]==='\u266d')?'b':(keyM[2]?'#':'');
+      const root=keyM[1].toUpperCase()+acc; const mo=/^(min|minor|m)$/.test(String(keyM[3]||'').trim())?'minor':'major';
+      push({title:root+' '+mo,detail:'Moves the whole workbench \u2014 wheel, scales, shapes, the chords you can tap onto words.',actLabel:'Change key',onAct:()=>{self.selectKey(root,mo);self.setState({askQuery:''});}}); }
+
+    if(/tune|in tune|pitch|flat\b|sharp\b/.test(low)) push({title:'Tuner',detail:'Mic on, chromatic readout. Strum everything at once and it names the chord.',actLabel:'Open tuner',onAct:clear({tab:'tuner'})});
+    if(/metronome|click|count in/.test(low)) push({title:'Metronome',detail:'Tap tempo, time signatures, eighth-note subdivision.',actLabel:'Open',onAct:clear({tab:'rhythm'})});
+
+    const rM=low.match(/rhym\w*\s*(?:for|with|on)?\s*['\"]?([a-z']{2,})['\"]?/);
+    if(rM){ const w=rM[1]; const list=this.findRhymes(w).slice(0,10);
+      push({title:'Rhymes for \u201c'+w+'\u201d',detail:list.length?list.join('  \u00b7  '):'Nothing close. Change the line, not the word.'}); }
+
+    const FEELQ=[[/sad|dark|down|blue|heartbreak|cry|lonely/,(s)=>/^m($|[679])|m7\u266d5/.test(s)],
+      [/bright|happy|sunny|lift|hopeful/,(s)=>s===''||s==='maj7'||s==='6'||s==='add9'],
+      [/tense|uneasy|scary|nervous|weird|wrong/,(s)=>/\u00b0|\+|7$|m7\u266d5/.test(s)],
+      [/dream|hazy|float|lush|pretty|soft/,(s)=>/maj7|add9|9|sus/.test(s)]];
+    const fq=FEELQ.find(p=>p[0].test(low));
+    if(fq){ chords.filter(c=>fq[1](sufOf(c.name))).slice(0,3).forEach(c=>push({
+      title:c.name,detail:this.feelFor(c.roman,c.name)+(nerd===0?'':'  \u00b7  '+c.roman+' in '+ctx.keyLabel),
+      actLabel:'Hear it',onAct:()=>self.playChord(c.pcs),act2Label:'Into progression',onAct2:addToProg(c)})); }
+
+    if(/voicing|shape|finger|how do i play|chord for|chord shapes/.test(low)){
+      const cM=q.match(/\b([A-G])([#b\u266d\u266f]?)(maj7|maj|min7|min|m7b5|m7|m9|m6|m|dim7|dim|aug|sus2|sus4|add9|9|7|6)?\b/);
+      if(cM){ const acc=(cM[2]==='b'||cM[2]==='\u266d')?'b':(cM[2]?'#':'');
+        const pc=this.pcOf(cM[1]+acc);
+        const MAPQ={'':'maj',maj:'maj',min:'min',m:'min',m7:'min7',min7:'min7',maj7:'maj7','7':'dom7','9':'9','6':'6',dim:'dim',dim7:'dim7',aug:'aug',sus2:'sus2',sus4:'sus4',add9:'add9',m9:'m9',m6:'m6',m7b5:'m7b5'};
+        const qual=MAPQ[String(cM[3]||'').toLowerCase()]||'maj';
+        const gr=((pc%12)+12)%12;
+        push({title:this.GTR_ROOTS[gr]+(this.SUF[qual]||'')+' shapes',detail:'Every playable voicing up the neck, with fingerings and audio.',actLabel:'Show shapes',onAct:clear({gRoot:gr,gQual:qual,tab:'guitar'})});
+      }
+    }
+    const scq=low.replace(/scale|mode|the/g,'').trim();
+    const sc=scq.length>2?this.SCALES.find(s=>s.name.toLowerCase().indexOf(scq)===0):null;
+    if(sc) push({title:sc.name,detail:'Degrees, fretboard shape and playback in '+ctx.keyLabel+'.',actLabel:'Open',onAct:clear({scaleName:sc.name,tab:'theory'})});
+
+    const NAVQ=[[/lyric|write|verse|chorus|song text/,'songs','Back to the song'],[/progress|loop|turnaround|build/,'prog','Progression builder'],[/mood|vibe|idea|stuck|starter/,'mood','Mood starters'],[/practice|drill|ear train|memor/,'practice','Practice drills'],[/wheel|fifths|circle/,'home','Circle of fifths'],[/diatonic|degree|mode/,'theory','Scales & modes']];
+    NAVQ.forEach(p=>{ if(p[0].test(low)) push({title:p[2],detail:'',actLabel:'Go',onAct:clear({tab:p[1]})}); });
+    return out;
+  }
+  shellVals(ctx){
+    const S=ctx.S, self=ctx.self, A=TOKENS.accent;
+    const nerd=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
+    const nerdDots=[0,1,2].map(i=>({style:'display:block;width:7px;height:7px;border-radius:50%;background:'+(i<=nerd?A:'var(--mm-border)')+';'}));
+    const cur=this.roomOfTab(S.tab)||this.ROOM_DEFS[0];
+    const roomNav=this.ROOM_DEFS.map(r=>{ const on=r.id===cur.id; return {label:r.label,icon:r.icon,
+      stroke:on?A:'var(--mm-text-4)',
+      style:'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:none;background:transparent;cursor:pointer;padding:9px 0 8px;min-height:56px;transition:transform .12s ease;',
+      labelStyle:'font-size:10px;font-weight:700;letter-spacing:0.01em;color:'+(on?A:'var(--mm-text-4)')+';',
+      onClick:()=>self.goRoom(r.id)}; });
+    const segT=(on)=>'border:2px solid '+(on?A:'var(--mm-border)')+';background:'+(on?'#332812':'var(--mm-surface)')+';color:'+(on?A:'var(--mm-text-2)')+';font-size:12.5px;font-weight:700;padding:0 15px;min-height:38px;border-radius:980px;cursor:pointer;white-space:nowrap;flex:none;transition:border-color .15s,color .15s,background .15s;';
+    const subTools=cur.tabs.map(t=>({label:this.TOOL_LABELS[t]||t,style:segT(t===S.tab),onClick:()=>self.goTool(t)}));
+
+    const askQuery=S.askQuery||'';
+    const askOpen=!!askQuery.trim();
+    const askActStyle='border:2px solid '+TOKENS.accentLo+';background:linear-gradient(135deg,'+TOKENS.accentHi+','+A+' 55%,'+TOKENS.accentLo+');color:#1a0e00;font-size:12px;font-weight:800;padding:0 13px;min-height:38px;border-radius:11px;cursor:pointer;';
+    const askAct2Style='border:1px solid var(--mm-border);background:#332812;color:'+A+';font-size:12px;font-weight:700;padding:0 12px;min-height:38px;border-radius:11px;cursor:pointer;';
+    const askResults=(askOpen?this.askAnswers(askQuery,{keyRoot:ctx.keyRoot,mode:ctx.mode,keyLabel:ctx.keyLabel,allPickerChords:ctx.allPickerChords}):[])
+      .map(r=>Object.assign({},r,{hasAct:!!(r.actLabel&&r.onAct),hasAct2:!!(r.act2Label&&r.onAct2),hasDetail:!!r.detail}));
+    const askChips=['something sadder','92 bpm','shapes for Fmaj7','rhyme for gasoline','in F minor','am I in tune']
+      .map(t=>({label:t,onClick:()=>self.setState({askQuery:t})}));
+
+    const slot=ctx.activeSlot;
+    const sheetOpen=!!slot;
+    const curChord=sheetOpen?(S.chordMap||{})[slot.line+'_'+slot.word]:null;
+    const assign=(c)=>()=>{ const key=slot.line+'_'+slot.word; self.playChord(c.pcs);
+      self.setState(st=>({chordMap:Object.assign({},st.chordMap||{},{[key]:{name:c.name,roman:c.roman,pcs:c.pcs}})})); };
+    const sheetOptStyle=(on)=>'display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;border:2px solid '+(on?A:'var(--mm-border)')+';background:'+(on?'#332812':'var(--mm-surface-2)')+';border-radius:12px;padding:9px 11px;cursor:pointer;min-width:136px;min-height:56px;flex:none;transition:border-color .15s,background .15s;';
+    const sheetOptions=(ctx.allPickerChords||[]).slice(0,14).map(c=>({name:c.name,roman:nerd===0?'':c.roman,feelOnly:true,
+      feel:this.feelFor(c.roman,c.name),style:sheetOptStyle(!!(curChord&&curChord.name===c.name)),onClick:assign(c)}));
+    const revSuf=Object.keys(this.SUF).sort((a,b)=>String(this.SUF[b]).length-String(this.SUF[a]).length);
+    const sheetShapes=()=>{ if(!curChord) return;
+      const m=String(curChord.name).match(/^([A-G])([#b\u266d\u266f]?)(.*)$/); if(!m) return;
+      const acc=(m[2]==='b'||m[2]==='\u266d')?'b':(m[2]?'#':'');
+      const gr=((this.pcOf(m[1]+acc)%12)+12)%12;
+      const qual=revSuf.find(k=>String(this.SUF[k])===String(m[3]||''))||'maj';
+      self.goTool('guitar'); self.setState({gRoot:gr,gQual:qual}); };
+    const sheetRhymes=sheetOpen?this.findRhymes(ctx.activeWordText).slice(0,8).map(w=>({word:w})):[];
+    const wordSlots=[];
+    String(S.songText||'').split('\n').forEach((ln,li)=>{
+      const t=ln.trim(); if(!t||t.charAt(0)==='#') return;
+      ln.split(/\s+/).filter(Boolean).forEach((w,wi)=>wordSlots.push({line:li,word:wi}));
+    });
+    const slotIdx=slot?wordSlots.findIndex(x=>x.line===slot.line&&x.word===slot.word):-1;
+    const goSlot=(i)=>{
+      const t=wordSlots[Math.max(0,Math.min(wordSlots.length-1,i))];
+      if(t) self.setState({activeChordSlot:{line:t.line,word:t.word},activeRhymeSlot:null});
+    };
+    const sheetNavStyle='border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text);font-size:17px;font-weight:700;width:42px;height:42px;border-radius:13px;cursor:pointer;flex:none;line-height:1;padding:0;';
+
+    return {
+      roomNav,subTools,hasSubTools:cur.tabs.length>1&&!S.focusMode,roomLabel:cur.label,
+      nerdLevel:nerd,nerdLabel:this.NERD_LABELS[nerd],nerdDots,cycleNerd:()=>{ const next=(nerd+1)%3;
+        const patch={nerdLevel:next};
+        if(next===0){ patch.diatExt='triad'; patch.progExt='triad'; if(this.BASIC_SUFFIXES.indexOf(this.SUF[S.gQual]||'')<0) patch.gQual='maj'; }
+        self.setState(patch); },
+      askQuery,askOpen,askIdle:!askOpen,askResults,hasAskResults:askResults.length>0,
+      askNoResults:askOpen&&askResults.length===0,askActStyle,askAct2Style,askChips,
+      onAskChange:(e)=>self.setState({askQuery:e.target.value}),clearAsk:()=>self.setState({askQuery:''}),
+      sheetOpen,sheetWord:ctx.activeWordText,sheetHasChord:!!curChord,
+      sheetChordName:curChord?curChord.name:'No chord yet',
+      sheetRoman:curChord?(nerd===0?this.plainRoman(curChord.roman):(curChord.roman||'')):'',
+      sheetFeel:curChord?this.feelFor(curChord.roman,curChord.name):'Tap one below and it lands on this word.',
+      sheetOptions,sheetShapes,
+      sheetPlay:()=>{ if(curChord&&curChord.pcs) self.playChord(curChord.pcs); },
+      sheetArp:()=>{ if(curChord&&curChord.pcs) self.playArp(curChord.pcs); },
+      sheetClear:()=>{ if(!slot) return; const key=slot.line+'_'+slot.word;
+        self.setState(st=>{ const cm=Object.assign({},st.chordMap||{}); delete cm[key]; return {chordMap:cm}; }); },
+      sheetClose:()=>self.setState({activeChordSlot:null}),
+      sheetRhymes,sheetHasRhymes:sheetRhymes.length>0,
+      sheetNavStyle,sheetSlotIdx:slotIdx<0?0:slotIdx,sheetSlotMax:Math.max(0,wordSlots.length-1),
+      sheetSlotLabel:slotIdx>=0?(slotIdx+1)+' / '+wordSlots.length:'',
+      sheetPrev:()=>goSlot(slotIdx-1),sheetNext:()=>goSlot(slotIdx+1),
+      onSheetScrub:(e)=>goSlot(parseInt(e.target.value,10)||0),
+      showHub:false,notHome:false,activeHere:false,
+      pickerOptions:nerd===0?(ctx.pickerOptions||[]).map(p=>Object.assign({},p,{roman:this.plainRoman(p.roman)})):ctx.pickerOptions,
+      showAdvChords:nerd===0?false:(nerd===2?true:!!S.showAdvChords),
+      showAdvAnalysis:nerd===0?false:(nerd===2?true:!!S.showAdvAnalysis),
+      showVoiceLeading:nerd===0?false:(nerd===2?true:!!S.showVoiceLeading)
+    };
+  }
+  strumChord(pcs,t,vol,dur,down,kind){
+    if(!pcs||!pcs.length) return;
+    this.ensureAudio();
+    const ms=this.midiChord(pcs,3);
+    const order=down?ms:ms.slice().reverse();
+    const sp=kind==='piano'?0.007:0.024;
+    order.forEach((m,i)=>{
+      if(kind==='piano') this.pianoVoice(this.midiFreq(m),t+i*sp,dur,vol*0.85);
+      else this.voice(this.midiFreq(m),t+i*sp,dur,vol);
+    });
+  }
+  pianoVoice(freq,t,dur,vol){
+    this.ensureAudio(); const ac=this.ac; const g=ac.createGain();
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    g.connect(ac.destination);
+    [[1,0.6],[2,0.22],[3,0.08],[4,0.035]].forEach(sp=>{
+      const o=ac.createOscillator(); o.type='sine'; o.frequency.value=freq*sp[0];
+      const og=ac.createGain(); og.gain.value=sp[1];
+      o.connect(og); og.connect(g); o.start(t); o.stop(t+dur+0.05);
+    });
+  }
+  noteAt(pcs,i,vol,t,dur,kind){
+    if(!pcs||!pcs.length) return;
+    const ms=this.midiChord(pcs,3);
+    const m=ms[i%ms.length]+12*Math.floor(i/ms.length);
+    if(kind==='piano') this.pianoVoice(this.midiFreq(m),t,dur,vol);
+    else this.voice(this.midiFreq(m),t,dur,vol);
+  }
+  noiseBuffer(){
+    if(this._noiseBuf) return this._noiseBuf;
+    const ac=this.ac, len=Math.floor(ac.sampleRate*0.4);
+    const b=ac.createBuffer(1,len,ac.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    this._noiseBuf=b; return b;
+  }
+  drumHit(kind,t,vol){
+    this.ensureAudio(); const ac=this.ac;
+    if(kind==='kick'){
+      const o=ac.createOscillator(); o.type='sine'; const g=ac.createGain();
+      o.frequency.setValueAtTime(132,t); o.frequency.exponentialRampToValueAtTime(46,t+0.12);
+      g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.24);
+      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.28); return;
+    }
+    const src=ac.createBufferSource(); src.buffer=this.noiseBuffer();
+    const f=ac.createBiquadFilter(), g=ac.createGain();
+    if(kind==='snare'){
+      f.type='bandpass'; f.frequency.value=1900; f.Q.value=0.9;
+      g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
+    } else {
+      f.type='highpass'; f.frequency.value=7400;
+      g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.055);
+    }
+    src.connect(f); f.connect(g); g.connect(ac.destination); src.start(t); src.stop(t+0.3);
+  }
+  drumEv(b,p){
+    const e=[];
+    if(b===0||(p>=4&&b===Math.floor(p/2))) e.push({o:0,k:'kick',v:0.5});
+    if(p>=4){ if(b===1||b===3) e.push({o:0,k:'snare',v:0.26}); }
+    else if(b===p-1) e.push({o:0,k:'snare',v:0.24});
+    e.push({o:0.5,k:'hat',v:0.1});
+    return e;
+  }
+  cycleChordBars(i){
+    this.setState(st=>{
+      const seq=(st.builderChords||[]).map((c,k)=>{
+        if(k!==i) return c;
+        const cur=Math.max(1,c.bars||1);
+        return {...c,bars:cur===1?2:cur===2?4:1};
+      });
+      return {builderChords:seq};
+    });
+    this._loopPos=0;
+  }
+  toggleBuilderLoop(){ if(this.state.loopOn) this.stopBuilderLoop(); else this.startBuilderLoop(); }
+  stopBuilderLoop(){
+    if(this._loopTimer){ clearTimeout(this._loopTimer); this._loopTimer=null; }
+    if(this.state.loopOn) this.setState({loopOn:false,loopIdx:0,loopBeat:0});
+  }
+  startBuilderLoop(){
+    const chords=this.state.builderChords||[];
+    if(!chords.length) return;
+    this.ensureAudio();
+    if(this._loopTimer){ clearTimeout(this._loopTimer); this._loopTimer=null; }
+    this._loopPos=0;
+    this.setState({loopOn:true,loopIdx:0,loopBeat:0});
+    const tick=()=>{
+      const st=this.state; const seq=st.builderChords||[];
+      if(!st.loopOn||!seq.length){ this.stopBuilderLoop(); return; }
+      const ts=this.TIME_SIGS[st.tsIndex]||this.TIME_SIGS[0];
+      let bpm=Number(st.bpm); if(!isFinite(bpm)||bpm<40||bpm>240) bpm=100;
+      const beatSec=60/bpm;
+      const p=ts.pulses;
+      const spans=seq.map(c=>Math.max(1,(c&&c.bars)||1)*p);
+      const total=spans.reduce((a,b)=>a+b,0)||p;
+      let pos=this._loopPos%total, idx=0;
+      while(idx<spans.length-1&&pos>=spans[idx]){ pos-=spans[idx]; idx++; }
+      const beat=pos, inBar=beat%p;
+      const t=this.ac.currentTime+0.03;
+      const c=seq[idx];
+      const pat=this.LOOP_PATTERNS[st.loopStyle]||this.LOOP_PATTERNS.folk;
+      const kind=st.loopVoice==='piano'?'piano':'guitar';
+      if(c&&c.pcs) pat.ev(beat,p).forEach(ev=>{
+        const when=t+ev.o*beatSec;
+        if(ev.note!=null) this.noteAt(c.pcs,ev.note,ev.v,when,ev.d,kind);
+        else this.strumChord(c.pcs,when,ev.v,ev.d,ev.down,kind);
+      });
+      if(st.loopDrums) this.drumEv(beat,p).forEach(d=>this.drumHit(d.k,t+d.o*beatSec,d.v));
+      this.setState({loopIdx:idx,loopBeat:inBar});
+      this._loopPos++;
+      this._loopTimer=setTimeout(tick,beatSec*1000);
+    };
+    tick();
+  }
   renderVals(){
     const S=this.state; const A=TOKENS.accent; const self=this;
     const splashVisible=S.splashPhase!=='gone';
@@ -2761,9 +3237,9 @@ class Component extends DCLogic {
     const keyModeLabel=mode==='major'?'major':'minor';
     const keyLabel=keyRoot+' '+keyModeLabel;
     const seg=(on)=>`border:none;background:${on?TOKENS.surface:'transparent'};color:${on?TOKENS.text:TOKENS.text3};font-size:14px;font-weight:600;padding:8px 20px;border-radius:10px;cursor:pointer;box-shadow:${on?'0 1px 3px rgba(0,0,0,0.12)':'none'};transition:all .2s;`;
-    const segS=(on)=>`border:2px solid ${on?TOKENS.border:'transparent'};background:${on?TOKENS.surface:'transparent'};color:${on?TOKENS.text:TOKENS.text3};font-size:13px;font-weight:700;padding:4px 12px;border-radius:var(--mm-r-sm);cursor:pointer;box-shadow:${on?'2px 2px 0 0 '+TOKENS.border:'none'};transition:all .15s;`;
-    const pill=(active)=>`border:2px solid ${active?TOKENS.accentLo:TOKENS.border};background:${active?'linear-gradient(135deg,'+TOKENS.accentHi+','+A+' 60%,'+TOKENS.accentLo+')':TOKENS.surface};color:${active?'#1a0e00':TOKENS.text2};font-size:13px;font-weight:${active?'800':'600'};padding:6px 13px;border-radius:var(--mm-r-pill);cursor:pointer;box-shadow:${active?'3px 3px 0 0 '+TOKENS.accentLo:'2px 2px 0 0 '+TOKENS.border};transition:transform .12s ease,box-shadow .12s ease,background .18s ease,color .18s ease;`;
-    const romanChip=(bg)=>`border:2px solid ${TOKENS.border};background:${bg};color:${TOKENS.text};font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:var(--mm-r-chip);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
+    const segS=(on)=>`border:1px solid ${on?TOKENS.border:'transparent'};background:${on?TOKENS.surface:'transparent'};color:${on?TOKENS.text:TOKENS.text3};font-size:13px;font-weight:700;padding:5px 12px;border-radius:var(--mm-r-sm);cursor:pointer;transition:background .15s,color .15s,border-color .15s;`;
+    const pill=(active)=>`border:1px solid ${active?A:TOKENS.border};background:${active?A:TOKENS.surface};color:${active?'#1a0e00':TOKENS.text2};font-size:13px;font-weight:${active?'700':'600'};padding:7px 14px;border-radius:var(--mm-r-pill);cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease;`;
+    const romanChip=(bg)=>`border:1px solid ${TOKENS.border};background:${bg};color:${TOKENS.text};font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:var(--mm-r-chip);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
     const card=(extra)=>`background:${TOKENS.surface};border-radius:var(--mm-r-card);padding:22px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.04);${extra||''}`;
     const goTab=(t)=>(e)=>{
       const el=e&&e.currentTarget;
@@ -2799,10 +3275,10 @@ class Component extends DCLogic {
       hoverStyle:`transform:translateY(-3px);border-color:${hexToRgba(t.accent,0.5)};box-shadow:0 10px 28px ${hexToRgba(t.accent,0.16)};`}));
     const toggle=(on)=>`position:relative;width:44px;height:26px;border-radius:var(--mm-r-pill);border:2px solid ${on?TOKENS.accentLo:TOKENS.border};background:${on?A:TOKENS.surface};cursor:pointer;transition:all .2s;padding:0;`;
     const knob=(on)=>`position:absolute;top:3px;left:${on?'21px':'3px'};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:all .2s;`;
-    const playPill=`border:2px solid ${TOKENS.accentLo};background:linear-gradient(135deg,${TOKENS.accentHi},${A} 55%,${TOKENS.accentLo});color:#1a0e00;font-size:14px;font-weight:800;padding:10px 20px;border-radius:var(--mm-r-btn);cursor:pointer;box-shadow:4px 4px 0 0 ${TOKENS.accentLo};transition:filter .15s,transform .12s ease,box-shadow .12s ease;animation:mmWarmGlow 3.2s ease-in-out infinite;`;
-    const playPillGhost=`border:2px solid ${A};background:${TOKENS.surface};color:${A};font-size:14px;font-weight:700;padding:10px 20px;border-radius:var(--mm-r-btn);cursor:pointer;box-shadow:3px 3px 0 0 ${TOKENS.border};transition:background .15s,transform .12s ease,box-shadow .12s ease;`;
-    const miniPlay=`border:2px solid ${TOKENS.accentLo};background:linear-gradient(135deg,${TOKENS.accentHi},${A} 55%,${TOKENS.accentLo});color:#1a0e00;font-size:12px;font-weight:800;width:30px;height:26px;border-radius:var(--mm-r-sm);cursor:pointer;box-shadow:2px 2px 0 0 ${TOKENS.accentLo};transition:transform .12s ease,filter .12s ease;`;
-    const miniArp=`border:2px solid ${TOKENS.border};background:#332812;color:${A};font-size:11px;font-weight:700;padding:0 9px;height:26px;border-radius:var(--mm-r-sm);cursor:pointer;box-shadow:2px 2px 0 0 ${TOKENS.border};transition:transform .12s ease,filter .12s ease;`;
+    const playPill=`border:1px solid ${A};background:${A};color:#1a0e00;font-size:14px;font-weight:700;padding:11px 20px;border-radius:var(--mm-r-btn);cursor:pointer;transition:filter .15s,transform .12s ease;`;
+    const playPillGhost=`border:1px solid ${TOKENS.border};background:${TOKENS.surface};color:${A};font-size:14px;font-weight:600;padding:11px 20px;border-radius:var(--mm-r-btn);cursor:pointer;transition:background .15s,transform .12s ease,box-shadow .12s ease;`;
+    const miniPlay=`border:1px solid ${A};background:${A};color:#1a0e00;font-size:12px;font-weight:700;width:32px;height:28px;border-radius:var(--mm-r-sm);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
+    const miniArp=`border:1px solid ${TOKENS.border};background:#332812;color:${A};font-size:11px;font-weight:700;padding:0 10px;height:28px;border-radius:var(--mm-r-sm);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
 
     // wheel
     const cx=150,cy=150,oR=122,iR=78;
@@ -2896,7 +3372,7 @@ class Component extends DCLogic {
         if(isSel){ bg=A; border=A; fg='#000'; }
         else if(isTarget){ bg='#1c3a3a'; border='#2dd4bf'; fg='#5eead4'; }
         else if(isRel){ bg='#2e2410'; border='#6b551f'; fg='#f7d488'; }
-        else if(isSub){ bg='#2a1c33'; border='var(--mm-purple)'; fg='#d8b4f8'; }
+        else if(isSub){ bg='#1c2a33'; border='var(--mm-purple)'; fg='#cfe9f5'; }
         chordNodes.push(h('button',{key:'c'+c.roman,onClick:()=>self.setState(st=>({chordWheelSel:st.chordWheelSel===c.roman?null:c.roman})),
           style:{position:'absolute',left:x+'px',top:y+'px',transform:'translate(-50%,-50%)',width:(c.isDiatonic?'46px':'40px'),height:(c.isDiatonic?'46px':'40px'),borderRadius:'50%',
             border:'2px solid '+border,background:bg,color:fg,fontSize:(c.isDiatonic?'12px':'10.5px'),fontWeight:700,cursor:'pointer',
@@ -2937,20 +3413,28 @@ class Component extends DCLogic {
     const romanBaseArr=mode==='major'?ROMAN_MAJ:ROMAN_MIN;
     const diatonic=romanBaseArr.map((rb,d)=>{ const c=this.buildDiatonicChord(keyRoot,diatScaleSemis,mode,d,diatExt,rb); return {...c,play:()=>self.playChord(c.pcs),arp:()=>self.playArp(c.pcs)}; });
     const EXT_DEFS=[['triad','Triads'],['7','7ths'],['9','9ths'],['11','11ths'],['sus4','Sus4'],['sus2','Sus2']];
-    const extList=EXT_DEFS.map(([id,label])=>({label,style:pill(diatExt===id),onClick:()=>self.setState({diatExt:id})}));
+    const extLvl=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
+    const EXT_VIS=extLvl===0?EXT_DEFS.filter(e=>e[0]==='triad'||e[0]==='7'):(extLvl===1?EXT_DEFS.filter(e=>e[0]!=='11'):EXT_DEFS);
+    const extList=EXT_VIS.map(([id,label])=>({label,style:pill(diatExt===id),onClick:()=>self.setState({diatExt:id})}));
 
     // guitar — full chromatic chord library
     const gRoot=(typeof S.gRoot==='number')?((S.gRoot%12+12)%12):0;
     const gQual=S.gQual||'maj';
     const QUAL_GROUPS=[
-      ['Triads',[['maj','Major'],['min','Minor'],['dim','Dim'],['aug','Aug'],['sus2','Sus2'],['sus4','Sus4']]],
-      ['Sixths & Sevenths',[['6','6'],['m6','m6'],['dom7','7'],['maj7','Maj7'],['min7','m7'],['m7b5','m7♭5'],['dim7','dim7']]],
-      ['Extended',[['add9','Add9'],['9','9'],['m9','m9']]]
+      ['Triads & power',[['maj','Major'],['min','Minor'],['dim','Dim'],['aug','Aug'],['sus2','Sus2'],['sus4','Sus4'],['5','5']]],
+      ['Sixths & sevenths',[['6','6'],['m6','m6'],['dom7','7'],['maj7','Maj7'],['min7','m7'],['m7b5','m7♭5'],['dim7','dim7'],['mMaj7','m(maj7)'],['7sus4','7sus4']]],
+      ['Ninths',[['add9','Add9'],['9','9'],['m9','m9'],['maj9','Maj9'],['69','6/9']]],
+      ['Elevenths & thirteenths',[['11','11'],['m11','m11'],['13','13'],['m13','m13']]],
+      ['Altered dominants',[['7b5','7♭5'],['7#5','7♯5'],['7b9','7♭9'],['7#9','7♯9']]]
     ];
     const keyScaleSemis=mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
     const inKeyRootPCs=new Set(keyScaleSemis.map(s=>(rootPC+s)%12));
     const rootList=this.GTR_ROOTS.map((r,i)=>i).filter(i=>inKeyRootPCs.has(i)).map(i=>({label:this.GTR_ROOTS[i],onClick:()=>self.setState({gRoot:i}),style:pill(i===gRoot)}));
-    const qualGroups=QUAL_GROUPS.map(([label,items])=>({label,items:items.map(([id,lab])=>({label:lab,onClick:()=>self.setState({gQual:id}),style:pill(id===gQual)}))}));
+    const qLvl=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
+    const QUAL_VIS=qLvl===0
+      ?[['Triads',[['maj','Major'],['min','Minor'],['sus2','Sus2'],['sus4','Sus4'],['5','5']]],['Sevenths',[['dom7','7'],['maj7','Maj7'],['min7','m7']]]]
+      :(qLvl===1?QUAL_GROUPS.slice(0,3):QUAL_GROUPS);
+    const qualGroups=QUAL_VIS.map(([label,items])=>({label,items:items.map(([id,lab])=>({label:lab,onClick:()=>self.setState({gQual:id}),style:pill(id===gQual)}))}));
     const gChord=this.chordFromRootPC(gRoot,gQual);
     const voicings=this.buildVoicings(gChord);
     const chordVibeText=this.chordVibe(keyRoot,mode,gRoot,gQual);
@@ -2971,7 +3455,7 @@ class Component extends DCLogic {
     const romanArrB = mode==='major'?['I','ii','iii','IV','V','vi','vii°']:['i','ii°','♭III','iv','v','♭VI','♭VII'];
     const addChordToBuilder=(c)=>{ self.setState(st=>{ const nb=[...(st.builderChords||[]),{name:c.name,roman:c.roman,pcs:c.pcs}]; return {builderChords:nb,insightIdx:nb.length-1}; }); };
     const progExt = S.progExt||'triad';
-    const progExtList = EXT_DEFS.map(([id,label])=>({label,style:pill(progExt===id),onClick:()=>self.setState({progExt:id})}));
+    const progExtList = EXT_VIS.map(([id,label])=>({label,style:pill(progExt===id),onClick:()=>self.setState({progExt:id})}));
     const builderAddChips = romanArrB.map((rb,d)=>{ const built=this.buildDiatonicChord(keyRoot,diatScaleSemis,mode,d,progExt,rb); return {roman:rb,name:built.name,onClick:()=>addChordToBuilder({name:built.name,roman:rb,pcs:built.pcs})}; });
     const cxHarm=this.complexHarmony(keyRoot,mode);
     const borrowedChips = cxHarm.mi.map(c=>({roman:c.roman,name:c.name,onClick:()=>addChordToBuilder(c)}));
@@ -3255,7 +3739,8 @@ class Component extends DCLogic {
 
     // write tab — one continuous notepad: lyrics + inline "# Label" headings + click-to-chord + one tab grid
     const allPickerRaw=[...romanArrB.map((rb,d)=>{ const c=this.chordFromSpec(keyRoot,degSpecsArr[d]); return {roman:rb,name:c.name,pcs:c.pcs}; }),...cxHarm.mi.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs})),...cxHarm.sd.map(c=>({roman:c.roman,name:c.name,pcs:c.pcs}))];
-    const seenPk={}; const allPickerChords=allPickerRaw.filter(c=>{ if(seenPk[c.name])return false; seenPk[c.name]=true; return true; });
+    const pkLvl=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
+    const seenPk={}; const allPickerChords=allPickerRaw.filter(c=>{ if(seenPk[c.name])return false; seenPk[c.name]=true; return this.chordFitsLevel(c,pkLvl); });
 
     const songText=S.songText||'';
     const onSongTextChange=(e)=>self.setState({songText:e.target.value});
@@ -3430,7 +3915,7 @@ class Component extends DCLogic {
 
     const ghostSmallStyle=`border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text-2);font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:9px;cursor:pointer;transition:background .15s,transform .12s ease;`;
     const stepBtnStyleSmall=`width:32px;height:32px;border-radius:50%;border:1px solid var(--mm-border);background:var(--mm-surface);font-size:17px;color:var(--mm-text);cursor:pointer;flex:none;transition:transform .12s ease,filter .12s ease;`;
-    const metroBtnStyleSmall=`border:none;background:${S.playing?'var(--mm-danger)':A};color:#fff;font-size:14px;font-weight:600;padding:9px 22px;border-radius:980px;cursor:pointer;flex:none;transition:transform .12s ease;`;
+    const metroBtnStyleSmall=`border:1px solid ${S.playing?'var(--mm-danger)':A};background:${S.playing?'var(--mm-danger)':A};color:${S.playing?'#fff':'#1a0e00'};font-size:14px;font-weight:600;padding:9px 22px;border-radius:980px;cursor:pointer;flex:none;transition:transform .12s ease;`;
 
     const onSongNameChange=(e)=>self.setState({currentSongName:e.target.value});
     const onSongTagsChange=(e)=>self.setState({currentSongTags:e.target.value});
@@ -3456,7 +3941,7 @@ class Component extends DCLogic {
       const moodSel=i===S.moodIndex;
       const styleOpen=expandedMoodStyle===i;
       return {mood:m.mood,keyLabel:m.keyRoot+' '+(m.keyMode==='major'?'major':'minor'),bpm:m.bpm,tsLabel:this.TIME_SIGS[m.tsIndex].label,why:m.why,artistStyle:m.artistStyle,instrumentsStr:m.instruments.join(' · '),
-        style:`text-align:left;border:2px solid ${moodSel?TOKENS.purple:'var(--mm-border)'};background:${moodSel?'#2a1c33':'var(--mm-surface)'};border-radius:14px;padding:13px 15px;cursor:pointer;box-shadow:${moodSel?'2px 2px 0 0 '+TOKENS.purple:'none'};transition:transform .12s ease,filter .12s ease;`,
+        style:`text-align:left;border:2px solid ${moodSel?TOKENS.purple:'var(--mm-border)'};background:${moodSel?'#1c2a33':'var(--mm-surface)'};border-radius:14px;padding:13px 15px;cursor:pointer;box-shadow:${moodSel?'2px 2px 0 0 '+TOKENS.purple:'none'};transition:transform .12s ease,filter .12s ease;`,
         onClick:()=>loadMood(i),
         styleOpen,styleChevronStyle:`display:inline-block;vertical-align:-1px;transition:transform .2s ease;transform:rotate(${styleOpen?180:0}deg);`,
         toggleStyleNotes:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); self.setState(st=>({expandedMoodStyle:st.expandedMoodStyle===i?null:i})); },
@@ -3553,11 +4038,52 @@ class Component extends DCLogic {
     const tunerChordName=tunerChordObj?tunerChordObj.name:(S.tunerListening?'Listening…':'—');
     const tunerChordNotesLabel=tunerChordObj?(tunerChordObj.single?'Single note — strum a full chord to identify it.':tunerChordObj.pcs.slice().sort((a,b)=>a-b).map(pc=>this.GTR_ROOTS[pc]).join(' · ')):'';
     const tunerBtnLabel=S.tunerListening?'Stop Listening':'Start Listening';
-    const tunerBtnStyle=`border:none;background:${S.tunerListening?'var(--mm-danger)':A};color:#fff;font-size:17px;font-weight:600;padding:13px 46px;border-radius:980px;cursor:pointer;transition:all .2s;`;
+    const tunerBtnStyle=`border:1px solid ${S.tunerListening?'var(--mm-danger)':A};background:${S.tunerListening?'var(--mm-danger)':A};color:${S.tunerListening?'#fff':'#1a0e00'};font-size:17px;font-weight:600;padding:13px 46px;border-radius:980px;cursor:pointer;transition:all .2s;`;
 
     const clearBuilder=()=>self.setState({builderChords:[]});
     const playBuilder=()=>self.playSeq(builderChords,false);
     const playBuilderArp=()=>self.playSeq(builderChords,true);
+    const nerd=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
+    const loopTs=this.TIME_SIGS[S.tsIndex]||this.TIME_SIGS[0];
+    const loopOn=!!S.loopOn;
+    const loopIdx=loopOn?(S.loopIdx||0):-1;
+    const loopStyle=S.loopStyle||'folk';
+    const loopStyleOpts=Object.keys(this.LOOP_PATTERNS).map(id=>({label:this.LOOP_PATTERNS[id].label,style:pill(loopStyle===id),onClick:()=>{self.setState({loopStyle:id});self._loopPos=0;}}));
+    const loopVoiceOpts=[['guitar','Guitar'],['piano','Piano']].map(v=>({label:v[1],style:segS((S.loopVoice||'guitar')===v[0]),onClick:()=>self.setState({loopVoice:v[0]})}));
+    const loopDrums=S.loopDrums!==false;
+    const loopDrumStyle=loopDrums?'border:1px solid '+A+';background:#332812;color:'+A+';font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:var(--mm-r-pill);cursor:pointer;':'border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text-3);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:var(--mm-r-pill);cursor:pointer;';
+    const toggleLoopDrums=()=>self.setState({loopDrums:!loopDrums});
+    const loopBeatDots=[];
+    for(let i=0;i<loopTs.pulses;i++){
+      const on=loopOn&&(S.loopBeat||0)%loopTs.pulses===i;
+      loopBeatDots.push({style:'display:block;width:'+(on?'9px':'6px')+';height:'+(on?'9px':'6px')+';border-radius:50%;background:'+(on?A:'var(--mm-border)')+';transition:all .1s ease;'});
+    }
+    const loopNowChord=(loopOn&&builderChords[loopIdx])?builderChords[loopIdx].name:'';
+    const loopBtnLabel=loopOn?'Stop the loop':'Loop it like a song';
+    const loopBtnStyle=loopOn
+      ?'border:1px solid var(--mm-danger);background:#2e1a1c;color:#ff6b81;font-size:14px;font-weight:700;padding:11px 20px;border-radius:var(--mm-r-btn);cursor:pointer;transition:filter .15s,transform .12s ease;'
+      :playPill;
+    const loopHint=builderChords.length?('Loops '+builderChords.length+' chord'+(builderChords.length===1?'':'s')+' at '+(S.bpm||100)+' BPM in '+loopTs.label+' — tap a chord\u2019s ×1 badge to give it more bars.'):'';
+    const linkBtnStyle='border:none;background:transparent;color:var(--mm-text-3);font-size:12.5px;font-weight:600;cursor:pointer;padding:6px 0;transition:color .15s ease;';
+    const barsBadge=(n,on)=>'position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:1px solid '+(on?A:'var(--mm-border)')+';background:'+(on?'#332812':'var(--mm-surface-2)')+';color:'+(on?A:'var(--mm-text-4)')+';font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:980px;cursor:pointer;line-height:1.3;';
+    const loopVals={loopOn,loopIdle:!loopOn,loopIdx,loopBeatDots,loopNowChord,loopBtnLabel,loopBtnStyle,loopHint,linkBtnStyle,
+      loopStyleOpts,loopVoiceOpts,loopDrums,loopDrumStyle,toggleLoopDrums,
+      loopDrumLabel:loopDrums?'Drums on':'Drums off',
+      toggleBuilderLoop:()=>self.toggleBuilderLoop(),
+      diatonic:diatonic.map(c=>({...c,romanLabel:nerd===0?this.plainRoman(c.roman):c.roman,feel:this.feelFor(c.roman,c.name)})),
+      showDiagrams:nerd>0,
+      focusMode:!!S.focusMode,askVisible:!S.focusMode,
+      navBarStyle:'position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(14,14,15,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--mm-border);padding-bottom:env(safe-area-inset-bottom);transition:transform .25s ease;transform:translateY('+(S.focusMode?'110%':'0')+');',
+      toggleFocus:()=>self.setState({focusMode:!S.focusMode}),
+      focusBtnLabel:S.focusMode?'Leave focus':'Focus mode',
+      focusBtnStyle:'border:1px solid '+(S.focusMode?A:'var(--mm-border)')+';background:'+(S.focusMode?'#332812':'var(--mm-surface)')+';color:'+(S.focusMode?A:'var(--mm-text-3)')+';font-size:12px;font-weight:700;padding:7px 13px;border-radius:980px;cursor:pointer;',
+      songTextStyle:'width:100%;min-height:'+(S.focusMode?'58vh':'150px')+';border:none;background:transparent;padding:0;font-size:'+(S.focusMode?'20px':'16px')+';line-height:'+(S.focusMode?'2.05':'1.9')+';font-family:inherit;resize:vertical;color:var(--mm-text);',
+      builderChips:builderChips.map((c,i)=>({...c,
+        roman:nerd===0?this.plainRoman(c.roman):c.roman,
+        barsLabel:'\u00d7'+Math.max(1,(builderChords[i]&&builderChords[i].bars)||1),
+        barsStyle:barsBadge(1,((builderChords[i]&&builderChords[i].bars)||1)>1),
+        cycleBars:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); self.cycleChordBars(i); },
+        style:c.style+';'+(i===loopIdx?'border-color:'+A+';background:#3a2c10;transform:translateY(-3px);':'')}))};
 
     return {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
@@ -3653,7 +4179,9 @@ class Component extends DCLogic {
       showImportConfirm:!!S.showImportConfirm,hasBackupError:!!S.backupError,backupError:S.backupError||'',
       borrowedSectionHelp:this.JARGON_HELP.borrowed,secDomSectionHelp:this.JARGON_HELP.secDom,
       showRomanHelp:!!S.showRomanHelp,toggleRomanHelp:()=>self.setState({showRomanHelp:!S.showRomanHelp}),
-      showQualityHelp:!!S.showQualityHelp,toggleQualityHelp:()=>self.setState({showQualityHelp:!S.showQualityHelp})
+      showQualityHelp:!!S.showQualityHelp,toggleQualityHelp:()=>self.setState({showQualityHelp:!S.showQualityHelp}),
+      ...loopVals,
+      ...this.shellVals({S,self,keyRoot,mode,keyLabel,allPickerChords,activeSlot,activeWordText,pickerOptions})
     };
   }
 }
