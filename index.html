@@ -326,6 +326,7 @@
           <div style="font-size:10px;color:var(--mm-text-3);font-weight:600;">{{ keyRoot }} {{ keyModeLabel }}</div>
         </div>
       </div>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">{{ chordWheelLegend }}</div>
       <div style="font-size:12.5px;color:var(--mm-text-2);text-align:center;line-height:1.5;min-height:34px;">{{ chordWheelCaption }}</div>
       <sc-if value="{{ hasChordWheelSel }}" hint-placeholder-val="{{ false }}">
       <div style="margin-top:12px;text-align:center;">
@@ -3346,9 +3347,7 @@ class Component extends DCLogic {
     const degSpecsArrHome = mode==='major'?this.MAJ_TRI:this.MIN_TRI;
     const diatonicHome = degSpecsArrHome.map(sp=>this.chordFromSpec(keyRoot,sp));
     const cxHarmHome = this.complexHarmony(keyRoot,mode);
-    const usedPcsHome = new Set(diatonicHome.map(c=>c.rootPC));
-    const extraChordsHome=[];
-    [...cxHarmHome.sd,...cxHarmHome.mi,...cxHarmHome.dm].forEach(c=>{ if(!usedPcsHome.has(c.rootPC)){ usedPcsHome.add(c.rootPC); extraChordsHome.push(c); } });
+    const extraChordsHome=[...cxHarmHome.sd,...cxHarmHome.mi,...cxHarmHome.dm];
     const allWheelChords=[...diatonicHome.map(c=>({...c,isDiatonic:true})),...extraChordsHome.map(c=>({...c,isDiatonic:false}))];
     const chordWheelSel = isWheelChords ? (S.chordWheelSel||null) : null;
     const selChordObj = chordWheelSel ? allWheelChords.find(c=>c.roman===chordWheelSel) : null;
@@ -3363,31 +3362,67 @@ class Component extends DCLogic {
       if(chordWheelSel==='I'||chordWheelSel==='i') relativeRoman = mode==='major'?'vi':'♭III';
     }
     const chordNodes=[];
+    const pushChordChip=(c,x,y,diam,romanFS,showName,nameFS)=>{
+      const isSel=chordWheelSel===c.roman, isTarget=targetingSel.has(c.roman), isSub=substituteSel.has(c.roman), isRel=relativeRoman===c.roman;
+      let bg='var(--mm-surface)',border='var(--mm-border)',fg=c.isDiatonic?'var(--mm-text)':'var(--mm-text-4)';
+      if(isSel){ bg=A; border=A; fg='#000'; }
+      else if(isTarget){ bg='#1c3a3a'; border='#2dd4bf'; fg='#5eead4'; }
+      else if(isRel){ bg='#2e2410'; border='#6b551f'; fg='#f7d488'; }
+      else if(isSub){ bg='#1c2a33'; border='var(--mm-purple)'; fg='#cfe9f5'; }
+      const labelKids=[h('span',{key:'r',style:{fontSize:romanFS+'px',opacity:0.85}},c.roman)];
+      if(showName) labelKids.push(h('span',{key:'n',style:{fontSize:nameFS+'px'}},c.name));
+      chordNodes.push(h('button',{key:'c'+c.roman,onClick:()=>{ self.playChord(c.pcs); self.setState(st=>({chordWheelSel:st.chordWheelSel===c.roman?null:c.roman})); },
+        style:{position:'absolute',left:x+'px',top:y+'px',transform:'translate(-50%,-50%)',width:diam+'px',height:diam+'px',borderRadius:'50%',
+          border:'2px solid '+border,background:bg,color:fg,fontWeight:700,cursor:'pointer',
+          boxShadow:'0 1px 3px rgba(0,0,0,0.3)',transition:'background .15s,border-color .15s',padding:0}},
+        h('div',{key:'w',style:{transform:'rotate('+unrot+'deg)',display:'flex',flexDirection:'column',alignItems:'center',lineHeight:1.15}},labelKids)));
+    };
     if(isWheelChords){
-      allWheelChords.forEach(c=>{
-        const slot=pcSlotIndex(c.rootPC);
+      diatonicHome.forEach(c=>{
+        const cc={...c,isDiatonic:true};
+        const slot=pcSlotIndex(cc.rootPC);
         const ang=(slot*30-90)*Math.PI/180, x=cx+oR*Math.cos(ang), y=cy+oR*Math.sin(ang);
-        const isSel=chordWheelSel===c.roman, isTarget=targetingSel.has(c.roman), isSub=substituteSel.has(c.roman), isRel=relativeRoman===c.roman;
-        let bg='var(--mm-surface)',border='var(--mm-border)',fg=c.isDiatonic?'var(--mm-text)':'var(--mm-text-4)';
-        if(isSel){ bg=A; border=A; fg='#000'; }
-        else if(isTarget){ bg='#1c3a3a'; border='#2dd4bf'; fg='#5eead4'; }
-        else if(isRel){ bg='#2e2410'; border='#6b551f'; fg='#f7d488'; }
-        else if(isSub){ bg='#1c2a33'; border='var(--mm-purple)'; fg='#cfe9f5'; }
-        chordNodes.push(h('button',{key:'c'+c.roman,onClick:()=>self.setState(st=>({chordWheelSel:st.chordWheelSel===c.roman?null:c.roman})),
-          style:{position:'absolute',left:x+'px',top:y+'px',transform:'translate(-50%,-50%)',width:(c.isDiatonic?'46px':'40px'),height:(c.isDiatonic?'46px':'40px'),borderRadius:'50%',
-            border:'2px solid '+border,background:bg,color:fg,fontSize:(c.isDiatonic?'12px':'10.5px'),fontWeight:700,cursor:'pointer',
-            boxShadow:'0 1px 3px rgba(0,0,0,0.3)',transition:'background .15s,border-color .15s',padding:0}},
-          h('div',{key:'w',style:{transform:'rotate('+unrot+'deg)',display:'flex',flexDirection:'column',alignItems:'center',lineHeight:1.15}},[
-            h('span',{key:'r',style:{fontSize:'8.5px',opacity:0.85}},c.roman),
-            h('span',{key:'n'},c.name)
-          ])));
+        pushChordChip(cc,x,y,46,8.5,true,12);
+      });
+      const extraBySlot={};
+      extraChordsHome.forEach(c=>{ const s=pcSlotIndex(c.rootPC); (extraBySlot[s]=extraBySlot[s]||[]).push({...c,isDiatonic:false}); });
+      Object.keys(extraBySlot).forEach(sKey=>{
+        const s=parseInt(sKey,10), group=extraBySlot[sKey], n=group.length;
+        const ang=(s*30-90)*Math.PI/180;
+        const tx=-Math.sin(ang), ty=Math.cos(ang);
+        const bx=cx+iR*Math.cos(ang), by=cy+iR*Math.sin(ang);
+        if(n===1){
+          pushChordChip(group[0],bx,by,40,8.5,true,10.5);
+        } else if(n===2){
+          group.forEach((c,i)=>{ const off=i===0?-13:13; pushChordChip(c,bx+tx*off,by+ty*off,26,8.5,false,0); });
+        } else if(n===3){
+          const rOut=iR+8, rIn=iR-6;
+          const outX=cx+rOut*Math.cos(ang), outY=cy+rOut*Math.sin(ang);
+          const inX=cx+rIn*Math.cos(ang), inY=cy+rIn*Math.sin(ang);
+          group.forEach((c,i)=>{
+            if(i===0) pushChordChip(c,outX,outY,20,7,false,0);
+            else { const off=i===1?-11:11; pushChordChip(c,inX+tx*off,inY+ty*off,20,7,false,0); }
+          });
+        } else {
+          const spacing=16;
+          group.forEach((c,i)=>{ const off=(i-(n-1)/2)*spacing; pushChordChip(c,bx+tx*off,by+ty*off,18,7,false,0); });
+        }
       });
     }
     const chordRing=h('div',{key:'cring','data-wheel-ring':'1',style:{position:'absolute',left:0,top:0,width:'300px',height:'300px',transform:'rotate('+rot+'deg)',transition:'transform .6s cubic-bezier(.34,1.56,.64,1)'}},chordNodes);
     const chordWheelDiagram=h('div',{ref:this.wheelRingRefCallback,style:{position:'relative',width:'300px',height:'300px',touchAction:'none',cursor:'grab'},
       onPointerDown:e=>self.onWheelPointerDown(e),onPointerMove:e=>self.onWheelPointerMove(e),onPointerUp:e=>self.onWheelPointerUp(e),onPointerCancel:e=>self.onWheelPointerUp(e)},[bezel,chordRing,pointer]);
     const chordWheelCenterLabel = selChordObj ? selChordObj.name : 'Tap a chord';
-    let chordWheelCaption = 'Diatonic chords in the outer ring · secondary dominants, borrowed, and passing chords fill the rest — tap any chord to see how it connects.';
+    const chordWheelLegend=[
+      {c:'var(--mm-text-4)',l:'Extra chord'},
+      {c:'#2dd4bf',l:'Targets'},
+      {c:'var(--mm-purple)',l:'Substitute'},
+      {c:'#f7d488',l:'Relative'},
+    ].map(item=>h('div',{key:item.l,style:{display:'flex',alignItems:'center',gap:'4px'}},[
+      h('span',{key:'d',style:{width:'8px',height:'8px',borderRadius:'50%',background:item.c,flex:'none'}}),
+      h('span',{key:'t',style:{fontSize:'10px',color:'var(--mm-text-3)'}},item.l)
+    ]));
+    let chordWheelCaption = 'Outer ring · diatonic chords · Inner ring · secondary dominants, borrowed & passing chords — tap any chord to see how it connects, tap again to hear it.';
     if(selChordObj){
       const parts=[];
       if(targetingSel.size) parts.push(Array.from(targetingSel).join(', ')+' resolve'+(targetingSel.size===1?'s':'')+' into '+selChordObj.name+'.');
@@ -4088,7 +4123,7 @@ class Component extends DCLogic {
     return {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
       isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
-      chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,hasChordWheelSel,addWheelChordToProg,
+      chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,chordWheelLegend,hasChordWheelSel,addWheelChordToProg,
       splashVisible,splashOpacity,
       isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',notHome:S.tab!=='home',
       goHome:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'home',autoScroll:false});},
