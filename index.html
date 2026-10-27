@@ -125,6 +125,10 @@
   .mmcx-techicon{font-size:18px;line-height:1.3;flex:none;}
   .mmcx-techtext{font-size:13px;line-height:1.6;color:var(--mm-text);}
   .mmcx-scrollx{overflow-x:auto;width:100%;padding:4px 0;-webkit-overflow-scrolling:touch;}
+  .mmcx-viewtoggle{display:flex;gap:4px;background:var(--mm-bg);border-radius:10px;padding:3px;margin-bottom:14px;}
+  .mmcx-viewtoggle button{flex:1;border:none;font-family:inherit;font-size:11.5px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;transition:background .18s ease,color .18s ease;}
+  .mmcx-gripwrap{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:16px;}
+  .mmcx-gripinfo{flex:1;min-width:170px;}
   .mmcx-playrow{display:flex;gap:8px;}
   .mmcx-play{flex:1;border:1px solid var(--mm-accent);background:var(--mm-accent);color:#1a0e00;font-family:var(--mm-font-display);font-size:14px;font-weight:700;padding:13px;border-radius:12px;cursor:pointer;transition:filter .15s ease;}
   .mmcx-ghost{background:var(--mm-surface-2);color:var(--mm-accent);border-color:var(--mm-border);}
@@ -559,8 +563,37 @@
 
     <div data-reveal class="mmcx-card">
       <div class="mmcx-label">Fretboard &middot; {{ labScaleName }}</div>
+      <div class="mmcx-viewtoggle">
+        <sc-for list="{{ labFretViews }}" as="fv" hint-placeholder-count="3"><button onClick="{{ fv.onClick }}" style="{{ fv.style }}" style-hover="color:var(--mm-text);">{{ fv.label }}</button></sc-for>
+      </div>
+      <sc-if value="{{ labIsCaged }}" hint-placeholder-val="{{ false }}">
+      <div class="mmcx-chiprow" style="margin-bottom:12px;">
+        <sc-for list="{{ labCagedShapes }}" as="cs" hint-placeholder-count="5"><button onClick="{{ cs.onClick }}" style="{{ cs.style }}" style-hover="filter:brightness(1.14);" style-active="transform:scale(0.94);">{{ cs.label }}</button></sc-for>
+      </div>
+      </sc-if>
       <div class="mmcx-scrollx">{{ labFretboard }}</div>
-      <div style="margin-top:12px;">{{ labLegend }}</div>
+      <sc-if value="{{ labIsCaged }}" hint-placeholder-val="{{ false }}">
+      <div class="mmcx-gripwrap">
+        <div>{{ labCagedDiagram }}</div>
+        <div class="mmcx-gripinfo">
+          <div class="mmcx-scalename">{{ labCagedInfo }}</div>
+          <div class="mmcx-scaletag">{{ labViewCaption }}</div>
+          <sc-if value="{{ labCagedApprox }}" hint-placeholder-val="{{ false }}">
+          <div class="mmcx-scaletag" style="color:var(--mm-accent);">{{ labCagedApproxNote }}</div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ labIsRun }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:14px;">
+        <div class="mmcx-scaletag">{{ labViewCaption }}</div>
+        <button onClick="{{ labRunPlay }}" style="{{ labRunPlayStyle }}" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.97);">Play the run</button>
+      </div>
+      </sc-if>
+      <sc-if value="{{ labIsFull }}" hint-placeholder-val="{{ true }}">
+      <div class="mmcx-scaletag" style="margin-top:14px;">{{ labViewCaption }}</div>
+      </sc-if>
+      <div style="margin-top:14px;">{{ labLegend }}</div>
     </div>
 
     <div data-reveal class="mmcx-card">
@@ -1693,7 +1726,7 @@ class Component extends DCLogic {
   scaleFeedbackRef = React.createRef();
   wheelCenterLabelRef = React.createRef();
   wordmarkRef = React.createRef();
-  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,labChord:null,labScaleId:null,labArpPattern:'up',arpPlaying:false,arpStep:null,arpLoop:true,
+  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,labChord:null,labScaleId:null,labArpPattern:'up',arpPlaying:false,arpStep:null,arpLoop:true,labFretView:'full',labCagedIdx:0,
     practiceMode:'switch',practiceScore:0,practiceStreak:0,
     practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
     practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
@@ -3427,6 +3460,7 @@ class Component extends DCLogic {
     const fretHi=Math.min(22,opt.fretHi===undefined?15:opt.fretHi);
     const showOutside=opt.showOutside!==false;
     const highlightPcs=opt.highlightPcs?new Set(opt.highlightPcs):null;
+    const win=opt.dimOutside||null;   /* {lo,hi}: keep the whole neck, fade the rest */
     const seqOrder=opt.seqOrder||null;   /* Map "string:fret" -> step index */
     const colW=opt.colW||30, rowH=opt.rowH||27, labelW=24, topPad=4;
     const nFrets=fretHi-fretLo+1;
@@ -3466,7 +3500,8 @@ class Component extends DCLogic {
             width:'4px',height:'4px',borderRadius:'50%',background:'#2c2c2e'}}));
           continue;
         }
-        const dim = highlightPcs && !highlightPcs.has(pc);
+        const dim = (highlightPcs && !highlightPcs.has(pc))
+                 || (win && (f<win.lo||f>win.hi));
         const sz = role==='pass'?17:20;
         const step = seqOrder?seqOrder.get(si+':'+f):undefined;
         const live = opt.activeKey!=null&&opt.activeKey===(si+':'+f);
@@ -3477,7 +3512,7 @@ class Component extends DCLogic {
           color:rd.fill?rd.ink:rd.ink,
           display:'flex',alignItems:'center',justifyContent:'center',
           fontSize:(role==='pass'?'8px':'8.5px'),fontWeight:800,letterSpacing:'-0.02em',
-          opacity:dim?0.28:1,
+          opacity:dim?0.2:1,
           boxShadow:live?'0 0 0 4px rgba(255,200,97,0.95)':(step!==undefined?'0 0 0 3px rgba(240,180,41,0.5)':'none'),
           transform:live?'scale(1.18)':'none',
           transition:'opacity .18s ease,box-shadow .1s ease,transform .1s ease'}},
@@ -3593,6 +3628,9 @@ class Component extends DCLogic {
       labName:'',labRoman:'',labHasRoman:false,labFormula:[],labTones:[],
       labExts:[],labHasExts:false,labScales:[],labScaleName:'',labTech:'',
       labFretboard:null,labPiano:null,labLegend:null,
+      labFretViews:[],labViewCaption:'',labIsFull:true,labIsCaged:false,labIsRun:false,
+      labCagedShapes:[],labCagedDiagram:null,labCagedInfo:'',labCagedApprox:false,labCagedApproxNote:'',
+      labRunLabel:'',labRunPlay:()=>{},labRunPlayStyle:'',
       labArpPatterns:[],labArpFretboard:null,labArpNotes:'',labArpHasHint:false,labArpHint:'',
       labArpToggle:()=>{},labArpToggleLabel:'Play',labArpToggleStyle:'',
       labArpLoopToggle:()=>{},labArpLoopLabel:'Loop',labArpLoopStyle:'',
@@ -3612,6 +3650,63 @@ class Component extends DCLogic {
       return {name:t.name,role:this.LAB_ROLE_CAPTION[role]||role,
         style:'background:'+rd.color+';color:'+rd.ink+';'};
     });
+    const segPill=(on)=>'border:1px solid '+(on?TOKENS.accent:'var(--mm-border)')+';background:'+(on?TOKENS.accent:'var(--mm-surface-2)')+';color:'+(on?'#1a0e00':'var(--mm-text-2)')+';font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;';
+
+    /* ── position views ───────────────────────────────────────────────── */
+    const view=S.labFretView||'full';
+    const shapes=this.cagedPositions(rootPC,quality);
+    const shapeIdx=Math.min(Math.max(0,S.labCagedIdx|0),Math.max(0,shapes.length-1));
+    const shape=shapes[shapeIdx]||null;
+    const runSpec=this.runSpecFor(sel.semis.length);
+    const runAnchor=this.runAnchorFret(sel.scaleRootPC,0);
+    const runNotes=this.scaleRunPositions(sel.pcs,runAnchor,runSpec.per,17);
+    const runFrets=runNotes.map(n=>n.f);
+    const runWin=runNotes.length?{lo:Math.min(...runFrets),hi:Math.max(...runFrets)}:null;
+    const runSeq=new Map();
+    runNotes.forEach((n,i)=>{ const k=n.s+':'+n.f; if(!runSeq.has(k)) runSeq.set(k,i); });
+
+    const VIEWS=[['full','Full neck'],['caged','CAGED'],['run',runSpec.per+' notes/string']];
+    const viewBtn=(on)=>'background:'+(on?'var(--mm-surface)':'transparent')+';color:'+(on?'var(--mm-text)':'var(--mm-text-3)')+';';
+    const labFretViews=VIEWS.map(([id,label])=>({
+      label:id==='run'&&runSpec.per===2&&sel.semis.length===5?'Box shape':label,
+      style:viewBtn(view===id),
+      onClick:()=>self.setState({labFretView:id})}));
+
+    let caption='Every note of the scale across the neck. Gold is the root, blue the chord tones, green the extensions you can lean on, outlined the ones to pass straight through.';
+    let boardWin=null, boardSeq=null;
+    if(view==='caged'&&shape){
+      boardWin={lo:shape.fretLo,hi:shape.fretHi};
+      boardSeq=null;
+      caption='The scale notes still lit are the ones this hand position can reach without moving. Play the grip, then solo out of it using only those.';
+    } else if(view==='run'&&runWin){
+      boardWin=runWin;
+      boardSeq=runSeq;
+      caption=runSpec.per===2&&sel.semis.length===5
+        ? 'The box shape, numbered in playing order. Two notes on every string — the fingering most lead guitar comes out of.'
+        : runSpec.per+' notes on every string, numbered in playing order. This is the pattern you drill until the scale is under your fingers. Start slow.';
+    }
+
+    const labCagedInfo=shape
+      ? (shape.letter+' shape · '+(shape.open?'open position':'barre at fret '+shape.barre)+' · root on the '+shape.rootString+' string, fret '+shape.rootFret)
+      : '';
+    const approx=shape&&!shape.exact;
+    const position={
+      labFretViews,labViewCaption:caption,
+      labIsFull:view==='full',labIsCaged:view==='caged',labIsRun:view==='run',
+      labCagedShapes:shapes.map((x,i)=>({label:x.letter,
+        style:segPill(i===shapeIdx)+'min-width:38px;',
+        onClick:()=>self.setState({labCagedIdx:i})})),
+      labCagedDiagram:shape?this.renderDiagram(shape.grip):null,
+      labCagedInfo,
+      labCagedApprox:!!approx,
+      labCagedApproxNote:approx
+        ? ('CAGED only covers triads and the plain sevenths, so this is the '+(this.SUF[shape.frameQuality]||'major')+' frame'+(shape.dropped.length?(' — it leaves out the '+shape.dropped.join(' and ')):'')+'. Add the missing note from the scale above.')
+        : '',
+      labRunLabel:runSpec.label,
+      labRunPlay:()=>self.playRun(runNotes),
+      labRunPlayStyle:'border:1px solid var(--mm-border);background:var(--mm-surface-2);color:'+TOKENS.accent+';font-size:12.5px;font-weight:700;padding:10px 16px;border-radius:11px;cursor:pointer;margin-top:10px;'
+    };
+
     /* arpeggio explorer */
     const pats=this.arpPatterns(chordPcs);
     const curPat=pats.find(x=>x.id===S.labArpPattern)||pats[0]||null;
@@ -3619,9 +3714,9 @@ class Component extends DCLogic {
     const playing=!!S.arpPlaying;
     const stepIdx=(typeof S.arpStep==='number')?S.arpStep:-1;
     const liveNote=(fing&&playing&&fing.notes[stepIdx])?fing.notes[stepIdx]:null;
-    const segPill=(on)=>'border:1px solid '+(on?TOKENS.accent:'var(--mm-border)')+';background:'+(on?TOKENS.accent:'var(--mm-surface-2)')+';color:'+(on?'#1a0e00':'var(--mm-text-2)')+';font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;';
+    const segPill2=(on)=>'border:1px solid '+(on?TOKENS.accent:'var(--mm-border)')+';background:'+(on?TOKENS.accent:'var(--mm-surface-2)')+';color:'+(on?'#1a0e00':'var(--mm-text-2)')+';font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;';
     const arp=fing?{
-      labArpPatterns:pats.map(x=>({label:x.label,style:segPill(curPat&&x.id===curPat.id),
+      labArpPatterns:pats.map(x=>({label:x.label,style:segPill2(curPat&&x.id===curPat.id),
         onClick:()=>self.setArpPattern(x.id)})),
       labArpFretboard:this.renderRoleFretboard({chordRootPC:rootPC,quality,chordPcs,
         scalePcs:sel.pcs,fretLo:fing.fretLo,fretHi:fing.fretHi,preferFlat:res.preferFlat,
@@ -3634,7 +3729,7 @@ class Component extends DCLogic {
       labArpToggleStyle:'border:1px solid '+TOKENS.accent+';background:'+(playing?'#332812':TOKENS.accent)+';color:'+(playing?TOKENS.accent:'#1a0e00')+';font-family:var(--mm-font-display);font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:12px;cursor:pointer;',
       labArpLoopToggle:()=>self.setState({arpLoop:!S.arpLoop}),
       labArpLoopLabel:S.arpLoop?'Loop on':'Loop off',
-      labArpLoopStyle:segPill(!!S.arpLoop)+'padding:11px 14px;border-radius:12px;',
+      labArpLoopStyle:segPill2(!!S.arpLoop)+'padding:11px 14px;border-radius:12px;',
       labBpmLabel:(Number(S.bpm)||100)+' bpm',
       labBpmUp:()=>self.adjustLabBpm(5),
       labBpmDown:()=>self.adjustLabBpm(-5)
@@ -3665,13 +3760,14 @@ class Component extends DCLogic {
       labExts,labHasExts:labExts.length>0,
       labScales,labScaleName:sel.label,labTech:sel.note,
       labFretboard:this.renderRoleFretboard({chordRootPC:rootPC,quality,chordPcs,
-        scalePcs:sel.pcs,fretLo:0,fretHi:15,preferFlat:res.preferFlat}),
+        scalePcs:sel.pcs,fretLo:0,fretHi:15,preferFlat:res.preferFlat,
+        dimOutside:boardWin,seqOrder:boardSeq}),
       labPiano:this.renderRolePiano({chordRootPC:rootPC,quality,chordPcs,
         scalePcs:sel.pcs,preferFlat:res.preferFlat,octaves:2}),
       labLegend:this.renderRoleLegend(['root','tone','ext','alt','pass']),
       labPlayChord:()=>self.playChord(chordPcs),
       labPlayArp:()=>self.playArp(chordPcs),
-      ...arp};
+      ...position,...arp};
   }
 
   /* ───────────────────────────────────────────────────────────────────────
@@ -3915,6 +4011,145 @@ class Component extends DCLogic {
   adjustLabBpm(delta){
     let bpm=Number(this.state.bpm); if(!isFinite(bpm)) bpm=100;
     this.setState({bpm:Math.max(40,Math.min(240,bpm+delta))});
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     FRETBOARD POSITIONS
+     Where to play, not just what. CAGED shapes come from the open-chord
+     grips already in OPEN, moved up the neck; the run patterns are the
+     one-position fingerings you drill.
+
+     Watch the two orientations: grip arrays and renderDiagram read low E
+     first, GTR_STRINGS and renderRoleFretboard read high e first, so
+     converting between them is always 5 - index.
+     ─────────────────────────────────────────────────────────────────────── */
+
+  /* letter -> which grip slot holds the root, and that grip's open root pc */
+  CAGED_FORMS = [
+    {letter:'C', slot:1, rootPC:0,  string:'A'},
+    {letter:'A', slot:1, rootPC:9,  string:'A'},
+    {letter:'G', slot:0, rootPC:7,  string:'low E'},
+    {letter:'E', slot:0, rootPC:4,  string:'low E'},
+    {letter:'D', slot:2, rootPC:2,  string:'D'}
+  ];
+  /* Only the forms players actually use. Minor and m7 have no workable C or G
+     grip, so they are not offered rather than invented. */
+  CAGED_GRIPS = {
+    maj:  {C:'C',     A:'A',     G:'G',     E:'E',     D:'D'},
+    dom7: {C:'C7',    A:'A7',    G:'G7',    E:'E7',    D:'D7'},
+    maj7: {C:'Cmaj7', A:'Amaj7', G:'Gmaj7', E:'Emaj7', D:'Dmaj7'},
+    min:  {          A:'Am',               E:'Em',    D:'Dm'},
+    min7: {          A:'Am7',              E:'Em7',   D:'Dm7'}
+  };
+
+  /* CAGED is defined for triads and the common sevenths. Anything else gets
+     the nearest frame, and the caption has to admit which notes it drops. */
+  cagedFrameFor(quality){
+    if(this.CAGED_GRIPS[quality]) return {q:quality,exact:true,dropped:[]};
+    const iv=new Set((this.QUAL[quality]||this.QUAL.maj).map(x=>((x%12)+12)%12));
+    const m3=iv.has(3), M3=iv.has(4), b7=iv.has(10), M7=iv.has(11);
+    let q;
+    if(m3&&!M3) q=b7?'min7':'min';
+    else if(M3) q=M7?'maj7':(b7?'dom7':'maj');
+    else q=b7?'dom7':'maj';            /* sus and power chords: major frame */
+    const frame=new Set((this.QUAL[q]||this.QUAL.maj).map(x=>((x%12)+12)%12));
+    const dropped=[];
+    iv.forEach(x=>{ if(!frame.has(x)) dropped.push(this.EXT_NAMES[x]||('+'+x)); });
+    return {q,exact:false,dropped};
+  }
+
+  cagedPositions(chordRootPC,quality,opt){
+    opt=opt||{};
+    const hi=opt.fretHi===undefined?15:opt.fretHi;
+    const rootPC=((chordRootPC%12)+12)%12;
+    const frame=this.cagedFrameFor(quality);
+    const grips=this.CAGED_GRIPS[frame.q]||this.CAGED_GRIPS.maj;
+    const out=[];
+    this.CAGED_FORMS.forEach(form=>{
+      const name=grips[form.letter];
+      if(!name) return;
+      const open=this.OPEN[name];
+      if(!open) return;
+      const shift=this.barre(rootPC,form.rootPC);
+      const frets=open.map(f=>f==='x'?'x':f+shift);
+      const nums=frets.filter(f=>f!=='x');
+      if(!nums.length) return;
+      const lo=Math.min(...nums), top=Math.max(...nums);
+      if(top>hi) return;                       /* off the end of the neck */
+      /* every slot in the grip that is sounding the root */
+      const roots=[];
+      frets.forEach((f,slot)=>{
+        if(f==='x') return;
+        if((this.GTR_STRINGS[5-slot]+f)%12===rootPC) roots.push({s:5-slot,f});
+      });
+      out.push({letter:form.letter,
+        label:form.letter+' shape',
+        grip:frets,
+        gripName:name,
+        rootString:form.string,
+        rootFret:frets[form.slot],
+        fretLo:lo,fretHi:top,
+        barre:lo===0?0:lo,
+        open:lo===0,
+        roots,
+        exact:frame.exact,frameQuality:frame.q,dropped:frame.dropped});
+    });
+    out.sort((a,b)=>a.fretLo-b.fretLo);
+    return out;
+  }
+
+  /* The one-position fingering you drill. Which pattern is canonical depends
+     on how many notes the scale has: three per string for a seven-note scale,
+     two per string for a pentatonic -- which IS the box shape -- and two for
+     the six-note blues. */
+  runSpecFor(semisLength){
+    if(semisLength>=7) return {per:3,label:'3 notes per string'};
+    if(semisLength===5) return {per:2,label:'Pentatonic box'};
+    return {per:2,label:'2 notes per string'};
+  }
+
+  scaleRunPositions(scalePcs,fretLo,per,fretHi){
+    const set=new Set((scalePcs||[]).map(pc=>((pc%12)+12)%12));
+    if(!set.size) return [];
+    const top=fretHi===undefined?20:fretHi;
+    const out=[];
+    /* start on the lowest scale note at or above the requested fret */
+    let f0=Math.max(0,fretLo|0);
+    while(f0<=top&&!set.has((this.GTR_STRINGS[5]+f0)%12)) f0++;
+    if(f0>top) return [];
+    let lastMidi=-1;
+    for(let fb=5;fb>=0;fb--){
+      const openMidi=this.STRING_MIDI[fb], openPc=this.GTR_STRINGS[fb];
+      let taken=0;
+      const from=(lastMidi<0)?f0:Math.max(0,lastMidi-openMidi+1);
+      for(let f=from;f<=top&&taken<per;f++){
+        if(!set.has((openPc+f)%12)) continue;
+        const midi=openMidi+f;
+        if(midi<=lastMidi) continue;
+        out.push({s:fb,f,pc:(openPc+f)%12,midi});
+        lastMidi=midi; taken++;
+      }
+      if(taken<per) break;                     /* ran out of neck */
+    }
+    return out;
+  }
+
+  /* Where a run sits best for a given scale: the lowest position whose root
+     falls on the low E or A string. */
+  runAnchorFret(scaleRootPC,fretLo){
+    const start=Math.max(0,fretLo|0);
+    for(let f=start;f<=12;f++){
+      if((this.GTR_STRINGS[5]+f)%12===scaleRootPC||(this.GTR_STRINGS[4]+f)%12===scaleRootPC) return f;
+    }
+    return start;
+  }
+
+  playRun(notes){
+    if(!notes||!notes.length) return;
+    this.ensureAudio();
+    const t=this.ac.currentTime+0.03;
+    const step=Math.max(0.07,this.arpStepDur()*0.6);
+    notes.forEach((n,i)=>this.voice(this.midiFreq(n.midi),t+i*step,step*2.1,0.15));
   }
 
   LOOP_PATTERNS={
