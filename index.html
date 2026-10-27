@@ -3076,8 +3076,26 @@ class Component extends DCLogic {
     const pcs=notesSemiAbs.map(s=>((rootPCkey+s)%12+12)%12);
     const notes=offsets.map((o,i)=>this.spell(rootName,intervals[i],o));
     const suf=this.extSuffix(intervals,ext);
-    const romanSuf=ext==='triad'?'':ext==='sus2'?'sus2':ext==='sus4'?'sus4':ext;
-    return {rootName,pcs,notes,notesStr:notes.join(' · '),name:rootName+suf,roman:romanBase+romanSuf};
+    return {rootName,pcs,notes,notesStr:notes.join(' · '),name:rootName+suf,
+      roman:this.romanForExt(romanBase,intervals,ext)};
+  }
+  /* A roman numeral already says major or minor through its case, so the
+     suffix only has to carry the 7th and any altered 5th: Imaj7, not I7, and
+     viiø7 rather than vii°7 once the diminished triad takes a ♭7. */
+  romanForExt(romanBase,iv,ext){
+    if(ext==='triad') return romanBase;
+    const bare=String(romanBase).replace('\u00b0','');
+    if(ext==='sus2') return bare+'sus2';
+    if(ext==='sus4') return bare+'sus4';
+    const red=new Set((iv||[]).map(x=>((x%12)+12)%12));
+    const d5=red.has(6)&&!red.has(7), A5=red.has(8)&&!red.has(7);
+    const b7=red.has(10), M7=red.has(11);
+    const dimSeventh=red.has(9)&&d5&&!b7&&!M7;
+    const lvl=(ext==='9'||ext==='11')?ext:'7';
+    if(d5) return bare+(dimSeventh?'\u00b0':'\u00f8')+lvl;
+    if(A5) return bare+'+'+(M7?'maj':'')+lvl;
+    if(M7) return bare+'maj'+lvl;
+    return bare+lvl;
   }
   renderFretboard(rootPC,semis){
     const h=React.createElement;
@@ -4185,7 +4203,7 @@ class Component extends DCLogic {
     if(r.indexOf('/')>=0) return false;
     const f=r.charAt(0);
     if(f==='b'||f==='\u266d'||f==='#') return false;
-    if(r.indexOf('\u00b0')>=0||r.indexOf('+')>=0) return false;
+    if(r.indexOf('\u00b0')>=0||r.indexOf('\u00f8')>=0||r.indexOf('+')>=0) return false;
     const suf=String((c&&c.name)||'').replace(/^[A-G][#b\u266d\u266f]?/,'');
     return this.BASIC_SUFFIXES.indexOf(suf)>=0;
   }
