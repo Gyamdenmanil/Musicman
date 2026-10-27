@@ -97,7 +97,37 @@
     --mm-shadow-hard-accent: none;
     --mm-font-display:'Space Grotesk',-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
     --mm-font-body:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
+    --mm-role-alt:#b388ff;
   }
+  /* Chord Lab. Structure lives in these classes; the selected state comes in as
+     an inline style from renderVals, the way every other control here works. */
+  .mmcx-card{background:var(--mm-surface);border:1px solid var(--mm-border);border-radius:18px;padding:18px;}
+  .mmcx-label{font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--mm-text-3);margin-bottom:10px;}
+  .mmcx-empty{font-size:14px;color:var(--mm-text-3);line-height:1.65;}
+  .mmcx-hero{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px;}
+  .mmcx-name{font-family:var(--mm-font-display);font-size:34px;font-weight:700;letter-spacing:-0.02em;line-height:1;}
+  .mmcx-roman{font-size:13px;font-weight:700;color:var(--mm-accent);background:rgba(240,180,41,0.12);padding:4px 10px;border-radius:8px;white-space:nowrap;flex:none;}
+  .mmcx-chiprow{display:flex;gap:6px;flex-wrap:wrap;}
+  .mmcx-chip{background:var(--mm-surface-2);border:1px solid var(--mm-border);padding:5px 10px;border-radius:8px;font-family:var(--mm-font-display);font-size:12.5px;font-weight:600;}
+  .mmcx-chip i{color:var(--mm-text-3);font-size:10px;margin-right:5px;font-style:normal;font-weight:700;}
+  .mmcx-tones{display:flex;gap:8px;flex-wrap:wrap;}
+  .mmcx-tone{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .mmcx-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mm-font-display);font-size:13px;font-weight:700;}
+  .mmcx-tonerole{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--mm-text-3);}
+  .mmcx-scales{display:flex;flex-direction:column;gap:8px;}
+  .mmcx-scale{display:flex;align-items:center;gap:12px;border:1px solid var(--mm-border);border-radius:12px;padding:11px 14px;cursor:pointer;text-align:left;width:100%;transition:border-color .18s ease,background .18s ease;}
+  .mmcx-spice{width:8px;height:8px;border-radius:50%;flex:none;}
+  .mmcx-scalebody{flex:1;min-width:0;}
+  .mmcx-scalename{display:block;font-size:14px;font-weight:600;color:var(--mm-text);}
+  .mmcx-scaletag{display:block;font-size:11px;color:var(--mm-text-3);margin-top:3px;line-height:1.4;}
+  .mmcx-tier{font-size:9px;font-weight:800;letter-spacing:0.08em;flex:none;}
+  .mmcx-tech{background:linear-gradient(135deg,rgba(240,180,41,0.10),rgba(240,180,41,0.03));border:1px solid rgba(240,180,41,0.25);border-radius:14px;padding:14px 16px;display:flex;gap:11px;}
+  .mmcx-techicon{font-size:18px;line-height:1.3;flex:none;}
+  .mmcx-techtext{font-size:13px;line-height:1.6;color:var(--mm-text);}
+  .mmcx-scrollx{overflow-x:auto;width:100%;padding:4px 0;-webkit-overflow-scrolling:touch;}
+  .mmcx-playrow{display:flex;gap:8px;}
+  .mmcx-play{flex:1;border:1px solid var(--mm-accent);background:var(--mm-accent);color:#1a0e00;font-family:var(--mm-font-display);font-size:14px;font-weight:700;padding:13px;border-radius:12px;cursor:pointer;transition:filter .15s ease;}
+  .mmcx-ghost{background:var(--mm-surface-2);color:var(--mm-accent);border-color:var(--mm-border);}
 </style>
 </helmet>
 <sc-if value="{{ splashVisible }}" hint-placeholder-val="{{ true }}">
@@ -331,6 +361,7 @@
       <sc-if value="{{ hasChordWheelSel }}" hint-placeholder-val="{{ false }}">
       <div style="margin-top:12px;text-align:center;">
         <button onClick="{{ addWheelChordToProg }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);">+ Add to progression</button>
+        <button onClick="{{ openLabFromWheel }}" style="{{ playPillGhostStyle }}" style-hover="background:#332812;" style-active="transform:scale(0.96);">Solo over it</button>
       </div>
       </sc-if>
       </sc-if>
@@ -382,6 +413,7 @@
             <div style="display:flex;gap:6px;justify-content:center;margin-top:9px;">
               <button onClick="{{ c.play }}" style="{{ miniPlayStyle }}" style-active="transform:scale(0.88);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg></button>
               <button onClick="{{ c.arp }}" style="{{ miniArpStyle }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.88);">arp</button>
+              <button onClick="{{ c.openLab }}" style="{{ miniLabStyle }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.88);">solo</button>
             </div>
           </div>
         </sc-for>
@@ -447,6 +479,7 @@
         <div style="display:flex;gap:8px;">
           <button onClick="{{ playSelChord }}" style="{{ playPillStyle }}" style-hover="filter:brightness(0.9);" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Chord</button>
           <button onClick="{{ playSelArp }}" style="{{ playPillGhostStyle }}" style-hover="background:#332812;" style-active="transform:scale(0.96);"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block;vertical-align:-1px;margin-right:5px;" aria-hidden="true"><path d="M4 2.5v11l9-5.5-9-5.5z"/></svg>Arpeggio</button>
+          <button onClick="{{ openLabFromGuitar }}" style="{{ playPillGhostStyle }}" style-hover="background:#332812;" style-active="transform:scale(0.96);">Solo over it</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:18px;">
@@ -459,6 +492,91 @@
       </div>
       <div style="font-size:12px;color:var(--mm-text-4);margin-top:14px;">Diagram reads low E → high E, left to right. × muted · ○ open. Shapes are movable — barre at the fret shown.</div>
     </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isLab }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:14px;animation:mmTabFade .18s ease-out;">
+
+    <sc-if value="{{ labNoChord }}" hint-placeholder-val="{{ false }}">
+    <div class="mmcx-card">
+      <div class="mmcx-label">Chord Lab</div>
+      <div class="mmcx-empty">Tap a chord anywhere &mdash; a diatonic chord in Scales, the selected shape in Shapes, a chip in Build, or the wheel on the home screen &mdash; and it opens here with every scale that fits it, the notes coloured by what each one does over that chord.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ labHasChord }}" hint-placeholder-val="{{ true }}">
+
+    <div data-reveal class="mmcx-card">
+      <div class="mmcx-label">Chord &middot; in {{ labKeyLabel }}</div>
+      <div class="mmcx-hero">
+        <div class="mmcx-name">{{ labName }}</div>
+        <sc-if value="{{ labHasRoman }}" hint-placeholder-val="{{ true }}">
+        <div class="mmcx-roman">{{ labRoman }}</div>
+        </sc-if>
+      </div>
+      <div class="mmcx-label">Formula</div>
+      <div class="mmcx-chiprow" style="margin-bottom:18px;">
+        <sc-for list="{{ labFormula }}" as="f" hint-placeholder-count="4"><div class="mmcx-chip"><i>{{ f.label }}</i>{{ f.name }}</div></sc-for>
+      </div>
+      <div class="mmcx-label">Chord tones</div>
+      <div class="mmcx-tones">
+        <sc-for list="{{ labTones }}" as="t" hint-placeholder-count="4">
+          <div class="mmcx-tone">
+            <div class="mmcx-dot" style="{{ t.style }}">{{ t.name }}</div>
+            <div class="mmcx-tonerole">{{ t.role }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ labHasExts }}" hint-placeholder-val="{{ true }}">
+      <div class="mmcx-label" style="margin-top:18px;">Extensions this chord invites</div>
+      <div class="mmcx-chiprow">
+        <sc-for list="{{ labExts }}" as="e" hint-placeholder-count="2"><div class="mmcx-chip"><i>{{ e.label }}</i>{{ e.name }}</div></sc-for>
+      </div>
+      </sc-if>
+    </div>
+
+    <div data-reveal class="mmcx-card">
+      <div class="mmcx-label">Scales that fit &middot; safest first</div>
+      <div class="mmcx-scales">
+        <sc-for list="{{ labScales }}" as="sc" hint-placeholder-count="6">
+          <button onClick="{{ sc.onClick }}" class="mmcx-scale" style="{{ sc.style }}" style-hover="filter:brightness(1.14);" style-active="transform:scale(0.985);">
+            <span class="mmcx-spice" style="{{ sc.spiceStyle }}"></span>
+            <span class="mmcx-scalebody">
+              <span class="mmcx-scalename" style="{{ sc.nameStyle }}">{{ sc.label }}</span>
+              <span class="mmcx-scaletag">{{ sc.tag }}</span>
+            </span>
+            <span class="mmcx-tier" style="{{ sc.tierStyle }}">{{ sc.tierLabel }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="mmcx-tech">
+      <div class="mmcx-techicon">&#128161;</div>
+      <div class="mmcx-techtext"><b style="color:var(--mm-accent);font-weight:700;">{{ labScaleName }}</b> &mdash; {{ labTech }}</div>
+    </div>
+
+    <div data-reveal class="mmcx-card">
+      <div class="mmcx-label">Fretboard &middot; {{ labScaleName }}</div>
+      <div class="mmcx-scrollx">{{ labFretboard }}</div>
+      <div style="margin-top:12px;">{{ labLegend }}</div>
+    </div>
+
+    <div data-reveal class="mmcx-card">
+      <div class="mmcx-label">Piano &middot; {{ labScaleName }}</div>
+      <div class="mmcx-scrollx">{{ labPiano }}</div>
+      <div class="mmcx-scaletag" style="margin-top:12px;">Both octaves are coloured the same &mdash; this is the note map for the scale, not a voicing to play.</div>
+    </div>
+
+    <div class="mmcx-card">
+      <div class="mmcx-playrow">
+        <button onClick="{{ labPlayChord }}" class="mmcx-play" style-hover="filter:brightness(0.92);" style-active="transform:scale(0.97);">Play chord</button>
+        <button onClick="{{ labPlayArp }}" class="mmcx-play mmcx-ghost" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.97);">Arpeggio</button>
+      </div>
+    </div>
+
+    </sc-if>
   </div>
   </sc-if>
 
@@ -524,6 +642,7 @@
         <div style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--mm-accent);margin-bottom:8px;">{{ insightChordName }} · {{ insightVerdict }}</div>
         <div style="font-size:13.5px;color:var(--mm-text);line-height:1.6;">{{ insightText }}</div>
         <div style="font-size:11.5px;color:var(--mm-text-4);margin-top:10px;">Tap any chord chip above to see how it moves from the one before it.</div>
+        <button onClick="{{ openLabFromInsight }}" style="{{ playPillGhostStyle }}" style-hover="background:#332812;" style-active="transform:scale(0.96);">Solo over {{ insightChordName }}</button>
       </div>
       </sc-if>
       </sc-if>
@@ -1553,7 +1672,7 @@ class Component extends DCLogic {
   scaleFeedbackRef = React.createRef();
   wheelCenterLabelRef = React.createRef();
   wordmarkRef = React.createRef();
-  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,
+  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,labChord:null,labScaleId:null,
     practiceMode:'switch',practiceScore:0,practiceStreak:0,
     practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
     practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
@@ -3138,22 +3257,31 @@ class Component extends DCLogic {
     /* 6 is a ♭5 (letter-degree 4) only when there is no perfect 5th above it;
        with a natural 5 present it is really a ♯11. Same story for 8: ♯5 vs ♭13. */
     const DEG={0:0,1:1,2:1,3:2,4:2,5:3,6:hasFifth?3:4,7:4,8:hasFifth?5:4,9:5,10:6,11:6};
+    /* What an interval is CALLED depends on the rest of the chord: a ♭3 becomes
+       a ♯9 once there is a major 3rd above it, a 6 becomes a 13 once there is a
+       7th, and a 4 becomes an 11 once there is a 3rd to stack it over. */
+    const has3=red.has(3)||red.has(4), hasM3=red.has(4), has7=red.has(10)||red.has(11);
+    const LABEL={0:'1',1:'♭9',2:'9',3:hasM3?'♯9':'♭3',4:'3',5:has3?'11':'4',
+      6:hasFifth?'♯11':'♭5',7:'5',8:hasFifth?'♭13':'♯5',9:has7?'13':'6',10:'♭7',11:'7'};
     const seen=new Set();
-    const tones=[],roles=[];
+    const tones=[],toneParts=[];
     iv.forEach(s=>{
       const r=((s%12)+12)%12;
       if(seen.has(r)) return;
       seen.add(r);
-      tones.push(this.spell(rootName,r,DEG[r]));
-      roles.push(r);
+      const name=this.spell(rootName,r,DEG[r]);
+      tones.push(name);
+      /* stacked above the octave in QUAL means it is an added extension
+         rather than part of the chord's core */
+      toneParts.push({name,label:LABEL[r],iv:r,isExt:s>11});
     });
     /* extensions this chord invites but does not already contain. A major 3rd
        rules the 11 out entirely: the natural 11 rubs against the 3rd and the
        #11 needs Lydian, so neither is a default — 9 and 13 are. */
     const EXT_ORDER=red.has(4)?[2,9]:[2,5,9];
     const exts=EXT_ORDER.filter(r=>!seen.has(r)).map(r=>({
-      name:this.spell(rootName,r,DEG[r]),label:this.EXT_NAMES[r]}));
-    return {tones,tonesStr:tones.join(' · '),exts,
+      name:this.spell(rootName,r,DEG[r]),label:this.EXT_NAMES[r],iv:r}));
+    return {tones,tonesStr:tones.join(' · '),toneParts,exts,
       extsStr:exts.map(e=>e.name+' ('+e.label+')').join('   ')};
   }
 
@@ -3353,6 +3481,139 @@ class Component extends DCLogic {
     ));
   }
 
+  /* Chords travel around this app as {name, roman, pcs} with no quality key,
+     which the scale engine needs. Recover it by matching the pitches. */
+  inferQuality(rootPC,pcs){
+    const want=new Set((pcs||[]).map(pc=>((pc-rootPC)%12+12)%12));
+    let best='maj',bestScore=-1e9;
+    Object.keys(this.QUAL).forEach(q=>{
+      const have=new Set(this.QUAL[q].map(s=>((s%12)+12)%12));
+      let shared=0; have.forEach(iv=>{ if(want.has(iv)) shared++; });
+      const score=shared*100-(have.size-shared)*12-(want.size-shared)*12;
+      if(score>bestScore){ bestScore=score; best=q; }
+    });
+    return best;
+  }
+
+  /* One door into the Chord Lab, whatever the chord came from. */
+  openChordLab(opt){
+    opt=opt||{};
+    const pcs=opt.pcs||[];
+    let rootPC=(typeof opt.rootPC==='number')?opt.rootPC:(pcs.length?pcs[0]:0);
+    rootPC=((rootPC%12)+12)%12;
+    const quality=opt.quality||this.inferQuality(rootPC,pcs);
+    this.stopBuilderLoop(); this.stopAutoScroll(); this.stopTuner();
+    this.setState({tab:'lab',labScaleId:null,activeChordSlot:null,activeRhymeSlot:null,
+      labChord:{rootPC,quality,roman:opt.roman||'',name:opt.name||''}});
+  }
+
+  /* Black keys do not sit centred on the white-key boundaries. Inside each
+     group the white key tops divide evenly, which offsets C♯/D♯ by a sixth of
+     a black key and F♯/A♯ by a quarter, with G♯ alone landing on its boundary. */
+  PIANO_WHITE = [0,2,4,5,7,9,11];
+  PIANO_BLACK = [{pc:1,after:0,shift:-1/6},{pc:3,after:1,shift:1/6},
+                 {pc:6,after:3,shift:-1/4},{pc:8,after:4,shift:0},{pc:10,after:5,shift:1/4}];
+
+  renderRolePiano(opt){
+    const h=React.createElement;
+    opt=opt||{};
+    const chordRootPC=((opt.chordRootPC%12)+12)%12;
+    const quality=opt.quality||'maj';
+    const scalePcSet=new Set(opt.scalePcs||[]);
+    const chordPcs=opt.chordPcs||this.chordPcsFor(chordRootPC,quality);
+    const chordPcSet=new Set(chordPcs);
+    const chordIvSet=new Set((this.QUAL[quality]||this.QUAL.maj).map(s=>((s%12)+12)%12));
+    const nameFor=pc=>this.pcName(pc,!!opt.preferFlat);
+    const octaves=opt.octaves||2;
+    const wW=opt.whiteW||34, wH=opt.whiteH||92;
+    const bW=Math.round(wW*0.58), bH=Math.round(wH*0.62);
+    const W=octaves*7*wW, H=wH;
+    const roleOf=pc=>this.noteRole(pc,chordRootPC,chordPcSet,scalePcSet,chordIvSet);
+    const els=[];
+    for(let o=0;o<octaves;o++){
+      this.PIANO_WHITE.forEach((pc,i)=>{
+        const role=roleOf(pc), rd=this.ROLE_DEFS[role], lit=(role!=='out'&&role!=='pass');
+        els.push(h('div',{key:'w'+o+'_'+i,style:{position:'absolute',left:((o*7+i)*wW)+'px',top:'0px',
+          width:wW+'px',height:wH+'px',boxSizing:'border-box',
+          background:lit?rd.color:(role==='pass'?'#c7c7cc':'#f2f2f7'),
+          border:'1px solid #8e8e93',borderRadius:'0 0 5px 5px',
+          display:'flex',alignItems:'flex-end',justifyContent:'center',paddingBottom:'7px',
+          fontFamily:'var(--mm-font-display)',fontSize:'10.5px',fontWeight:800,
+          color:lit?rd.ink:'#6e6e73'}},role==='out'?'':nameFor(pc)));
+      });
+    }
+    for(let o=0;o<octaves;o++){
+      this.PIANO_BLACK.forEach(bk=>{
+        const role=roleOf(bk.pc), rd=this.ROLE_DEFS[role], lit=(role!=='out'&&role!=='pass');
+        const boundary=(o*7+bk.after+1)*wW;
+        els.push(h('div',{key:'b'+o+'_'+bk.pc,style:{position:'absolute',
+          left:(boundary-bW/2+bk.shift*bW)+'px',top:'0px',
+          width:bW+'px',height:bH+'px',boxSizing:'border-box',zIndex:2,
+          background:lit?rd.color:(role==='pass'?'#3a3a3c':'#141416'),
+          border:'1px solid #000',borderRadius:'0 0 4px 4px',
+          display:'flex',alignItems:'flex-end',justifyContent:'center',paddingBottom:'5px',
+          fontFamily:'var(--mm-font-display)',fontSize:'9px',fontWeight:800,
+          color:lit?rd.ink:'#8e8e93'}},role==='out'?'':nameFor(bk.pc)));
+      });
+    }
+    return h('div',{style:{position:'relative',width:W+'px',height:H+'px',flex:'none'}},els);
+  }
+
+  /* Short enough to sit under a 34px note circle. */
+  LAB_ROLE_CAPTION = {root:'root',tone:'tone',ext:'ext'};
+
+  /* Everything the Chord Lab tab binds. */
+  chordLabVals(ctx){
+    const S=ctx.S, self=ctx.self;
+    const blank={labHasChord:false,labNoChord:true,labKeyLabel:ctx.keyLabel,
+      labName:'',labRoman:'',labHasRoman:false,labFormula:[],labTones:[],
+      labExts:[],labHasExts:false,labScales:[],labScaleName:'',labTech:'',
+      labFretboard:null,labPiano:null,labLegend:null,
+      labPlayChord:()=>{},labPlayArp:()=>{}};
+    const lc=S.labChord;
+    if(!lc) return blank;
+    const rootPC=((lc.rootPC%12)+12)%12, quality=lc.quality||'maj';
+    const res=this.chordToScales(rootPC,quality,this.pcOf(ctx.keyRoot),ctx.mode);
+    if(!res.scales.length) return blank;
+    const bd=this.chordToneBreakdown(res.chordRootName,rootPC,quality);
+    const sel=res.scales.find(x=>x.id===S.labScaleId)||res.scales[0];
+    const chordPcs=res.chordPcs;
+    const labTones=bd.toneParts.map(t=>{
+      const role=t.iv===0?'root':(t.isExt?'ext':'tone');
+      const rd=this.ROLE_DEFS[role];
+      return {name:t.name,role:this.LAB_ROLE_CAPTION[role]||role,
+        style:'background:'+rd.color+';color:'+rd.ink+';'};
+    });
+    const safePcs=new Set();
+    res.scales.forEach(x=>{ if(x.tier.id==='safe') x.pcs.forEach(pc=>safePcs.add(pc)); });
+    const labExts=bd.exts.filter(e=>safePcs.has(((rootPC+e.iv)%12+12)%12));
+    const labScales=res.scales.map(x=>{
+      const on=x.id===sel.id;
+      return {label:x.label,
+        tag:x.notesStr+(x.isParentKey?'  ·  the home scale':(x.inKey?'  ·  all in key':'')),
+        tierLabel:x.tier.label,
+        tierStyle:'color:'+x.tier.color+';',
+        spiceStyle:'background:'+x.tier.color+';',
+        nameStyle:on?('color:'+TOKENS.accent+';'):'',
+        style:'border-color:'+(on?TOKENS.accent:'var(--mm-border)')+';background:'+(on?'#2e2410':'var(--mm-surface-2)')+';',
+        onClick:()=>self.setState({labScaleId:x.id})};
+    });
+    return {labHasChord:true,labNoChord:false,labKeyLabel:ctx.keyLabel,
+      labName:lc.name||(res.chordRootName+(this.SUF[quality]||'')),
+      labRoman:lc.roman||'',labHasRoman:!!(lc.roman&&String(lc.roman).length),
+      labFormula:bd.toneParts.map(t=>({label:t.label,name:t.name})),
+      labTones,
+      labExts,labHasExts:labExts.length>0,
+      labScales,labScaleName:sel.label,labTech:sel.note,
+      labFretboard:this.renderRoleFretboard({chordRootPC:rootPC,quality,chordPcs,
+        scalePcs:sel.pcs,fretLo:0,fretHi:15,preferFlat:res.preferFlat}),
+      labPiano:this.renderRolePiano({chordRootPC:rootPC,quality,chordPcs,
+        scalePcs:sel.pcs,preferFlat:res.preferFlat,octaves:2}),
+      labLegend:this.renderRoleLegend(['root','tone','ext','alt','pass']),
+      labPlayChord:()=>self.playChord(chordPcs),
+      labPlayArp:()=>self.playArp(chordPcs)};
+  }
+
   LOOP_PATTERNS={
     block:{label:'Block',ev:(b,p)=>b===0?[{o:0,v:0.15,d:2.6,down:true}]:[]},
     folk:{label:'Folk',ev:(b,p)=>{const e=[];if(b%2===0)e.push({o:0,v:b===0?0.15:0.11,d:1.5,down:true});e.push({o:0.5,v:0.062,d:0.8,down:false});return e;}},
@@ -3372,11 +3633,11 @@ class Component extends DCLogic {
   }
   ROOM_DEFS=[
     {id:'write',label:'Write',tabs:['songs'],icon:['M3.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M11.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M7.5 15.5V4','M15.5 15.5V4','M7.5 4H15.5']},
-    {id:'chords',label:'Chords',tabs:['home','theory','guitar','prog'],icon:['M10 2.5C13 2.5 15.5 5.5 15.5 9C15.5 13 11.5 16.5 10 17.5C8.5 16.5 4.5 13 4.5 9C4.5 5.5 7 2.5 10 2.5Z']},
+    {id:'chords',label:'Chords',tabs:['home','lab','theory','guitar','prog'],icon:['M10 2.5C13 2.5 15.5 5.5 15.5 9C15.5 13 11.5 16.5 10 17.5C8.5 16.5 4.5 13 4.5 9C4.5 5.5 7 2.5 10 2.5Z']},
     {id:'tempo',label:'Tempo',tabs:['rhythm','tuner'],icon:['M6 18H14L12 4H8Z','M10 4L13 15']},
     {id:'ideas',label:'Ideas',tabs:['mood','practice'],icon:['M10 2L13 7L18 10L13 13L10 18L7 13L2 10L7 7Z']}
   ];
-  TOOL_LABELS={home:'Wheel',theory:'Scales',guitar:'Shapes',prog:'Build',rhythm:'Metronome',tuner:'Tuner',mood:'Vibe',practice:'Drills',songs:'Song'};
+  TOOL_LABELS={home:'Wheel',lab:'Chord Lab',theory:'Scales',guitar:'Shapes',prog:'Build',rhythm:'Metronome',tuner:'Tuner',mood:'Vibe',practice:'Drills',songs:'Song'};
   NERD_LABELS=['Beginner','Amateur','Professional'];
   BASIC_SUFFIXES=['','m','7','m7','maj7','sus2','sus4','5'];
   chordFitsLevel(c,level){
@@ -3710,6 +3971,7 @@ class Component extends DCLogic {
     const playPillGhost=`border:1px solid ${TOKENS.border};background:${TOKENS.surface};color:${A};font-size:14px;font-weight:600;padding:11px 20px;border-radius:var(--mm-r-btn);cursor:pointer;transition:background .15s,transform .12s ease,box-shadow .12s ease;`;
     const miniPlay=`border:1px solid ${A};background:${A};color:#1a0e00;font-size:12px;font-weight:700;width:32px;height:28px;border-radius:var(--mm-r-sm);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
     const miniArp=`border:1px solid ${TOKENS.border};background:#332812;color:${A};font-size:11px;font-weight:700;padding:0 10px;height:28px;border-radius:var(--mm-r-sm);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
+    const miniLab=`border:1px solid ${TOKENS.border};background:var(--mm-surface-2);color:var(--mm-text-2);font-size:11px;font-weight:700;padding:0 10px;height:28px;border-radius:var(--mm-r-sm);cursor:pointer;transition:transform .12s ease,filter .12s ease;`;
 
     // wheel
     const cx=150,cy=150,oR=122,iR=78;
@@ -3861,6 +4123,7 @@ class Component extends DCLogic {
       chordWheelCaption = selChordObj.name+' ('+selChordObj.roman+')'+(parts.length?' — '+parts.join(' '):' — a diatonic chord in this key.');
     }
     const hasChordWheelSel=!!selChordObj;
+    const openLabFromWheel = selChordObj ? ()=>self.openChordLab({name:selChordObj.name,roman:selChordObj.roman,pcs:selChordObj.pcs}) : ()=>{};
     const addWheelChordToProg = selChordObj ? ()=>self.setState(st=>{ const nb=[...(st.builderChords||[]),{name:selChordObj.name,roman:selChordObj.roman,pcs:selChordObj.pcs}]; return {builderChords:nb,insightIdx:nb.length-1,tab:'prog'}; }) : ()=>{};
 
     // scales
@@ -3876,7 +4139,7 @@ class Component extends DCLogic {
     const diatExt=S.diatExt||'triad';
     const diatScaleSemis=mode==='major'?MAJ_SCALE_SEMIS:MIN_SCALE_SEMIS;
     const romanBaseArr=mode==='major'?ROMAN_MAJ:ROMAN_MIN;
-    const diatonic=romanBaseArr.map((rb,d)=>{ const c=this.buildDiatonicChord(keyRoot,diatScaleSemis,mode,d,diatExt,rb); return {...c,play:()=>self.playChord(c.pcs),arp:()=>self.playArp(c.pcs)}; });
+    const diatonic=romanBaseArr.map((rb,d)=>{ const c=this.buildDiatonicChord(keyRoot,diatScaleSemis,mode,d,diatExt,rb); return {...c,play:()=>self.playChord(c.pcs),arp:()=>self.playArp(c.pcs),openLab:()=>self.openChordLab({name:c.name,roman:c.roman,pcs:c.pcs})}; });
     const EXT_DEFS=[['triad','Triads'],['7','7ths'],['9','9ths'],['11','11ths'],['sus4','Sus4'],['sus2','Sus2']];
     const extLvl=(typeof S.nerdLevel==='number')?S.nerdLevel:1;
     const EXT_VIS=extLvl===0?EXT_DEFS.filter(e=>e[0]==='triad'||e[0]==='7'):(extLvl===1?EXT_DEFS.filter(e=>e[0]!=='11'):EXT_DEFS);
@@ -3926,6 +4189,9 @@ class Component extends DCLogic {
     const borrowedChips = cxHarm.mi.map(c=>({roman:c.roman,name:c.name,onClick:()=>addChordToBuilder(c)}));
     const secDomChips = cxHarm.sd.map(c=>({roman:c.roman,name:c.name,onClick:()=>addChordToBuilder(c)}));
     const bIdx = (S.insightIdx!=null && builderChords[S.insightIdx]) ? S.insightIdx : (builderChords.length? builderChords.length-1 : null);
+    const openLabFromInsight = (bIdx!=null && builderChords[bIdx])
+      ? ()=>self.openChordLab({name:builderChords[bIdx].name,roman:builderChords[bIdx].roman,pcs:builderChords[bIdx].pcs})
+      : ()=>{};
     const builderChips = builderChords.map((c,i)=>({name:c.name,roman:c.roman,selected:i===bIdx,
       style:`position:relative;border:1px solid ${i===bIdx?A:'var(--mm-border)'};background:${i===bIdx?'#2e2410':'var(--mm-surface)'};border-radius:12px;padding:10px 16px;text-align:center;min-width:64px;cursor:pointer;transition:all .15s;animation:mmChipPop .28s ease-out;`,
       select:()=>self.setState({insightIdx:i}),
@@ -4553,9 +4819,9 @@ class Component extends DCLogic {
     return {
       keyLabel,keyRoot,keyModeLabel,relativeInfo,keySigLabel:sigLabel,
       isWheelKeys,isWheelChords,setWheelModeKeys,setWheelModeChords,wheelModeKeysStyle,wheelModeChordsStyle,
-      chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,chordWheelLegend,hasChordWheelSel,addWheelChordToProg,
+      chordWheelDiagram,chordWheelCenterLabel,chordWheelCaption,chordWheelLegend,hasChordWheelSel,addWheelChordToProg,openLabFromWheel,
       splashVisible,splashOpacity,
-      isHome:S.tab==='home',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',notHome:S.tab!=='home',
+      isHome:S.tab==='home',isLab:S.tab==='lab',isTheory:S.tab==='theory',isGuitar:S.tab==='guitar',isProg:S.tab==='prog',isRhythm:S.tab==='rhythm',isSongs:S.tab==='songs',isMood:S.tab==='mood',isPractice:S.tab==='practice',isTuner:S.tab==='tuner',notHome:S.tab!=='home',
       goHome:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'home',autoScroll:false});},
       goTheory:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'theory',autoScroll:false});},
       goGuitar:()=>{self.stopAutoScroll();self.stopTuner();self.setState({tab:'guitar',autoScroll:false});},
@@ -4597,11 +4863,12 @@ class Component extends DCLogic {
       majBtnStyle:segS(mode==='major'),minBtnStyle:segS(mode==='minor'),
       wheelDiagram,wheelCaption,
       scaleList,scaleNotesList,scaleTitle:scaleObj.name,playScaleBtn:()=>self.playScaleNotes(rootPC,scaleObj.semis),scaleFretboard,
-      playPillStyle:playPill,playPillGhostStyle:playPillGhost,miniPlayStyle:miniPlay,miniArpStyle:miniArp,
+      playPillStyle:playPill,playPillGhostStyle:playPillGhost,miniPlayStyle:miniPlay,miniArpStyle:miniArp,miniLabStyle:miniLab,
       diatonic,extList,
       rootList,qualGroups,keyShortcuts,borrowedShortcuts,secDomShortcuts,selChordName:gChord.name,selChordNotes:gChord.notesStr,voicings,chordVibeText,
       gtrAddToProgBtn,gtrProgChips,gtrHasProg,gtrNoProg,goProgBtn,
       playSelChord:()=>self.playChord(gChord.pcs),playSelArp:()=>self.playArp(gChord.pcs),
+      openLabFromGuitar:()=>self.openChordLab({name:gChord.name,rootPC:gRoot,quality:gQual}),
       bpm:S.bpm,tempoMark,setBpm:(e)=>self.setState({bpm:+e.target.value}),bpmUp:()=>self.setState({bpm:Math.min(240,S.bpm+1)}),bpmDown:()=>self.setState({bpm:Math.max(40,S.bpm-1)}),
       stepBtnStyle:`width:44px;height:44px;border-radius:50%;border:1px solid var(--mm-border);background:var(--mm-surface);font-size:22px;font-weight:400;color:var(--mm-text);cursor:pointer;transition:transform .12s ease,filter .12s ease;`,
       beatDots,tsList,toggleMetro:()=>self.toggleMetro(),metroBtnLabel:S.playing?'Stop':'Start',
@@ -4611,7 +4878,7 @@ class Component extends DCLogic {
       builderChips,hasBuilderChords,noBuilderChords,builderAddChips,progExtList,borrowedChips,secDomChips,playBuilder,playBuilderArp,clearBuilder,
       showPresetPicker:!!S.showPresetPicker,togglePresetPicker,
       showAdvChords:!!S.showAdvChords,toggleAdvChords,advChevronStyle,
-      hasInsight,insightChordName,insightVerdict,insightText,
+      hasInsight,insightChordName,insightVerdict,insightText,openLabFromInsight,
       suggestedChips,hasSuggestions,
       hasAdvAnalysis,showAdvAnalysis,toggleAdvAnalysis,advAnalysisChevronStyle,advAnalysisSections,
       hasVoiceLeading,showVoiceLeading,toggleVoiceLeading,voiceLeadingChevronStyle,voiceLeadingPairs,hasAnalysisCard,
@@ -4646,6 +4913,7 @@ class Component extends DCLogic {
       showRomanHelp:!!S.showRomanHelp,toggleRomanHelp:()=>self.setState({showRomanHelp:!S.showRomanHelp}),
       showQualityHelp:!!S.showQualityHelp,toggleQualityHelp:()=>self.setState({showQualityHelp:!S.showQualityHelp}),
       ...loopVals,
+      ...this.chordLabVals({S,self,keyRoot,mode,keyLabel}),
       ...this.shellVals({S,self,keyRoot,mode,keyLabel,allPickerChords,activeSlot,activeWordText,pickerOptions})
     };
   }
