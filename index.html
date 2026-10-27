@@ -3080,22 +3080,40 @@ class Component extends DCLogic {
       roman:this.romanForExt(romanBase,intervals,ext)};
   }
   /* A roman numeral already says major or minor through its case, so the
-     suffix only has to carry the 7th and any altered 5th: Imaj7, not I7, and
-     viiø7 rather than vii°7 once the diminished triad takes a ♭7. */
+     suffix only has to carry the seventh, any altered fifth, and whatever the
+     stack actually produced on top. Mirrors extSuffix step for step so the
+     numeral and the chord name can never disagree about the same chord. */
   romanForExt(romanBase,iv,ext){
     if(ext==='triad') return romanBase;
     const bare=String(romanBase).replace('\u00b0','');
     if(ext==='sus2') return bare+'sus2';
     if(ext==='sus4') return bare+'sus4';
     const red=new Set((iv||[]).map(x=>((x%12)+12)%12));
-    const d5=red.has(6)&&!red.has(7), A5=red.has(8)&&!red.has(7);
-    const b7=red.has(10), M7=red.has(11);
-    const dimSeventh=red.has(9)&&d5&&!b7&&!M7;
-    const lvl=(ext==='9'||ext==='11')?ext:'7';
-    if(d5) return bare+(dimSeventh?'\u00b0':'\u00f8')+lvl;
-    if(A5) return bare+'+'+(M7?'maj':'')+lvl;
-    if(M7) return bare+'maj'+lvl;
-    return bare+lvl;
+    const h=x=>red.has(x);
+    const m3=h(3), d5=h(6)&&!h(7), A5=h(8)&&!h(7);
+    const b7=h(10), M7=h(11), dimSeventh=h(9)&&d5&&!b7&&!M7;
+    let core;
+    if(d5) core=dimSeventh?'\u00b07':(b7?'\u00f87':'\u00b07');
+    else if(A5) core=b7?'7\u266f5':(M7?'maj7\u266f5':'+');
+    else if(M7) core=m3?'(maj7)':'maj7';
+    else core=b7?'7':'';
+    if(ext==='7') return bare+core;
+    /* a 9th or 11th is only "natural" if the scale actually put one there:
+       stacking thirds on iii in a major key yields a flat 9, not a 9 */
+    const major9=iv.some(x=>x>11&&((x%12+12)%12)===2);
+    const flat9 =iv.some(x=>x>11&&((x%12+12)%12)===1);
+    const NINE={'maj7':'maj9','7':'9','\u00f87':'\u00f89','\u00b07':'\u00b09','(maj7)':'(maj9)','':'add9'};
+    const withNine=major9?(NINE[core]||core+'9'):(core+(flat9?'\u266d9':''));
+    if(ext==='9') return bare+withNine;
+    const perfect11=iv.some(x=>x>15&&((x%12+12)%12)===5);
+    const sharp11 =iv.some(x=>x>15&&((x%12+12)%12)===6);
+    if(sharp11) return bare+withNine+'\u266f11';
+    if(perfect11){
+      const ELEVEN={'maj7':'maj11','7':'11','\u00f87':'\u00f811','\u00b07':'\u00b011','(maj7)':'11'};
+      const base=ELEVEN[core]||(core+'11');
+      return bare+(flat9?base+'\u266d9':base);
+    }
+    return bare+withNine+'11';
   }
   renderFretboard(rootPC,semis){
     const h=React.createElement;
