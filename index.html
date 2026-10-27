@@ -1179,6 +1179,9 @@
           <button onClick="{{ clearChord }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">Clear</button>
           <button onClick="{{ closePicker }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">Close</button>
         </div>
+        <sc-if value="{{ hasActiveWordChord }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ openLabFromWord }}" style="margin-top:9px;border:1px solid #6b551f;background:transparent;color:var(--mm-accent);font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:transform .12s ease,background .12s ease;" style-hover="background:rgba(240,180,41,0.1);" style-active="transform:scale(0.96);">What can I play over {{ activeWordChordName }}?</button>
+        </sc-if>
       </div>
       </sc-if>
 
@@ -4171,11 +4174,11 @@ class Component extends DCLogic {
   }
   ROOM_DEFS=[
     {id:'write',label:'Write',tabs:['songs'],icon:['M3.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M11.5 15.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0','M7.5 15.5V4','M15.5 15.5V4','M7.5 4H15.5']},
-    {id:'chords',label:'Chords',tabs:['home','lab','theory','guitar','prog'],icon:['M10 2.5C13 2.5 15.5 5.5 15.5 9C15.5 13 11.5 16.5 10 17.5C8.5 16.5 4.5 13 4.5 9C4.5 5.5 7 2.5 10 2.5Z']},
+    {id:'chords',label:'Chords',tabs:['lab','prog','theory','guitar','home'],icon:['M10 2.5C13 2.5 15.5 5.5 15.5 9C15.5 13 11.5 16.5 10 17.5C8.5 16.5 4.5 13 4.5 9C4.5 5.5 7 2.5 10 2.5Z']},
     {id:'tempo',label:'Tempo',tabs:['rhythm','tuner'],icon:['M6 18H14L12 4H8Z','M10 4L13 15']},
     {id:'ideas',label:'Ideas',tabs:['mood','practice'],icon:['M10 2L13 7L18 10L13 13L10 18L7 13L2 10L7 7Z']}
   ];
-  TOOL_LABELS={home:'Wheel',lab:'Chord Lab',theory:'Scales',guitar:'Shapes',prog:'Build',rhythm:'Metronome',tuner:'Tuner',mood:'Vibe',practice:'Drills',songs:'Song'};
+  TOOL_LABELS={home:'Circle of 5ths',lab:'Chord Lab',theory:'Scales',guitar:'Chord shapes',prog:'Progression',rhythm:'Metronome',tuner:'Tuner',mood:'Moods',practice:'Practice',songs:'Song'};
   NERD_LABELS=['Beginner','Amateur','Professional'];
   BASIC_SUFFIXES=['','m','7','m7','maj7','sus2','sus4','5'];
   chordFitsLevel(c,level){
@@ -5043,6 +5046,14 @@ class Component extends DCLogic {
     const pickerOptions=activeHere?allPickerChords.map(pc=>({name:pc.name,roman:pc.roman,onClick:()=>{ const key=activeSlot.line+'_'+activeSlot.word; self.setState(st=>({chordMap:{...(st.chordMap||{}),[key]:{name:pc.name,roman:pc.roman,pcs:pc.pcs}},activeChordSlot:null})); }})):[];
     const clearChord=()=>{ if(!activeHere) return; const key=activeSlot.line+'_'+activeSlot.word; self.setState(st=>{ const cm={...(st.chordMap||{})}; delete cm[key]; return {chordMap:cm,activeChordSlot:null}; }); };
     const closePicker=()=>self.setState({activeChordSlot:null});
+    /* the word under the cursor may already carry a chord -- that is the one
+       worth soloing over, so offer the jump right there in the picker */
+    const activeWordChord=activeHere?((S.chordMap||{})[activeSlot.line+'_'+activeSlot.word]||null):null;
+    const hasActiveWordChord=!!activeWordChord;
+    const activeWordChordName=activeWordChord?activeWordChord.name:'';
+    const openLabFromWord=activeWordChord
+      ? ()=>self.openChordLab({name:activeWordChord.name,roman:activeWordChord.roman,pcs:activeWordChord.pcs})
+      : ()=>{};
 
     const labelButtons=['Intro','Verse','Pre-Chorus','Chorus','Post-Chorus','Verse 2','Bridge','Solo','Breakdown','Outro'].map(t=>({label:t,onClick:()=>self.setState(st=>({songText:(st.songText?st.songText+'\n\n':'')+'# '+t+'\n'}))}));
     const labelDraft=S.labelDraft||'';
@@ -5424,6 +5435,7 @@ class Component extends DCLogic {
       progressionMessages,hasProgressionMessages,allGoodMessage,
       presetList,
       songText,onSongTextChange,lineViews,activeHere,activeWordText,pickerOptions,clearChord,closePicker,
+      hasActiveWordChord,activeWordChordName,openLabFromWord,
       rhymeActiveHere,rhymeActiveWordText,rhymeSuggestionsList,hasRhymeSuggestions,noRhymeSuggestions,closeRhymePicker,
       labelButtons,labelDraft,onLabelDraftChange,insertCustomLabel,
       tabBlocks,addTabBlockBtn,outputTabBlocks,
