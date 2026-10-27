@@ -2923,6 +2923,436 @@ class Component extends DCLogic {
     return h('div',{style:{position:'relative',width:W+'px',height:H+'px'}},els);
   }
 
+  /* ───────────────────────────────────────────────────────────────────────
+     CHORD → SCALE ENGINE  ("what can I actually play over this?")
+     Given a chord (root + quality) and the current key, returns a ranked
+     list of scales that fit, each tagged with a spice tier, the note roles
+     it exposes over that chord, and a one-line technique note.
+     ─────────────────────────────────────────────────────────────────────── */
+
+  SOLO_SCALES = {
+    ionian:       {label:'Ionian (Major)',      semis:[0,2,4,5,7,9,11],       degs:[0,1,2,3,4,5,6]},
+    dorian:       {label:'Dorian',              semis:[0,2,3,5,7,9,10],       degs:[0,1,2,3,4,5,6]},
+    phrygian:     {label:'Phrygian',            semis:[0,1,3,5,7,8,10],       degs:[0,1,2,3,4,5,6]},
+    lydian:       {label:'Lydian',              semis:[0,2,4,6,7,9,11],       degs:[0,1,2,3,4,5,6]},
+    mixolydian:   {label:'Mixolydian',          semis:[0,2,4,5,7,9,10],       degs:[0,1,2,3,4,5,6]},
+    aeolian:      {label:'Aeolian (Nat. Minor)',semis:[0,2,3,5,7,8,10],       degs:[0,1,2,3,4,5,6]},
+    locrian:      {label:'Locrian',             semis:[0,1,3,5,6,8,10],       degs:[0,1,2,3,4,5,6]},
+    harmonicMinor:{label:'Harmonic Minor',      semis:[0,2,3,5,7,8,11],       degs:[0,1,2,3,4,5,6]},
+    melodicMinor: {label:'Melodic Minor',       semis:[0,2,3,5,7,9,11],       degs:[0,1,2,3,4,5,6]},
+    harmonicMajor:{label:'Harmonic Major',      semis:[0,2,4,5,7,8,11],       degs:[0,1,2,3,4,5,6]},
+    lydianDom:    {label:'Lydian Dominant',     semis:[0,2,4,6,7,9,10],       degs:[0,1,2,3,4,5,6]},
+    lydianAug:    {label:'Lydian Augmented',    semis:[0,2,4,6,8,9,11],       degs:[0,1,2,3,4,5,6]},
+    altered:      {label:'Altered',             semis:[0,1,3,4,6,8,10],       degs:[0,1,2,2,4,5,6]},
+    locrian2:     {label:'Locrian ♮2',     semis:[0,2,3,5,6,8,10],       degs:[0,1,2,3,4,5,6]},
+    phrygianDom:  {label:'Phrygian Dominant',   semis:[0,1,4,5,7,8,10],       degs:[0,1,2,3,4,5,6]},
+    majPent:      {label:'Major Pentatonic',    semis:[0,2,4,7,9],            degs:[0,1,2,4,5]},
+    minPent:      {label:'Minor Pentatonic',    semis:[0,3,5,7,10],           degs:[0,2,3,4,6]},
+    blues:        {label:'Blues',               semis:[0,3,5,6,7,10],         degs:[0,2,3,3,4,6]},
+    majBlues:     {label:'Major Blues',         semis:[0,2,3,4,7,9],          degs:[0,1,2,2,4,5]},
+    mixoBlues:    {label:'Mixo-Blues (Hendrix)',semis:[0,2,3,4,5,7,9,10],     degs:[0,1,2,2,3,4,5,6]},
+    halfWhole:    {label:'Half-Whole Dim',      semis:[0,1,3,4,6,7,9,10],     degs:[0,1,2,2,3,4,5,6]},
+    wholeHalf:    {label:'Whole-Half Dim',      semis:[0,2,3,5,6,8,9,11],     degs:[0,1,2,3,4,5,6,7]},
+    wholeTone:    {label:'Whole Tone',          semis:[0,2,4,6,8,10],         degs:[0,1,2,3,4,6], chromatic:true}
+  };
+
+  SPICE = {
+    safe:   {id:'safe',   label:'SAFE',    color:'#32d74b', rank:0, blurb:'Everything lands. Start here.'},
+    sweet:  {id:'sweet',  label:'SWEET',   color:'#f0b429', rank:1, blurb:'One colour note added — still safe, more interesting.'},
+    blues:  {id:'blues',  label:'BLUES',   color:'#e8720c', rank:2, blurb:'A deliberate rub. Bend into it, don’t park on it.'},
+    jazz:   {id:'jazz',   label:'JAZZ',    color:'#8ecbe6', rank:3, blurb:'Tension you have to resolve.'},
+    outside:{id:'outside',label:'OUTSIDE', color:'#b388ff', rank:4, blurb:'Keep moving — never sit still on it.'},
+    pro:    {id:'pro',    label:'PRO',     color:'#ff375f', rank:5, blurb:'Only if you mean it.'}
+  };
+
+  ROLE_DEFS = {
+    root:{id:'root',label:'Root',          color:'#f0b429', fill:true,  ink:'#1a0e00'},
+    tone:{id:'tone',label:'Chord tone',    color:'#8ecbe6', fill:true,  ink:'#06202b'},
+    ext: {id:'ext', label:'Extension',     color:'#32d74b', fill:true,  ink:'#04230b'},
+    alt: {id:'alt', label:'Altered colour',color:'#b388ff', fill:true,  ink:'#1b0b2e'},
+    pass:{id:'pass',label:'Passing tone',  color:'#8e8e93', fill:false, ink:'#c7c7cc'},
+    out: {id:'out', label:'Outside scale', color:'#3a3a3c', fill:false, ink:'#6e6e73'}
+  };
+
+  /* Quality → recipe family. Entries are evaluated in order and de-duped. */
+  CHORD_FAMILY = {
+    maj:'major', maj7:'major', maj9:'major', '6':'major', '69':'major', add9:'major',
+    min:'minor', min7:'minor', m9:'minor', m11:'minor', m13:'minor',
+    m6:'minorSix', mMaj7:'minorMaj',
+    dom7:'dom', '9':'dom', '13':'dom', '11':'dom', '7sus4':'dom',
+    '7b9':'domFlat9', '7#9':'domSharp9', '7b5':'domFlat5', '7#5':'domSharp5',
+    m7b5:'halfDim', dim:'dim', dim7:'dim', aug:'aug',
+    sus2:'sus', sus4:'sus', '5':'sus'
+  };
+
+  SCALE_RECIPES = {
+    major:[
+      {off:0,deg:0,s:'ionian',t:'safe',note:'The parent major scale — every note belongs. Keep moving through the 4th; it’s the one note that argues with the 3rd.'},
+      {off:0,deg:0,s:'majPent',t:'safe',note:'Five notes, no wrong answers. Drops the 4th and the 7th, which is exactly what makes it hook-shaped.'},
+      {off:4,deg:2,s:'minPent',t:'safe',note:'Minor pentatonic a major 3rd up. Over a maj7 it spells 3–5–7–9–13 — all colour, zero clash. The Asato / Mayer move.'},
+      {off:0,deg:0,s:'lydian',t:'sweet',note:'Raise the 4th. Same brightness, none of the rub — an instant dreamy lift. Steely Dan and film-score harmony live here.'},
+      {off:7,deg:4,s:'majPent',t:'sweet',note:'Major pentatonic off the 5th. You lose the root and gain the 9 — floatier, less obvious than playing from the root.'},
+      {off:9,deg:5,s:'minPent',t:'sweet',note:'Minor pentatonic off the 6th — the relative-minor box. Same notes as the root major pentatonic, different shape and contour.'},
+      {off:0,deg:0,s:'lydianAug',t:'outside',note:'♯4 and ♯5 together. Very film-score, very unstable — land on a chord tone or it just sounds wrong.'},
+      {off:0,deg:0,s:'harmonicMajor',t:'pro',note:'Major with a ♭6. One dark note in an otherwise bright scale — a single cloud crossing the sun.'},
+      {off:0,deg:0,s:'lydianDom',t:'pro',note:'Only once the chord turns dominant (C7♯11). The ♭7 fights a maj7 — use it as the moment the chord changes character.'}
+    ],
+    minor:[
+      {off:0,deg:0,s:'dorian',t:'safe',note:'Natural 6 keeps it hopeful rather than tragic. The default scale over any m7 — funk, Santana, most modal rock.'},
+      {off:0,deg:0,s:'minPent',t:'safe',note:'Home base. Five notes, all consonant over m7. Everything else on this list is a decoration of this box.'},
+      {off:0,deg:0,s:'aeolian',t:'safe',note:'Natural minor — ♭6 instead of Dorian’s natural 6. Sadder, more closed. Pick it when the song isn’t trying to lift.'},
+      {off:3,deg:2,s:'majPent',t:'sweet',note:'Major pentatonic a minor 3rd up. Spells ♭3–11–5–♭7–root — Dorian colour with no chance of fluffing the 6th. The cheapest way to sound like you know more than you do.'},
+      {off:10,deg:6,s:'majPent',t:'sweet',note:'Major pentatonic off the ♭7. Lands on the 9 and the 11 — wide, floating, very neo-soul.'},
+      {off:0,deg:0,s:'blues',t:'blues',note:'Minor pentatonic plus the ♭5. Treat the ♭5 as a passing tone — slide through it, never park on it.'},
+      {off:0,deg:0,s:'melodicMinor',t:'jazz',note:'Raise the 7th. Your line turns the chord into m(maj7) underneath — spy-movie minor: beautiful and slightly wrong.'},
+      {off:0,deg:0,s:'harmonicMinor',t:'jazz',note:'♭6 and natural 7 together leave a minor-3rd leap near the top — dramatic, neoclassical, Yngwie territory.'},
+      {off:0,deg:0,s:'phrygian',t:'pro',note:'♭2. Spanish, flamenco, metal. The half-step above the root is the whole point — resolve down into it.'}
+    ],
+    minorSix:[
+      {off:0,deg:0,s:'dorian',t:'safe',note:'The 6th is already in the chord, so Dorian is the exact fit — nothing to avoid.'},
+      {off:0,deg:0,s:'melodicMinor',t:'safe',note:'Minor with a natural 6 and 7. The classic m6 scale — noir and bittersweet at once.'},
+      {off:0,deg:0,s:'minPent',t:'safe',note:'Safe but blunt — it misses the 6th, the one note that makes this chord what it is.'},
+      {off:3,deg:2,s:'majPent',t:'sweet',note:'Major pentatonic a minor 3rd up — covers the ♭3, 11, 5 and ♭7 without stepping on the 6th.'}
+    ],
+    minorMaj:[
+      {off:0,deg:0,s:'melodicMinor',t:'safe',note:'The parent scale — ♭3 with a natural 7 is literally this chord spelled out.'},
+      {off:0,deg:0,s:'harmonicMinor',t:'sweet',note:'Same chord, darker: the ♭6 adds the dramatic leap into the natural 7.'},
+      {off:0,deg:0,s:'minPent',t:'blues',note:'The pentatonic’s ♭7 fights the chord’s natural 7 — use it as a bend into that 7, not as a resting note.'}
+    ],
+    dom:[
+      {off:0,deg:0,s:'mixolydian',t:'safe',note:'The parent scale: major with a ♭7. If the chord is the V of your key, this is just the home major scale starting on the 5th.'},
+      {off:0,deg:0,s:'majPent',t:'safe',note:'No 7th at all, so nothing can clash. Bright, vocal, instantly Mayer.'},
+      {off:0,deg:0,s:'mixoBlues',t:'blues',note:'Mixolydian with the ♭3 added. The Hendrix push-pull — bend the ♭3 up into the 3 and you have the whole blues language in one move.'},
+      {off:0,deg:0,s:'minPent',t:'blues',note:'Minor pentatonic over a dominant chord is the blues. The ♭3 rubbing against the chord’s major 3rd is the grit.'},
+      {off:0,deg:0,s:'blues',t:'blues',note:'Minor pentatonic + ♭5. Dirtier again — the rock and Texas-blues default.'},
+      {off:0,deg:0,s:'majBlues',t:'blues',note:'Major pentatonic with a ♭3 slipped in below the 3. The sweeter half of the blues language — country and soul.'},
+      {off:0,deg:0,s:'lydianDom',t:'jazz',note:'♯11 instead of the natural 4. Floats instead of resolving — perfect for a dominant chord that isn’t going home.'},
+      {off:0,deg:0,s:'halfWhole',t:'jazz',note:'Symmetrical: ♭9, ♯9, ♯11, 13. All the colour of altered without the ♯5 — and it repeats every minor 3rd, so one shape covers the neck.'},
+      {off:0,deg:0,s:'altered',t:'jazz',note:'Maximum tension — ♭9 ♯9 ♯11 ♯5. It only makes sense if you resolve it immediately; this is the sound of the V about to land.'},
+      {off:0,deg:0,s:'phrygianDom',t:'pro',note:'♭2 over a major 3rd — flamenco heat. (It’s harmonic minor from the 5th, so over E7 it means A harmonic minor.)'},
+      {off:0,deg:0,s:'wholeTone',t:'pro',note:'Six notes, all whole steps. Save it for 7♯5 — it has no gravity at all, which is exactly the effect.'}
+    ],
+    domFlat9:[
+      {off:0,deg:0,s:'halfWhole',t:'safe',note:'The ♭9 is in the chord and in the scale — this is the natural home. Repeats every minor 3rd.'},
+      {off:0,deg:0,s:'altered',t:'safe',allowMissing:true,note:'♭9 and ♯5 together. Dense and urgent — resolve down a 5th and it sounds inevitable. It has no natural 5th, which is the point: drop the 5 from your voicing and the whole thing locks in.'},
+      {off:0,deg:0,s:'phrygianDom',t:'sweet',note:'The ♭9 as a melodic half-step above the root — flamenco rather than jazz.'},
+      {off:5,deg:3,s:'harmonicMinor',t:'jazz',note:'Harmonic minor a 4th up — i.e. the harmonic minor of the key you’re resolving into. Classic V7♭9 → i move.'}
+    ],
+    domSharp9:[
+      {off:0,deg:0,s:'altered',t:'safe',allowMissing:true,note:'The ♯9 is the chord’s defining note and the scale is built around it. No natural 5th here — leave the 5 out of the chord and nothing fights.'},
+      {off:0,deg:0,s:'halfWhole',t:'safe',note:'Has both the ♭9 and the ♯9 — you can slide between them over the same chord.'},
+      {off:0,deg:0,s:'minPent',t:'blues',note:'The Hendrix chord already contains a ♭3 (spelled ♯9) — minor pentatonic is literally written into it. Purple Haze, Foxy Lady.'},
+      {off:0,deg:0,s:'blues',t:'blues',note:'Minor pentatonic + ♭5 over a 7♯9 is the funk-rock sweet spot.'}
+    ],
+    domFlat5:[
+      {off:0,deg:0,s:'wholeTone',t:'safe',note:'The ♭5 reads as a ♯11 here — whole tone covers it and never implies a natural 5.'},
+      {off:0,deg:0,s:'altered',t:'safe',note:'Contains the ♭5 and the ♭9 — the fullest altered-dominant sound.'},
+      {off:0,deg:0,s:'lydianDom',t:'sweet',note:'Treat the ♭5 as a ♯11 and keep the natural 5 available — lighter, floatier than altered.'}
+    ],
+    domSharp5:[
+      {off:0,deg:0,s:'wholeTone',t:'safe',note:'The textbook 7♯5 scale — all whole steps, no gravity, lurching upward.'},
+      {off:0,deg:0,s:'altered',t:'safe',note:'♯5 plus ♭9 and ♯9 — the full altered palette over this chord.'},
+      {off:0,deg:0,s:'lydianAug',t:'outside',note:'If the line wants a natural 7 instead of a ♭7, this is the ♯5 colour without the dominant pull.'}
+    ],
+    halfDim:[
+      {off:0,deg:0,s:'locrian',t:'safe',note:'The parent mode — the 7th mode of the major scale. The ♭2 is the only awkward note; pass straight through it.'},
+      {off:0,deg:0,s:'locrian2',t:'safe',note:'Locrian with a natural 9 (6th mode of melodic minor). The standard jazz choice — it makes the chord sing instead of sulk.'},
+      {off:3,deg:2,s:'minPent',t:'sweet',note:'Minor pentatonic from the ♭3 — covers the ♭3, ♭5 and ♭7 in one familiar box, and throws in the ♭9 as a passing bite.'},
+      {off:0,deg:0,s:'wholeHalf',t:'jazz',note:'Diminished colour over the ♭5 — works when the chord is a passing chord rather than a iiø.'}
+    ],
+    dim:[
+      {off:0,deg:0,s:'wholeHalf',t:'safe',note:'Whole-half diminished — the parent scale. It repeats every minor 3rd, so one shape covers four positions on the neck.'},
+      {off:1,deg:1,s:'harmonicMinor',t:'sweet',note:'A dim7 is usually a dominant in disguise. Play the harmonic minor of the chord a half-step above and it resolves itself.'},
+      {off:0,deg:0,s:'halfWhole',t:'jazz',note:'The other diminished scale — use it when the chord is heading somewhere a half-step away.'},
+      {off:0,deg:0,s:'minPent',t:'pro',note:'Only three of the five notes fit. Use it to launch out of the chord, not to sit on it.'}
+    ],
+    aug:[
+      {off:0,deg:0,s:'wholeTone',t:'safe',note:'Contains the root, 3rd and ♯5 with nothing to avoid — the natural augmented scale.'},
+      {off:0,deg:0,s:'lydianAug',t:'sweet',note:'♯5 with a natural 7 — the dreamier, more tonal way to play an augmented chord.'},
+      {off:0,deg:0,s:'harmonicMajor',t:'outside',note:'The ♭6 doubles as the ♯5. A sideways, slightly queasy colour — don’t linger.'}
+    ],
+    sus:[
+      {off:0,deg:0,s:'mixolydian',t:'safe',note:'No 3rd in the chord, so the ♭7 version fits without committing to major or minor.'},
+      {off:0,deg:0,s:'majPent',t:'safe',note:'Bright and open — it supplies the major 3rd the chord is withholding.'},
+      {off:0,deg:0,s:'minPent',t:'safe',note:'With no 3rd in the chord, minor and major pentatonic both fit. Switching between them is the whole trick over sus and power chords.'},
+      {off:0,deg:0,s:'dorian',t:'sweet',note:'Leans the chord minor without the chord ever saying so — moody and modal.'},
+      {off:0,deg:0,s:'ionian',t:'sweet',note:'Leans it major. The 4th is in the chord, so unlike over a plain major, you can rest on it.'},
+      {off:0,deg:0,s:'blues',t:'blues',note:'Power chords and the blues scale — the entire rock-riff vocabulary in one line.'}
+    ]
+  };
+
+  PC_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  PC_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+  pcName(pc,preferFlat){ pc=((pc%12)+12)%12; return (preferFlat?this.PC_FLAT:this.PC_SHARP)[pc]; }
+  /* spell() needs a letter degree; for a note that is not a scale degree of the
+     key there is no obvious one, and guessing wrong gives C## where D belongs.
+     Try all seven and keep the spelling with the fewest accidentals. */
+  spellBest(root,semi,preferDeg){
+    let best=null,bestScore=99;
+    for(let d=0;d<7;d++){
+      const name=this.spell(root,semi,d);
+      const score=(name.length-1)*2+(d===preferDeg?0:1);
+      if(score<bestScore){ bestScore=score; best=name; }
+    }
+    return best;
+  }
+
+  /* Chord pitch classes for an arbitrary root + quality. */
+  chordPcsFor(rootPC,quality){
+    const iv=this.QUAL[quality]||this.QUAL.maj;
+    const seen=[];
+    iv.forEach(s=>{ const pc=((rootPC+s)%12+12)%12; if(seen.indexOf(pc)<0) seen.push(pc); });
+    return seen;
+  }
+
+  /* Which 12 pitch classes does the current key contain? */
+  keyPcSet(keyRootPC,keyMode){
+    const semis=keyMode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
+    return new Set(semis.map(s=>(keyRootPC+s)%12));
+  }
+
+  /* Role of one pitch class against a chord + scale. */
+  noteRole(pc,chordRootPC,chordPcSet,scalePcSet,chordIvSet){
+    const iv=((pc-chordRootPC)%12+12)%12;
+    if(iv===0) return 'root';
+    if(chordPcSet.has(pc)) return 'tone';
+    if(!scalePcSet.has(pc)) return 'out';
+    const hasThird=chordIvSet.has(3)||chordIvSet.has(4);
+    const hasMajThird=chordIvSet.has(4);
+    const hasSeventh=chordIvSet.has(10)||chordIvSet.has(11);
+    if(iv===2||iv===9) return 'ext';                    /* 9, 13 */
+    if(iv===5) return hasMajThird?'pass':'ext';         /* 11 rubs on a major 3rd */
+    if(iv===1||iv===3||iv===6||iv===8) return 'alt';    /* b9, #9, #11, b13 */
+    if(!hasThird&&(iv===3||iv===4)) return 'ext';
+    if(!hasSeventh&&(iv===10||iv===11)) return 'ext';
+    return 'pass';
+  }
+
+  EXT_NAMES = {1:'♭9',2:'9',3:'♯9',5:'11',6:'♯11',8:'♭13',9:'13',10:'♭7',11:'7',4:'3'};
+
+  /* Chord tones + the extensions this chord invites, as display strings. */
+  chordToneBreakdown(rootName,rootPC,quality){
+    const iv=this.QUAL[quality]||this.QUAL.maj;
+    const red=new Set(iv.map(s=>((s%12)+12)%12));
+    const hasFifth=red.has(7);
+    /* 6 is a ♭5 (letter-degree 4) only when there is no perfect 5th above it;
+       with a natural 5 present it is really a ♯11. Same story for 8: ♯5 vs ♭13. */
+    const DEG={0:0,1:1,2:1,3:2,4:2,5:3,6:hasFifth?3:4,7:4,8:hasFifth?5:4,9:5,10:6,11:6};
+    const seen=new Set();
+    const tones=[],roles=[];
+    iv.forEach(s=>{
+      const r=((s%12)+12)%12;
+      if(seen.has(r)) return;
+      seen.add(r);
+      tones.push(this.spell(rootName,r,DEG[r]));
+      roles.push(r);
+    });
+    /* extensions this chord invites but does not already contain. A major 3rd
+       rules the 11 out entirely: the natural 11 rubs against the 3rd and the
+       #11 needs Lydian, so neither is a default — 9 and 13 are. */
+    const EXT_ORDER=red.has(4)?[2,9]:[2,5,9];
+    const exts=EXT_ORDER.filter(r=>!seen.has(r)).map(r=>({
+      name:this.spell(rootName,r,DEG[r]),label:this.EXT_NAMES[r]}));
+    return {tones,tonesStr:tones.join(' · '),exts,
+      extsStr:exts.map(e=>e.name+' ('+e.label+')').join('   ')};
+  }
+
+  /* The headline: ranked scales for a chord, in the current key. */
+  chordToScales(chordRootPC,quality,keyRootPC,keyMode){
+    chordRootPC=((chordRootPC%12)+12)%12;
+    const fam=this.CHORD_FAMILY[quality]||'major';
+    const recipes=this.SCALE_RECIPES[fam]||this.SCALE_RECIPES.major;
+    const chordPcs=this.chordPcsFor(chordRootPC,quality);
+    const chordPcSet=new Set(chordPcs);
+    const chordIvSet=new Set((this.QUAL[quality]||this.QUAL.maj).map(s=>((s%12)+12)%12));
+    const keySet=this.keyPcSet(keyRootPC,keyMode);
+    const keySemis=keyMode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
+    const keySig=Array.from(keySet).sort((a,b)=>a-b).join(',');
+    const sigPC=keyMode==='major'?keyRootPC:((keyRootPC+3)%12);
+    const preferFlat=[5,10,3,8,1,6].indexOf(sigPC)>=0;
+    const keyRootName=this.pcName(keyRootPC,preferFlat);
+    const chordSemiFromKey=((chordRootPC-keyRootPC)%12+12)%12;
+    const diatDeg=keySemis.indexOf(chordSemiFromKey);
+    /* a diatonic root keeps its scale-degree letter; anything else gets the
+       cleanest available spelling rather than a guessed degree */
+    const chordRootName=diatDeg>=0
+      ? this.spell(keyRootName,chordSemiFromKey,diatDeg)
+      : this.spellBest(keyRootName,chordSemiFromKey);
+    const out=[];
+    const seenKeys=new Set();
+    recipes.forEach(r=>{
+      const def=this.SOLO_SCALES[r.s];
+      if(!def) return;
+      const scaleRootPC=((chordRootPC+r.off)%12+12)%12;
+      const dedupe=r.s+'@'+scaleRootPC;
+      if(seenKeys.has(dedupe)) return;
+      seenKeys.add(dedupe);
+      const scalePcs=def.semis.map(s=>(scaleRootPC+s)%12);
+      const scalePcSet=new Set(scalePcs);
+      /* every chord tone must be in the scale, or the "safe" claim is a lie */
+      const missing=chordPcs.filter(pc=>!scalePcSet.has(pc));
+      let scaleRootName=this.spell(chordRootName,r.off,r.deg);
+      if(scaleRootName.length>2) scaleRootName=this.pcName(scaleRootPC,preferFlat);
+      const roles={};
+      scalePcs.forEach(pc=>{ roles[pc]=this.noteRole(pc,chordRootPC,chordPcSet,scalePcSet,chordIvSet); });
+      const noteList=def.semis.map((s,i)=>{
+        const pc=(scaleRootPC+s)%12;
+        /* whole tone has no letter spelling at all — six notes, seven letters.
+           Everything else spells by degree, with anything two or more
+           accidentals deep swapped for its plain name: F## reads as G. */
+        let name=(def.chromatic&&s!==0)
+          ? this.pcName(pc,preferFlat)
+          : this.spell(scaleRootName,s,def.degs[i]);
+        if(name.length>2) name=this.pcName(pc,preferFlat);
+        return {name,pc,role:roles[pc]};
+      });
+      const inKey=scalePcs.every(pc=>keySet.has(pc));
+      const isParentKey=Array.from(scalePcSet).sort((a,b)=>a-b).join(',')===keySig;
+      let note=r.note;
+      let tier=this.SPICE[r.t]||this.SPICE.safe;
+      if(tier.id==='safe'&&def.semis.length>=7&&missing.length&&!r.allowMissing){
+        tier=this.SPICE.sweet;
+        note+=' Watch one gap: it has no '+missing.map(pc=>this.pcName(pc,preferFlat)).join(' or ')+' — the chord\'s own note, so land elsewhere.';
+      }
+      if(isParentKey){
+        note+=' — the same seven notes as '+keyRootName+' '+(keyMode==='major'?'major':'minor')+', just started here.';
+        if(missing.length){
+          /* the home scale, but this chord reaches outside the key, so the
+             scale is missing the chord's own colour note — not a safe bet */
+          note+=' It does not cover the whole chord though: '+missing.length+' chord tone'+(missing.length===1?'':'s')+' sit outside the key.';
+        } else {
+          note+=' Nothing in it can be wrong.';
+          tier=this.SPICE.safe;
+        }
+      }
+      out.push({
+        id:r.s+'@'+scaleRootPC,
+        scaleKey:r.s,
+        label:scaleRootName+' '+def.label,
+        shortLabel:scaleRootName+' '+def.label.replace(/\s*\(.*\)\s*/,''),
+        scaleRootPC,scaleRootName,
+        semis:def.semis,degs:def.degs,
+        pcs:scalePcs,
+        notes:noteList,
+        notesStr:noteList.map(n=>n.name).join(' '),
+        tier,recipeTier:r.t,
+        note,
+        inKey,isParentKey,allowMissing:!!r.allowMissing,
+        missingCount:missing.length,
+        extCount:noteList.filter(n=>n.role==='ext').length,
+        altCount:noteList.filter(n=>n.role==='alt').length,
+        covers:chordPcs.length-missing.length
+      });
+    });
+    out.sort((a,b)=>{
+      if(a.tier.rank!==b.tier.rank) return a.tier.rank-b.tier.rank;
+      if(a.missingCount!==b.missingCount) return a.missingCount-b.missingCount;
+      if(a.isParentKey!==b.isParentKey) return a.isParentKey?-1:1;
+      if(a.inKey!==b.inKey) return a.inKey?-1:1;
+      return b.extCount-a.extCount;
+    });
+    return {chordRootName,chordPcs,scales:out,preferFlat};
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     ROLE-COLOURED FRETBOARD
+     Draws every note of a scale across the neck, coloured by what it does
+     over the current chord. Window it with fretLo/fretHi for positions.
+     ─────────────────────────────────────────────────────────────────────── */
+  GTR_STRINGS = [4,11,7,2,9,4];
+  GTR_STRING_NAMES = ['e','B','G','D','A','E'];
+
+  renderRoleFretboard(opt){
+    const h=React.createElement;
+    opt=opt||{};
+    const chordRootPC=((opt.chordRootPC%12)+12)%12;
+    const quality=opt.quality||'maj';
+    const scalePcs=opt.scalePcs||[];
+    const scalePcSet=new Set(scalePcs);
+    const chordPcs=opt.chordPcs||this.chordPcsFor(chordRootPC,quality);
+    const chordPcSet=new Set(chordPcs);
+    const chordIvSet=new Set((this.QUAL[quality]||this.QUAL.maj).map(s=>((s%12)+12)%12));
+    const nameFor=opt.nameFor||(pc=>this.pcName(pc,!!opt.preferFlat));
+    const fretLo=Math.max(0,opt.fretLo===undefined?0:opt.fretLo);
+    const fretHi=Math.min(22,opt.fretHi===undefined?15:opt.fretHi);
+    const showOutside=opt.showOutside!==false;
+    const highlightPcs=opt.highlightPcs?new Set(opt.highlightPcs):null;
+    const seqOrder=opt.seqOrder||null;   /* Map "string:fret" -> step index */
+    const colW=opt.colW||30, rowH=opt.rowH||27, labelW=24, topPad=4;
+    const nFrets=fretHi-fretLo+1;
+    const boardW=nFrets*colW;
+    const W=labelW+boardW+10, H=topPad+6*rowH+24;
+    const els=[];
+    const x0=labelW;
+    /* fret wires */
+    for(let f=fretLo;f<=fretHi+1;f++){
+      const isNut=(f===0);
+      els.push(h('div',{key:'fw'+f,style:{position:'absolute',left:(x0+(f-fretLo)*colW)+'px',top:topPad+'px',
+        width:isNut?'3px':'1px',height:(6*rowH)+'px',background:isNut?'var(--mm-text)':'#48484a'}}));
+    }
+    /* inlays */
+    [3,5,7,9,15,17,19,21].forEach(f=>{ if(f<fretLo||f>fretHi) return;
+      els.push(h('div',{key:'in'+f,style:{position:'absolute',left:(x0+(f-fretLo)*colW+colW/2-3)+'px',top:(topPad+6*rowH+5)+'px',
+        width:'6px',height:'6px',borderRadius:'50%',background:'#3a3a3c'}})); });
+    if(12>=fretLo&&12<=fretHi) [-9,3].forEach((dx,i)=>els.push(h('div',{key:'in12'+i,style:{position:'absolute',
+      left:(x0+(12-fretLo)*colW+colW/2+dx)+'px',top:(topPad+6*rowH+5)+'px',width:'6px',height:'6px',borderRadius:'50%',background:'#3a3a3c'}})));
+    /* strings */
+    this.GTR_STRINGS.forEach((openPc,i)=>{
+      els.push(h('div',{key:'st'+i,style:{position:'absolute',left:x0+'px',top:(topPad+i*rowH+rowH/2-1)+'px',
+        width:boardW+'px',height:(i>=4?'2px':'1.2px'),background:'#6e6e73'}}));
+      els.push(h('div',{key:'sn'+i,style:{position:'absolute',left:'0px',top:(topPad+i*rowH+rowH/2-7)+'px',
+        width:(labelW-6)+'px',textAlign:'right',fontSize:'9.5px',color:'var(--mm-text-4)',fontWeight:700}},this.GTR_STRING_NAMES[i]));
+    });
+    /* notes */
+    this.GTR_STRINGS.forEach((openPc,si)=>{
+      for(let f=fretLo;f<=fretHi;f++){
+        const pc=(openPc+f)%12;
+        const role=this.noteRole(pc,chordRootPC,chordPcSet,scalePcSet,chordIvSet);
+        if(role==='out'&&!showOutside) continue;
+        const rd=this.ROLE_DEFS[role];
+        const cx=x0+(f-fretLo)*colW+colW/2, cy=topPad+si*rowH+rowH/2;
+        if(role==='out'){
+          els.push(h('div',{key:'o'+si+'_'+f,style:{position:'absolute',left:(cx-2)+'px',top:(cy-2)+'px',
+            width:'4px',height:'4px',borderRadius:'50%',background:'#2c2c2e'}}));
+          continue;
+        }
+        const dim = highlightPcs && !highlightPcs.has(pc);
+        const sz = role==='pass'?17:20;
+        const step = seqOrder?seqOrder.get(si+':'+f):undefined;
+        els.push(h('div',{key:'n'+si+'_'+f,style:{position:'absolute',left:(cx-sz/2)+'px',top:(cy-sz/2)+'px',
+          width:sz+'px',height:sz+'px',borderRadius:'50%',
+          background:rd.fill?rd.color:'var(--mm-bg)',
+          border:rd.fill?(role==='root'?'2px solid #fff6e0':'none'):('1.5px dashed '+rd.color),
+          color:rd.fill?rd.ink:rd.ink,
+          display:'flex',alignItems:'center',justifyContent:'center',
+          fontSize:(role==='pass'?'8px':'8.5px'),fontWeight:800,letterSpacing:'-0.02em',
+          opacity:dim?0.28:1,
+          boxShadow:step!==undefined?('0 0 0 3px rgba(240,180,41,0.55)'):'none',
+          transition:'opacity .18s ease,box-shadow .12s ease'}},
+          step!==undefined?String(step+1):nameFor(pc)));
+      }
+    });
+    /* fret numbers */
+    for(let f=fretLo;f<=fretHi;f++){
+      if(f===0) continue;
+      els.push(h('div',{key:'fn'+f,style:{position:'absolute',left:(x0+(f-fretLo)*colW)+'px',top:(topPad+6*rowH+14)+'px',
+        width:colW+'px',textAlign:'center',fontSize:'9px',color:'#6e6e73',fontWeight:600}},f));
+    }
+    return h('div',{style:{position:'relative',width:W+'px',height:H+'px',flex:'none'}},els);
+  }
+
+  renderRoleLegend(roles){
+    const h=React.createElement;
+    const list=(roles||['root','tone','ext','alt','pass']).map(id=>this.ROLE_DEFS[id]).filter(Boolean);
+    return h('div',{style:{display:'flex',flexWrap:'wrap',gap:'10px',alignItems:'center'}},list.map(rd=>
+      h('div',{key:rd.id,style:{display:'flex',alignItems:'center',gap:'5px'}},[
+        h('span',{key:'d',style:{width:'11px',height:'11px',borderRadius:'50%',flex:'none',
+          background:rd.fill?rd.color:'transparent',border:rd.fill?'none':('1.5px dashed '+rd.color)}}),
+        h('span',{key:'l',style:{fontSize:'10.5px',color:'var(--mm-text-3)',fontWeight:600}},rd.label)
+      ])
+    ));
+  }
+
   LOOP_PATTERNS={
     block:{label:'Block',ev:(b,p)=>b===0?[{o:0,v:0.15,d:2.6,down:true}]:[]},
     folk:{label:'Folk',ev:(b,p)=>{const e=[];if(b%2===0)e.push({o:0,v:b===0?0.15:0.11,d:1.5,down:true});e.push({o:0.5,v:0.062,d:0.8,down:false});return e;}},
