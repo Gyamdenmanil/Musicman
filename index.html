@@ -261,6 +261,7 @@
           <button onClick="{{ sheetPlay }}" style="{{ askActStyle }}" style-hover="filter:brightness(1.08);" style-active="transform:scale(0.96);">&#9654; Strum</button>
           <button onClick="{{ sheetArp }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Arp</button>
           <button onClick="{{ sheetShapes }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Shapes</button>
+          <button onClick="{{ sheetLab }}" style="{{ askAct2Style }}" style-hover="filter:brightness(1.15);" style-active="transform:scale(0.96);">Solo over it</button>
           </sc-if>
           <button onClick="{{ sheetClose }}" style="border:1px solid var(--mm-border);background:var(--mm-surface);color:var(--mm-text-3);font-size:12px;font-weight:700;padding:0 12px;min-height:38px;border-radius:11px;cursor:pointer;" style-hover="border-color:#48484a;" style-active="transform:scale(0.96);">Done</button>
         </div>
@@ -1179,9 +1180,6 @@
           <button onClick="{{ clearChord }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">Clear</button>
           <button onClick="{{ closePicker }}" style="border:none;background:transparent;color:var(--mm-text-4);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s ease;" style-hover="opacity:0.75;" style-active="opacity:0.5;">Close</button>
         </div>
-        <sc-if value="{{ hasActiveWordChord }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ openLabFromWord }}" style="margin-top:9px;border:1px solid #6b551f;background:transparent;color:var(--mm-accent);font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:transform .12s ease,background .12s ease;" style-hover="background:rgba(240,180,41,0.1);" style-active="transform:scale(0.96);">What can I play over {{ activeWordChordName }}?</button>
-        </sc-if>
       </div>
       </sc-if>
 
@@ -4306,6 +4304,8 @@ class Component extends DCLogic {
       const gr=((this.pcOf(m[1]+acc)%12)+12)%12;
       const qual=revSuf.find(k=>String(this.SUF[k])===String(m[3]||''))||'maj';
       self.goTool('guitar'); self.setState({gRoot:gr,gQual:qual}); };
+    const sheetLab=()=>{ if(!curChord) return;
+      self.openChordLab({name:curChord.name,roman:curChord.roman,pcs:curChord.pcs}); };
     const sheetRhymes=sheetOpen?this.findRhymes(ctx.activeWordText).slice(0,8).map(w=>({word:w})):[];
     const wordSlots=[];
     String(S.songText||'').split('\n').forEach((ln,li)=>{
@@ -4332,7 +4332,7 @@ class Component extends DCLogic {
       sheetChordName:curChord?curChord.name:'No chord yet',
       sheetRoman:curChord?(nerd===0?this.plainRoman(curChord.roman):(curChord.roman||'')):'',
       sheetFeel:curChord?this.feelFor(curChord.roman,curChord.name):'Tap one below and it lands on this word.',
-      sheetOptions,sheetShapes,
+      sheetOptions,sheetShapes,sheetLab,
       sheetPlay:()=>{ if(curChord&&curChord.pcs) self.playChord(curChord.pcs); },
       sheetArp:()=>{ if(curChord&&curChord.pcs) self.playArp(curChord.pcs); },
       sheetClear:()=>{ if(!slot) return; const key=slot.line+'_'+slot.word;
@@ -5046,14 +5046,6 @@ class Component extends DCLogic {
     const pickerOptions=activeHere?allPickerChords.map(pc=>({name:pc.name,roman:pc.roman,onClick:()=>{ const key=activeSlot.line+'_'+activeSlot.word; self.setState(st=>({chordMap:{...(st.chordMap||{}),[key]:{name:pc.name,roman:pc.roman,pcs:pc.pcs}},activeChordSlot:null})); }})):[];
     const clearChord=()=>{ if(!activeHere) return; const key=activeSlot.line+'_'+activeSlot.word; self.setState(st=>{ const cm={...(st.chordMap||{})}; delete cm[key]; return {chordMap:cm,activeChordSlot:null}; }); };
     const closePicker=()=>self.setState({activeChordSlot:null});
-    /* the word under the cursor may already carry a chord -- that is the one
-       worth soloing over, so offer the jump right there in the picker */
-    const activeWordChord=activeHere?((S.chordMap||{})[activeSlot.line+'_'+activeSlot.word]||null):null;
-    const hasActiveWordChord=!!activeWordChord;
-    const activeWordChordName=activeWordChord?activeWordChord.name:'';
-    const openLabFromWord=activeWordChord
-      ? ()=>self.openChordLab({name:activeWordChord.name,roman:activeWordChord.roman,pcs:activeWordChord.pcs})
-      : ()=>{};
 
     const labelButtons=['Intro','Verse','Pre-Chorus','Chorus','Post-Chorus','Verse 2','Bridge','Solo','Breakdown','Outro'].map(t=>({label:t,onClick:()=>self.setState(st=>({songText:(st.songText?st.songText+'\n\n':'')+'# '+t+'\n'}))}));
     const labelDraft=S.labelDraft||'';
@@ -5435,7 +5427,6 @@ class Component extends DCLogic {
       progressionMessages,hasProgressionMessages,allGoodMessage,
       presetList,
       songText,onSongTextChange,lineViews,activeHere,activeWordText,pickerOptions,clearChord,closePicker,
-      hasActiveWordChord,activeWordChordName,openLabFromWord,
       rhymeActiveHere,rhymeActiveWordText,rhymeSuggestionsList,hasRhymeSuggestions,noRhymeSuggestions,closeRhymePicker,
       labelButtons,labelDraft,onLabelDraftChange,insertCustomLabel,
       tabBlocks,addTabBlockBtn,outputTabBlocks,
