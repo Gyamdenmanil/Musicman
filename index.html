@@ -569,10 +569,28 @@
       <div class="mmcx-scaletag" style="margin-top:12px;">Both octaves are coloured the same &mdash; this is the note map for the scale, not a voicing to play.</div>
     </div>
 
-    <div class="mmcx-card">
-      <div class="mmcx-playrow">
+    <div data-reveal class="mmcx-card">
+      <div class="mmcx-label">Arpeggio</div>
+      <div class="mmcx-chiprow" style="margin-bottom:14px;">
+        <sc-for list="{{ labArpPatterns }}" as="ap" hint-placeholder-count="5"><button onClick="{{ ap.onClick }}" style="{{ ap.style }}" style-hover="filter:brightness(1.14);" style-active="transform:scale(0.94);">{{ ap.label }}</button></sc-for>
+      </div>
+      <div class="mmcx-scrollx">{{ labArpFretboard }}</div>
+      <div class="mmcx-scaletag" style="margin-top:10px;">{{ labArpNotes }}</div>
+      <sc-if value="{{ labArpHasHint }}" hint-placeholder-val="{{ false }}">
+      <div class="mmcx-scaletag" style="color:var(--mm-accent);">{{ labArpHint }}</div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px;">
+        <button onClick="{{ labArpToggle }}" style="{{ labArpToggleStyle }}" style-hover="filter:brightness(1.08);" style-active="transform:scale(0.97);">{{ labArpToggleLabel }}</button>
+        <button onClick="{{ labArpLoopToggle }}" style="{{ labArpLoopStyle }}" style-hover="filter:brightness(1.12);" style-active="transform:scale(0.96);">{{ labArpLoopLabel }}</button>
+        <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+          <button onClick="{{ labBpmDown }}" style="{{ stepBtnStyleSmall }}" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.9);">&minus;</button>
+          <div style="font-size:12.5px;font-weight:700;color:var(--mm-text-2);min-width:64px;text-align:center;font-variant-numeric:tabular-nums;">{{ labBpmLabel }}</div>
+          <button onClick="{{ labBpmUp }}" style="{{ stepBtnStyleSmall }}" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.9);">+</button>
+        </div>
+      </div>
+      <div class="mmcx-playrow" style="margin-top:14px;">
         <button onClick="{{ labPlayChord }}" class="mmcx-play" style-hover="filter:brightness(0.92);" style-active="transform:scale(0.97);">Play chord</button>
-        <button onClick="{{ labPlayArp }}" class="mmcx-play mmcx-ghost" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.97);">Arpeggio</button>
+        <button onClick="{{ labPlayArp }}" class="mmcx-play mmcx-ghost" style-hover="filter:brightness(1.2);" style-active="transform:scale(0.97);">One pass</button>
       </div>
     </div>
 
@@ -1474,6 +1492,9 @@ const TOKENS = {
   fontBody:"'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif",
 };
 
+const ARP_ASC=(n)=>Array.from({length:n},(_,i)=>i);
+const ARP_ORDER=(n,pref)=>{ const p=pref.filter(i=>i<n); ARP_ASC(n).forEach(i=>{ if(p.indexOf(i)<0) p.push(i); }); return p; };
+
 class Component extends DCLogic {
   LETTERS = ['C','D','E','F','G','A','B'];
   LPC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
@@ -1672,7 +1693,7 @@ class Component extends DCLogic {
   scaleFeedbackRef = React.createRef();
   wheelCenterLabelRef = React.createRef();
   wordmarkRef = React.createRef();
-  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,labChord:null,labScaleId:null,
+  state = {tab:'songs',keyRoot:'C',keyMode:'major',diatExt:'triad',progExt:'triad',scaleName:'Ionian (Major)',gRoot:0,gQual:'maj',bpm:100,tsIndex:0,sub:false,playing:false,curBeat:-1,builderChords:[],progIndex:0,moodIndex:null,showPresetPicker:false,insightIdx:null,songText:'',chordMap:{},tabGrids:[],capo:0,keyHistory:[],labelDraft:'',activeChordSlot:null,savedSongs:[],currentSongId:null,currentSongName:'',viewingSongId:null,autoScroll:false,scrollSpeed:3,hoverKey:null,recordings:[],isRecording:false,recSeconds:0,recordError:'',currentSongTags:'',songSearchQuery:'',activeRhymeSlot:null,writeSubTab:'lyrics',songsSubTab:'songs',pendingImportData:null,showImportConfirm:false,backupError:'',showRomanHelp:false,showQualityHelp:false,showAdvChords:false,showAdvAnalysis:false,showLiveStats:false,showViewStats:false,wheelMode:'keys',chordWheelSel:null,labChord:null,labScaleId:null,labArpPattern:'up',arpPlaying:false,arpStep:null,arpLoop:true,
     practiceMode:'switch',practiceScore:0,practiceStreak:0,
     practiceSwitchBpm:80,practiceSwitchOn:false,practiceSwitchChords:[],practiceSwitchIdx:0,practiceSwitchBeat:0,
     practiceEarType:'note',practiceEarQuestion:null,practiceEarFeedback:null,
@@ -1819,6 +1840,7 @@ class Component extends DCLogic {
     if(this.mediaRecorder&&this.mediaRecorder.state!=='inactive'){ try{ this.mediaRecorder.stop(); }catch(e){} }
     if(this.recStream){ this.recStream.getTracks().forEach(t=>t.stop()); }
     if(this.switchTimer) clearInterval(this.switchTimer);
+    if(this.arpTimer) clearInterval(this.arpTimer);
     if(this.memoryTimer) clearTimeout(this.memoryTimer);
     this.stopWaveform();
     this.teardownTuner();
@@ -3447,6 +3469,7 @@ class Component extends DCLogic {
         const dim = highlightPcs && !highlightPcs.has(pc);
         const sz = role==='pass'?17:20;
         const step = seqOrder?seqOrder.get(si+':'+f):undefined;
+        const live = opt.activeKey!=null&&opt.activeKey===(si+':'+f);
         els.push(h('div',{key:'n'+si+'_'+f,style:{position:'absolute',left:(cx-sz/2)+'px',top:(cy-sz/2)+'px',
           width:sz+'px',height:sz+'px',borderRadius:'50%',
           background:rd.fill?rd.color:'var(--mm-bg)',
@@ -3455,8 +3478,9 @@ class Component extends DCLogic {
           display:'flex',alignItems:'center',justifyContent:'center',
           fontSize:(role==='pass'?'8px':'8.5px'),fontWeight:800,letterSpacing:'-0.02em',
           opacity:dim?0.28:1,
-          boxShadow:step!==undefined?('0 0 0 3px rgba(240,180,41,0.55)'):'none',
-          transition:'opacity .18s ease,box-shadow .12s ease'}},
+          boxShadow:live?'0 0 0 4px rgba(255,200,97,0.95)':(step!==undefined?'0 0 0 3px rgba(240,180,41,0.5)':'none'),
+          transform:live?'scale(1.18)':'none',
+          transition:'opacity .18s ease,box-shadow .1s ease,transform .1s ease'}},
           step!==undefined?String(step+1):nameFor(pc)));
       }
     });
@@ -3502,8 +3526,8 @@ class Component extends DCLogic {
     let rootPC=(typeof opt.rootPC==='number')?opt.rootPC:(pcs.length?pcs[0]:0);
     rootPC=((rootPC%12)+12)%12;
     const quality=opt.quality||this.inferQuality(rootPC,pcs);
-    this.stopBuilderLoop(); this.stopAutoScroll(); this.stopTuner();
-    this.setState({tab:'lab',labScaleId:null,activeChordSlot:null,activeRhymeSlot:null,
+    this.stopBuilderLoop(); this.stopAutoScroll(); this.stopTuner(); this.stopArp(true);
+    this.setState({tab:'lab',labScaleId:null,arpPlaying:false,arpStep:null,activeChordSlot:null,activeRhymeSlot:null,
       labChord:{rootPC,quality,roman:opt.roman||'',name:opt.name||''}});
   }
 
@@ -3569,6 +3593,10 @@ class Component extends DCLogic {
       labName:'',labRoman:'',labHasRoman:false,labFormula:[],labTones:[],
       labExts:[],labHasExts:false,labScales:[],labScaleName:'',labTech:'',
       labFretboard:null,labPiano:null,labLegend:null,
+      labArpPatterns:[],labArpFretboard:null,labArpNotes:'',labArpHasHint:false,labArpHint:'',
+      labArpToggle:()=>{},labArpToggleLabel:'Play',labArpToggleStyle:'',
+      labArpLoopToggle:()=>{},labArpLoopLabel:'Loop',labArpLoopStyle:'',
+      labBpmLabel:'',labBpmUp:()=>{},labBpmDown:()=>{},
       labPlayChord:()=>{},labPlayArp:()=>{}};
     const lc=S.labChord;
     if(!lc) return blank;
@@ -3584,6 +3612,37 @@ class Component extends DCLogic {
       return {name:t.name,role:this.LAB_ROLE_CAPTION[role]||role,
         style:'background:'+rd.color+';color:'+rd.ink+';'};
     });
+    /* arpeggio explorer */
+    const pats=this.arpPatterns(chordPcs);
+    const curPat=pats.find(x=>x.id===S.labArpPattern)||pats[0]||null;
+    const fing=curPat?this.arpFingering(curPat.steps,{fretLo:0,fretHi:15,mode:curPat.mode,apex:curPat.apex}):null;
+    const playing=!!S.arpPlaying;
+    const stepIdx=(typeof S.arpStep==='number')?S.arpStep:-1;
+    const liveNote=(fing&&playing&&fing.notes[stepIdx])?fing.notes[stepIdx]:null;
+    const segPill=(on)=>'border:1px solid '+(on?TOKENS.accent:'var(--mm-border)')+';background:'+(on?TOKENS.accent:'var(--mm-surface-2)')+';color:'+(on?'#1a0e00':'var(--mm-text-2)')+';font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;';
+    const arp=fing?{
+      labArpPatterns:pats.map(x=>({label:x.label,style:segPill(curPat&&x.id===curPat.id),
+        onClick:()=>self.setArpPattern(x.id)})),
+      labArpFretboard:this.renderRoleFretboard({chordRootPC:rootPC,quality,chordPcs,
+        scalePcs:sel.pcs,fretLo:fing.fretLo,fretHi:fing.fretHi,preferFlat:res.preferFlat,
+        seqOrder:fing.seqOrder,activeKey:liveNote?(liveNote.s+':'+liveNote.f):null,colW:38,rowH:30}),
+      labArpNotes:fing.notes.map(n=>this.pcName(n.pc,res.preferFlat)).join(' \u2192 '),
+      labArpHasHint:fing.shifts>0,
+      labArpHint:fing.shifts>0?('This one will not sit in a single position \u2014 it shifts '+fing.shifts+' time'+(fing.shifts===1?'':'s')+' on the way up.'):'',
+      labArpToggle:()=>self.toggleArp(),
+      labArpToggleLabel:playing?'Stop':'Play arpeggio',
+      labArpToggleStyle:'border:1px solid '+TOKENS.accent+';background:'+(playing?'#332812':TOKENS.accent)+';color:'+(playing?TOKENS.accent:'#1a0e00')+';font-family:var(--mm-font-display);font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:12px;cursor:pointer;',
+      labArpLoopToggle:()=>self.setState({arpLoop:!S.arpLoop}),
+      labArpLoopLabel:S.arpLoop?'Loop on':'Loop off',
+      labArpLoopStyle:segPill(!!S.arpLoop)+'padding:11px 14px;border-radius:12px;',
+      labBpmLabel:(Number(S.bpm)||100)+' bpm',
+      labBpmUp:()=>self.adjustLabBpm(5),
+      labBpmDown:()=>self.adjustLabBpm(-5)
+    }:{labArpPatterns:[],labArpFretboard:null,labArpNotes:'',labArpHasHint:false,labArpHint:'',
+      labArpToggle:()=>{},labArpToggleLabel:'Play',labArpToggleStyle:'',
+      labArpLoopToggle:()=>{},labArpLoopLabel:'Loop',labArpLoopStyle:'',
+      labBpmLabel:'',labBpmUp:()=>{},labBpmDown:()=>{}};
+
     const safePcs=new Set();
     res.scales.forEach(x=>{ if(x.tier.id==='safe') x.pcs.forEach(pc=>safePcs.add(pc)); });
     const labExts=bd.exts.filter(e=>safePcs.has(((rootPC+e.iv)%12+12)%12));
@@ -3611,7 +3670,251 @@ class Component extends DCLogic {
         scalePcs:sel.pcs,preferFlat:res.preferFlat,octaves:2}),
       labLegend:this.renderRoleLegend(['root','tone','ext','alt','pass']),
       labPlayChord:()=>self.playChord(chordPcs),
-      labPlayArp:()=>self.playArp(chordPcs)};
+      labPlayArp:()=>self.playArp(chordPcs),
+      ...arp};
+  }
+
+  /* ───────────────────────────────────────────────────────────────────────
+     ARPEGGIO EXPLORER
+     Patterns are orders over the chord's tones, not fixed note names, so a
+     triad and a 13th chord both get something sensible. A pattern whose name
+     promises a 7th is withheld from chords that have none.
+     ─────────────────────────────────────────────────────────────────────── */
+
+  ARP_PATTERNS = [
+    {id:'up',    label:'Up',          min:2, mode:'rise', build:n=>ARP_ASC(n)},
+    {id:'down',  label:'Down',        min:2, mode:'fall', build:n=>ARP_ASC(n).slice().reverse()},
+    {id:'updown',label:'Up & down',   min:3, mode:'arch', build:n=>{const a=ARP_ASC(n); return a.concat(a.slice(1,-1).reverse());}},
+    {id:'1537',  label:'1-5-3-7',     min:4, mode:'position', build:n=>ARP_ORDER(n,[0,2,1,3])},
+    {id:'1753',  label:'1-7-5-3',     min:4, mode:'position', build:n=>ARP_ORDER(n,[0,3,2,1])},
+    {id:'pedal', label:'Root pedal',  min:3, mode:'pedal',build:n=>{const o=[]; for(let i=1;i<n;i++) o.push(0,i); return o;}}
+  ];
+
+  /* Standard tuning, high e first so the indices line up with GTR_STRINGS. */
+  STRING_MIDI = [64,59,55,50,45,40];
+
+  arpPatterns(chordPcs){
+    const n=(chordPcs||[]).length;
+    if(n<2) return [];
+    const out=[],seen=new Set();
+    this.ARP_PATTERNS.forEach(p=>{
+      if(n<p.min) return;
+      const idx=p.build(n);
+      /* two buttons that play the identical sequence are one button */
+      const sig=idx.join(',');
+      if(seen.has(sig)) return;
+      seen.add(sig);
+      out.push({id:p.id,label:p.label,idx,mode:p.mode,
+        apex:idx.indexOf(Math.max.apply(null,idx)),
+        steps:idx.map(i=>chordPcs[i])});
+    });
+    return out;
+  }
+
+  /* Turn a pitch-class sequence into something a hand can actually play.
+     A pattern says which chord tone comes next; this decides where. The line
+     has to move the way the pattern's name promises, so each step takes the
+     nearest voice in the right DIRECTION rather than simply the nearest one --
+     minimising hand movement alone produced an "Up" arpeggio that descended. */
+  arpFingering(pcSeq,opt){
+    opt=opt||{};
+    const pcs=(pcSeq||[]).map(pc=>((pc%12)+12)%12);
+    const empty={notes:[],seqOrder:new Map(),fretLo:0,fretHi:5,span:0,wrapped:false};
+    if(!pcs.length) return empty;
+    const lo=Math.max(0,opt.fretLo===undefined?0:opt.fretLo);
+    const hi=Math.min(20,opt.fretHi===undefined?15:opt.fretHi);
+    const reach=opt.reach||4;
+    const mode=opt.mode||'rise';
+
+    /* Down is Up read backwards, and an arch is an ascent with its own
+       reflection, so both reduce to solving the ascent once. */
+    if(mode==='fall'){
+      const r=this.arpFingering(pcs.slice().reverse(),Object.assign({},opt,{mode:'rise'}));
+      if(!r.notes.length) return empty;
+      return this.arpFinish(r.notes.slice().reverse(),hi,r.wrapped,r.shifts);
+    }
+
+    /* every place this pitch class can be played, lowest voice first */
+    const where=pc=>{
+      const list=[];
+      for(let st=5;st>=0;st--) for(let f=lo;f<=hi;f++){
+        if((this.GTR_STRINGS[st]+f)%12!==pc) continue;
+        list.push({s:st,f,pc,midi:this.STRING_MIDI[st]+f});
+      }
+      list.sort((a,b)=>(a.midi-b.midi)||(a.f-b.f));
+      return list;
+    };
+    const cand=pcs.map(where);
+    if(cand.some(l=>!l.length)) return empty;
+
+    let wrapped=false, shifts=0;
+
+    /* A pattern that only reorders the chord tones gets a position instead of
+       a direction: pin a five-fret window on the first note and take whichever
+       voice falls nearest the hand. */
+    if(mode==='position'){
+      const head=cand[0][0];
+      const wLo=Math.max(lo,head.f-1), wHi=Math.min(hi,head.f+reach-1);
+      const placed=[head];
+      for(let i=1;i<pcs.length;i++){
+        const prev=placed[i-1];
+        const pool=cand[i].filter(cd=>cd.f>=wLo&&cd.f<=wHi);
+        const use=pool.length?pool:cand[i];
+        if(!pool.length) wrapped=true;
+        const reach2=cd=>Math.abs(cd.f-prev.f)*3+Math.abs(cd.s-prev.s);
+        let best=use[0];
+        use.forEach(cd=>{ if(reach2(cd)<reach2(best)) best=cd; });
+        placed.push(best);
+      }
+      return this.arpFinish(placed,hi,wrapped,shifts);
+    }
+
+    /* the next voice above (or below) a reference, staying in position if it
+       can and only breaking position when nothing else is in range */
+    const step=(list,ref,up)=>{
+      const dir=cd=>up?cd.midi>ref.midi:cd.midi<ref.midi;
+      const pickFrom=(pool)=>{
+        let best=null;
+        pool.forEach(cd=>{
+          if(!best){ best=cd; return; }
+          const closer=Math.abs(cd.f-ref.f)-Math.abs(best.f-ref.f);
+          const pitch=up?(cd.midi-best.midi):(best.midi-cd.midi);
+          if(pitch<0||(pitch===0&&closer<0)) best=cd;
+        });
+        return best;
+      };
+      const near=pickFrom(list.filter(cd=>dir(cd)&&Math.abs(cd.f-ref.f)<=reach));
+      if(near) return near;
+      /* Six chord tones cannot all be reached from one position, so a long
+         ascent has to shift. Take the smallest shift available rather than the
+         lowest voice, and count it so the caller can say so. */
+      const any=list.filter(dir);
+      if(any.length){
+        let best=any[0];
+        any.forEach(cd=>{ if(Math.abs(cd.f-ref.f)<Math.abs(best.f-ref.f)) best=cd; });
+        shifts++;
+        return best;
+      }
+      wrapped=true;                      /* ran out of neck; fold back */
+      return up?list[0]:list[list.length-1];
+    };
+
+    const apex=(typeof opt.apex==='number')?opt.apex:pcs.length-1;
+    const notes=[cand[0][0]];
+    let lastRise=notes[0];
+    for(let i=1;i<pcs.length;i++){
+      if(mode==='pedal'){
+        /* The pedal note is one fixed position returned to over and over, so
+           the notes alternating with it have to stay reachable FROM it -- not
+           merely from each other, or the hand walks away from the pedal. */
+        if(i%2===0){ notes.push(notes[0]); continue; }
+        const home=notes[0].f;
+        const inReach=cand[i].filter(cd=>Math.abs(cd.f-home)<=reach&&cd.midi>lastRise.midi);
+        if(inReach.length){
+          let best=inReach[0];
+          inReach.forEach(cd=>{ if(cd.midi<best.midi) best=cd; });
+          lastRise=best;
+        } else {
+          const above=cand[i].filter(cd=>Math.abs(cd.f-home)<=reach);
+          if(above.length){
+            /* the climb has run out inside the position; restart it low */
+            let best=above[0];
+            above.forEach(cd=>{ if(cd.midi<best.midi) best=cd; });
+            lastRise=best;
+          } else { lastRise=step(cand[i],notes[0],true); }
+        }
+        notes.push(lastRise);
+      } else if(mode==='arch'&&i>apex){
+        const mirror=2*apex-i;
+        notes.push(notes[mirror>=0?mirror:0]);
+      } else {
+        notes.push(step(cand[i],notes[i-1],true));
+      }
+    }
+    return this.arpFinish(notes,hi,wrapped,shifts);
+  }
+
+  arpFinish(notes,hi,wrapped,shifts){
+    const seqOrder=new Map();
+    notes.forEach((n,i)=>{ const k=n.s+':'+n.f; if(!seqOrder.has(k)) seqOrder.set(k,i); });
+    const frets=notes.map(n=>n.f);
+    const minF=Math.min(...frets), maxF=Math.max(...frets);
+    return {notes,seqOrder,
+      fretLo:Math.max(0,minF-1),fretHi:Math.min(hi,maxF+1),
+      span:maxF-minF,wrapped:!!wrapped,shifts:shifts||0};
+  }
+
+  arpStepDur(){
+    let bpm=Number(this.state.bpm);
+    if(!isFinite(bpm)||bpm<40||bpm>240) bpm=100;
+    return 30/bpm;   /* one step per eighth note */
+  }
+
+  currentArpFingering(patternId){
+    const lc=this.state.labChord;
+    if(!lc) return null;
+    const pcs=this.chordPcsFor(((lc.rootPC%12)+12)%12,lc.quality||'maj');
+    const pats=this.arpPatterns(pcs);
+    if(!pats.length) return null;
+    const want=patternId||this.state.labArpPattern;
+    const pat=pats.find(x=>x.id===want)||pats[0];
+    const fing=this.arpFingering(pat.steps,{fretLo:0,fretHi:15,mode:pat.mode,apex:pat.apex});
+    return fing.notes.length?Object.assign({pattern:pat},fing):null;
+  }
+
+  /* Notes are scheduled ahead on the WebAudio clock; the highlight is driven
+     by reading that same clock back. Neither one is the other's timer, so
+     they cannot drift apart. */
+  startArp(patternId){
+    const fing=this.currentArpFingering(patternId);
+    if(!fing) return;
+    this.ensureAudio();
+    if(this.arpTimer){ clearInterval(this.arpTimer); this.arpTimer=null; }
+    this._arpSeq=fing.notes;
+    this._arpQ=[];
+    this._arpIdx=0;
+    this._arpNext=this.ac.currentTime+0.08;
+    this.setState({arpPlaying:true,arpStep:0});
+    this.arpTick();
+    this.arpTimer=setInterval(()=>this.arpTick(),25);
+  }
+
+  arpTick(){
+    const seq=this._arpSeq||[];
+    if(!this.ac||!seq.length){ this.stopArp(); return; }
+    const dur=this.arpStepDur(), loop=!!this.state.arpLoop, now=this.ac.currentTime;
+    while(this._arpNext<now+0.15){
+      if(!loop&&this._arpIdx>=seq.length) break;
+      const i=this._arpIdx%seq.length;
+      this.voice(this.midiFreq(seq[i].midi),this._arpNext,dur*1.9,0.17);
+      this._arpQ.push({step:i,t:this._arpNext});
+      this._arpNext+=dur;
+      this._arpIdx++;
+    }
+    let cur=null;
+    while(this._arpQ.length&&this._arpQ[0].t<=now) cur=this._arpQ.shift();
+    if(cur&&cur.step!==this.state.arpStep) this.setState({arpStep:cur.step});
+    if(!loop&&this._arpIdx>=seq.length&&now>this._arpNext) this.stopArp();
+  }
+
+  stopArp(quiet){
+    if(this.arpTimer){ clearInterval(this.arpTimer); this.arpTimer=null; }
+    this._arpSeq=null; this._arpQ=null;
+    if(!quiet&&(this.state.arpPlaying||this.state.arpStep!=null)) this.setState({arpPlaying:false,arpStep:null});
+  }
+
+  toggleArp(){ if(this.state.arpPlaying) this.stopArp(); else this.startArp(); }
+
+  setArpPattern(id){
+    const wasPlaying=this.state.arpPlaying;
+    this.stopArp(true);
+    this.setState({labArpPattern:id,arpPlaying:false,arpStep:null});
+    if(wasPlaying) this.startArp(id);
+  }
+
+  adjustLabBpm(delta){
+    let bpm=Number(this.state.bpm); if(!isFinite(bpm)) bpm=100;
+    this.setState({bpm:Math.max(40,Math.min(240,bpm+delta))});
   }
 
   LOOP_PATTERNS={
@@ -3662,6 +3965,7 @@ class Component extends DCLogic {
   roomOfTab(tab){ return this.ROOM_DEFS.find(r=>r.tabs.indexOf(tab)>=0)||null; }
   goTool(tab){
     this.stopBuilderLoop();
+    this.stopArp();
     const r=this.roomOfTab(tab); this._roomLast=this._roomLast||{}; if(r) this._roomLast[r.id]=tab;
     this.stopAutoScroll(); if(tab!=='tuner') this.stopTuner();
     this.setState({tab,autoScroll:false,activeChordSlot:null,activeRhymeSlot:null});
