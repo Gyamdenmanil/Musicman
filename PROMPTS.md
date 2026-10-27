@@ -1,111 +1,29 @@
 # Musicman — Chord Context Rework: Build Prompts
 
-Six self-contained prompts, one per phase. Run them **in order** — each assumes the
-previous one landed. Paste one prompt per fresh Claude Code session, then commit
-before moving on.
+Seven self-contained prompts covering Phase 0 through 5b. Run them **in order** —
+each assumes the previous one landed. Paste one prompt per fresh Claude Code
+session, then commit before moving on.
 
 ---
 
 ## How to use this
 
-1. **Put the context block in `CLAUDE.md` once** (next section). It gets auto-loaded
-   into every session in this repo, so you never paste it again and every prompt stays
-   short.
-2. **Save the mockup** you already have to `docs/mockup-chord-context.html`. Phase 2
-   reads it from disk rather than having it pasted in.
-3. **Run Phase 0 first.** It builds the test harness every later phase depends on.
-4. **Commit after each phase.** One 4600-line file, no test suite — git is the only
+1. ~~Put the context block in `CLAUDE.md`~~ — done, it is committed and auto-loads.
+2. ~~Save the mockup to `docs/mockup-chord-context.html`~~ — done, commit `783189d`.
+3. ~~Run Phase 0~~ — done, commit `d6a4392`. `./tools/test-theory.sh` passes.
+4. **Phase 2 is next.** It needs the Chrome extension connected, since every one of
+   its acceptance criteria is a screenshot.
+5. **Commit after each phase.** One 4600-line file, no test suite — git is the only
    undo.
 
 ---
 
-## The context block → `CLAUDE.md`
+## Context
 
-```markdown
-# Musicman
-
-A songwriter's workbench: pick a key, explore scales and diatonic chords, find
-voicings, build progressions, write songs with lyrics + chords + tab. Guitar-first.
-Everything is stored on-device; no server, no account.
-
-## Architecture — read this before editing
-
-Three files. `index.html` is the entire app (~4600 lines, ~394KB).
-
-- `index.html` has two halves:
-  - **Template**: the `<x-dc>` element, lines 38–1344. Declarative HTML.
-  - **Logic**: `<script type="text/x-dc" data-dc-script>`, lines 1345–4614,
-    containing `class Component extends DCLogic`.
-- `support.js` — the generated `dc-runtime` bundle (React-based template engine).
-  **Never edit it.** If it goes missing, `git checkout -- support.js`.
-- `icon-512.png` — app icon.
-
-### How the template and logic connect
-
-`renderVals()` (~line 3623) returns one flat object. Every key in it is addressable
-from the template:
-
-- `{{ someVal }}` — interpolate a value. **A React element works here** — see
-  `scaleFretboard` built at ~line 3831 and consumed at template line 363.
-- `<sc-if value="{{ flag }}" hint-placeholder-val="{{ false }}">…</sc-if>`
-- `<sc-for list="{{ arr }}" as="item" hint-placeholder-count="7">…{{ item.x }}…</sc-for>`
-- `onClick="{{ handler }}"` — a function from `renderVals`.
-- `style="{{ styleString }}"` plus `style-hover="…"` / `style-active="…"`.
-
-Styling convention: inline `style="…"` in the template, or a style string built by a
-helper in `renderVals` (`pill()`, `card()`, `seg()`, `romanChip()`). Shared CSS and
-`--mm-*` custom properties live in the `<helmet><style>` block, lines 44–101.
-`TOKENS` (line 1347) mirrors those custom properties for use in JS.
-
-### State
-
-One flat object at line 1556. Mutate with `this.setState({ … })`. Tab routing is
-`state.tab`; the template gates on boolean flags built at ~line 4518
-(`isTheory`, `isGuitar`, `isProg`, `isSongs`, …). Nav structure is `ROOM_DEFS`
-(~3333) + `TOOL_LABELS` (~3339); navigate with `goTool(tab)` / `goRoom(id)` (~3362).
-
-### Chord → scale engine
-
-Lives at lines ~2925–3320. Public surface:
-
-- `chordToScales(chordRootPC, quality, keyRootPC, keyMode)` → `{ chordRootName,
-  chordPcs, scales[], preferFlat }`. Each scale: `{ label, shortLabel, scaleRootPC,
-  scaleRootName, semis, degs, pcs, notes[{name,pc,role}], notesStr, tier, note,
-  inKey, isParentKey, missingCount, extCount, altCount }`.
-- `chordToneBreakdown(rootName, rootPC, quality)` → `{ tones, tonesStr, exts, extsStr }`
-- `renderRoleFretboard(opt)` → React element. Options: `chordRootPC`, `quality`,
-  `chordPcs`, `scalePcs`, `fretLo`, `fretHi`, `showOutside`, `highlightPcs`,
-  `seqOrder` (Map of `"string:fret"` → step index), `preferFlat`, `colW`, `rowH`.
-- `renderRoleLegend(roles)` → React element.
-- `noteRole(pc, chordRootPC, chordPcSet, scalePcSet, chordIvSet)` →
-  `'root' | 'tone' | 'ext' | 'alt' | 'pass' | 'out'`
-- Data tables: `SOLO_SCALES`, `SPICE`, `ROLE_DEFS`, `CHORD_FAMILY`, `SCALE_RECIPES`.
-
-Quality keys come from `QUAL` (line 1362); display suffixes from `SUF` (line 1363).
-
-## Constraints
-
-- **No build step, no dependencies, no bundler.** Self-contained files only.
-  Google Fonts is the one allowed external host (already linked).
-- **There is no `node`, `npm`, or `npx` on this machine.** Do not write a prompt,
-  script, or test that assumes them.
-  - Serve locally with `python3 -m http.server 8000`.
-  - Test logic headlessly with `./tools/test-theory.sh` (JavaScriptCore via
-    `osascript -l JavaScript`).
-- **Surgical edits.** Do not reformat, re-indent, or "clean up" code you were not
-  asked to change. Prefer a Python string-replace patch script with an assertion that
-  each anchor matched exactly once over hand-editing a 4600-line file.
-- Match the surrounding idiom: same comment density, same naming, same style-string
-  helpers. New code should be indistinguishable from what is already there.
-- Mobile-first. iPhone 16 Pro Max (430×932 CSS px) is the reference viewport; the
-  body must never scroll horizontally.
-- Dark UI only — the app sets `color-scheme: dark` deliberately.
-
-## Verification expectations
-
-Never report a change as working without evidence. For logic, show harness output.
-For UI, serve the app and screenshot the actual screen you changed.
-```
+The architecture notes, anchors, and constraints every prompt relies on live in
+`CLAUDE.md` at the repo root, which Claude Code auto-loads in this repo. They used
+to be duplicated here, which meant every engine change drifted two files — read
+`CLAUDE.md` instead, and keep it as the single source of truth.
 
 ---
 
@@ -116,6 +34,14 @@ browser, and there is one known spelling defect to clear before building UI on t
 of the engine.
 
 **Estimate:** ~10k tokens.
+
+> **Already done** — commit `d6a4392`. The harness exists at `tools/test-theory.sh`
+> and passes. Building it immediately surfaced four more bugs beyond the stated
+> spelling defect, all since fixed: runaway accidentals on non-diatonic roots in
+> sharp-heavy keys, the natural 11th mis-classified as an extension over chords
+> with a major 3rd, a parent-key promotion that claimed SAFE for chords reaching
+> outside the key, and the invited-extensions list offering the 11 on major chords.
+> Re-run this prompt only if you want to rebuild the harness from scratch.
 
 ```text
 Two small tasks, in order.
@@ -164,8 +90,15 @@ The harness must do two things:
         - contains the substring "undefined", "NaN", "null" in any label,
           notesStr or note
         - contains a TRIPLE accidental (###, bbb) anywhere in a note name
-        - claims tier SAFE while missingCount > 0
-      Print a clear PASS/FAIL summary line and list up to 20 offenders.
+        - is a SEVEN-note scale tiered SAFE that still omits a chord tone, unless
+          its recipe entry sets `allowMissing` to declare the omission deliberate
+      Do NOT assert that every SAFE scale has missingCount 0. A pentatonic omits
+      chord tones by design and is still perfectly safe to play — that rule would
+      flag dozens of correct entries. Only a complete seven-note scale has no
+      excuse for being unable to play one of the chord's own notes.
+      8352 calls produce the same few defects over and over, so group offenders by
+      (quality, scale, reason) and report distinct causes with counts rather than a
+      list of near-identical instances. Print a clear PASS/FAIL summary line.
 
 TASK 2 — Fix the symmetric-scale spelling defect that sweep will catch.
 
@@ -200,9 +133,12 @@ DONE WHEN
 
 ## Phase 1 — Audit and harden the chord → scale engine
 
-**Status:** already landed in the working tree (lines ~2925–3320). This prompt is an
-audit, not a build. Run it to confirm the engine is trustworthy before any UI depends
-on it.
+**Status:** the engine landed in commit `d6a4392` (lines ~2925–3320), and the audit
+below was effectively run as part of Phase 0 — the harness surfaced the findings the
+moment it existed, and the correctness bugs were fixed there. This prompt is an
+audit, not a build. Re-run it when you add or retier recipes, or if you want a second
+opinion on the curatorial calls (which tier a scale deserves, how the technique notes
+are worded) that Phase 0 deliberately left alone.
 
 **Estimate:** ~20k tokens.
 
@@ -216,8 +152,9 @@ Check each of these and report findings with evidence:
 1. MUSICAL CORRECTNESS of SCALE_RECIPES (~2988). For each of the 12 chord families,
    verify every recipe entry actually fits the chord it is offered for:
      - Does the scale contain all the chord's tones? If not, is the omission
-       deliberate and is the tier honest about it? A SAFE scale must have
-       missingCount 0.
+       deliberate and is the tier honest about it? A complete seven-note scale
+       tiered SAFE should have missingCount 0 or an explicit `allowMissing` flag;
+       a pentatonic may omit tones freely and still be SAFE.
      - Is the tier right? SAFE should mean "you cannot play a wrong note here".
        Flag anything mis-tiered.
      - Is the technique note factually true for that chord/scale pair, in every key?

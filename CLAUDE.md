@@ -55,7 +55,12 @@ Lives at lines ~2925–3320. Public surface:
 - `renderRoleLegend(roles)` → React element.
 - `noteRole(pc, chordRootPC, chordPcSet, scalePcSet, chordIvSet)` →
   `'root' | 'tone' | 'ext' | 'alt' | 'pass' | 'out'`
+- `pcName(pc, preferFlat)` -> plain pitch-class name; `spellBest(root, semi)` ->
+  the cleanest letter spelling for a note with no obvious scale degree.
 - Data tables: `SOLO_SCALES`, `SPICE`, `ROLE_DEFS`, `CHORD_FAMILY`, `SCALE_RECIPES`.
+  A `SCALE_RECIPES` entry may set `allowMissing:true` to declare that omitting a
+  chord tone is the point (the altered scale has no natural 5th); without it, a
+  seven-note scale tiered SAFE that omits a tone is demoted automatically.
 
 Quality keys come from `QUAL` (line 1362); display suffixes from `SUF` (line 1363).
 
